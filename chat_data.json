@@ -1,0 +1,43 @@
+{
+    "servers": [
+        {
+            "id": "s1",
+            "name": "Laboratório da Lou",
+            "icon_char": "L",
+            "avatar": null,
+            "channels": [
+                {
+                    "id": "c1_1",
+                    "name": "papo-ia",
+                    "type": "text",
+                    "messages": [
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Olá. Este é o novo formato de mensagem."
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Legal. Agora com avatares."
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "profiles": {
+        "user": {
+            "name": "Mateus",
+            "id_tag": "#1987",
+            "avatar": "default.png"
+        },
+        "model": {
+            "name": "Lou",
+            "id_tag": "#AI",
+            "avatar": "lou.png"
+        }
+    }
+}
