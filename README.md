@@ -7,27 +7,15 @@ IA de conversação com foco em interatividade natural e alto nível de personal
 ## 🧩 Funcionalidades Principais
 
 ### 🖼️ Interface Personalizável
-- Renomear grupos e canais (texto e voz) diretamente pelo clique direito.
+- Renomear grupos e canais (texto e voz).
 - Alterar nome e foto do usuário com refletência imediata:
   - No rodapé da interface.
   - Em cada nova mensagem enviada.
-- Imagem do grupo preenche totalmente o ícone (sem bordas quadradas).
-- Layout dos grupos centralizado na lateral esquerda (não colado na borda).
-
-### 🗣️ Chat de Voz Estilo Discord
-- Entrar e sair de chats de voz sem trocar o canal de texto.
-- Avatar e nome aparecem abaixo do chat de voz.
-- Entradas automáticas (ex: Lou entra segundos depois do usuário).
-- Ícones de microfone mutado visíveis.
-- IA permanece escutando e pode responder proativamente.
 
 ### 💬 Chat de Texto Moderno
 - Mensagens com avatar e nome acima (usuário e Lou).
 - Transições suaves entre canais (sem bug visual).
-- Indicação de digitação com texto "Digitando..." no lugar de "...".
-- Clique com botão direito em canais ou grupos para:
-  - Excluir (botão vermelho).
-  - Renomear (edição inline).
+- Indicação de digitação com texto "Digitando...".
 
 ---
 
