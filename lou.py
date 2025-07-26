@@ -11,10 +11,15 @@ from functools import partial
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QTextEdit, QScrollArea, QLabel, QFrame, QSplitter,
-    QDialog, QLineEdit, QMessageBox, QFileDialog, QRadioButton
+    QDialog, QLineEdit, QMessageBox, QFileDialog, QRadioButton,
+    QMenu
 )
-from PySide6.QtCore import Qt, QThread, Signal, QTimer, QSize
-from PySide6.QtGui import QFont, QKeyEvent, QPainter, QPen, QColor, QIcon, QFontDatabase, QCursor, QPixmap, QPainterPath
+# --- MODIFICADO: Adicionado QEvent e QInputDialog ---
+from PySide6.QtCore import Qt, QThread, Signal, QTimer, QSize, QEvent
+from PySide6.QtGui import (
+    QFont, QKeyEvent, QPainter, QPen, QColor, QIcon, QFontDatabase,
+    QCursor, QPixmap, QPainterPath, QAction
+)
 
 # --- Importe e configure a API do Gemini ---
 import google.generativeai as genai
@@ -23,7 +28,7 @@ import google.generativeai as genai
 # ## SUBSTITUA PELA SUA CHAVE DE API DO GOOGLE AI STUDIO                    ##
 # ###########################################################################
 # Lembre-se de substituir "SUA_API_KEY_AQUI" pela sua chave real.
-API_KEY = "AIzaSyAXOt7yvZz6dLdhhCvYhUQattF17i9EG7c"
+API_KEY = ""
 # ###########################################################################
 
 # --- WORKERS DA IA ---
@@ -55,7 +60,7 @@ class MemoryExtractorWorker(BaseWorker):
     def __init__(self, conversation_snippet): super().__init__(); self.snippet = conversation_snippet
     def run(self):
         try:
-            extractor_model = genai.GenerativeModel('gemini-2.0-flash'); prompt=f"""Analise o seguinte trecho de conversa. Extraia apenas fatos importantes e de longo prazo em uma lista JSON. Se não houver nenhum, retorne []. Conversa: {self.snippet} Resultado:"""; response = extractor_model.generate_content(prompt); clean_response = response.text.strip().replace("```json", "").replace("```", ""); memories = json.loads(clean_response)
+            extractor_model = genai.GenerativeModel('gemini-1.5-flash'); prompt=f"""Analise o seguinte trecho de conversa. Extraia apenas fatos importantes e de longo prazo em uma lista JSON. Se não houver nenhum, retorne []. Conversa: {self.snippet} Resultado:"""; response = extractor_model.generate_content(prompt); clean_response = response.text.strip().replace("```json", "").replace("```", ""); memories = json.loads(clean_response)
             if isinstance(memories, list): self.memories_extracted.emit(memories)
         except (Exception, json.JSONDecodeError): self.memories_extracted.emit([])
 
@@ -73,38 +78,149 @@ class ProactiveMessageWorker(BaseWorker):
 
 # --- DIÁLOGOS DE CONFIGURAÇÃO ---
 class BaseDialog(QDialog):
-    def __init__(self, parent=None): super().__init__(parent); self.setStyleSheet("QDialog { background-color: #36393f; color: #dcddde; } QLabel#dialog_label { color: #b9bbbe; font-size: 9pt; font-weight: bold; } QLineEdit#dialog_input { background-color: #202225; color: #dcddde; border: 1px solid #202225; border-radius: 3px; padding: 8px; } QPushButton { background-color: #4f545c; color: #fff; border: none; padding: 8px 16px; border-radius: 3px; font-weight: bold;} QPushButton:hover { background-color: #5d636b; }")
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
+        self.setStyleSheet("QDialog { background-color: #36393f; color: #dcddde; border: 1px solid #282a2e; } QLabel#dialog_label { color: #b9bbbe; font-size: 9pt; font-weight: bold; } QLineEdit#dialog_input { background-color: #202225; color: #dcddde; border: 1px solid #202225; border-radius: 3px; padding: 8px; } QPushButton { background-color: #4f545c; color: #fff; border: none; padding: 8px 16px; border-radius: 3px; font-weight: bold;} QPushButton:hover { background-color: #5d636b; }")
+    
+    # O MÉTODO event() FOI REMOVIDO DAQUI
+
+class RenameDialog(BaseDialog):
+    def __init__(self, current_name, parent=None):
+        super().__init__(parent)
+        self.layout = QVBoxLayout(self)
+        self.label = QLabel("NOME DO CANAL"); self.label.setObjectName("dialog_label")
+        self.input = QLineEdit(current_name); self.input.setObjectName("dialog_input")
+        self.buttons = QHBoxLayout()
+        self.ok_button = QPushButton("Renomear"); self.ok_button.clicked.connect(self.accept)
+        self.buttons.addStretch(); self.buttons.addWidget(self.ok_button)
+        self.layout.addWidget(self.label); self.layout.addWidget(self.input); self.layout.addLayout(self.buttons)
+    def get_new_name(self):
+        return self.input.text().strip()
+
+class ConfirmationDialog(BaseDialog):
+    def __init__(self, title, message, parent=None):
+        super().__init__(parent)
+        self.layout = QVBoxLayout(self)
+        self.label = QLabel(title); self.label.setStyleSheet("font-weight: bold; font-size: 12pt; margin-bottom: 5px;")
+        self.message = QLabel(message); self.message.setWordWrap(True)
+        self.buttons = QHBoxLayout()
+        self.no_button = QPushButton("Não"); self.no_button.clicked.connect(self.reject)
+        self.yes_button = QPushButton("Sim"); self.yes_button.clicked.connect(self.accept)
+        self.yes_button.setStyleSheet("background-color: #d83c3e;")
+        self.buttons.addStretch(); self.buttons.addWidget(self.no_button); self.buttons.addWidget(self.yes_button)
+        self.layout.addWidget(self.label); self.layout.addWidget(self.message); self.layout.addLayout(self.buttons)
+
 class CreateChannelDialog(BaseDialog):
     def __init__(self, parent=None):
-        super().__init__(parent); self.setWindowTitle("Criar Canal de Texto"); self.layout=QVBoxLayout(self)
+        super().__init__(parent)
+        self.layout=QVBoxLayout(self)
         self.name_label = QLabel("NOME DO CANAL"); self.name_label.setObjectName("dialog_label"); self.input = QLineEdit(); self.input.setObjectName("dialog_input")
-        self.buttons = QHBoxLayout(); self.ok_button = QPushButton("Criar Canal"); self.ok_button.clicked.connect(self.accept); self.cancel_button = QPushButton("Cancelar"); self.cancel_button.clicked.connect(self.reject)
-        self.buttons.addStretch(); self.buttons.addWidget(self.cancel_button); self.buttons.addWidget(self.ok_button)
+        self.buttons = QHBoxLayout(); self.ok_button = QPushButton("Criar"); self.ok_button.clicked.connect(self.accept)
+        self.buttons.addStretch(); self.buttons.addWidget(self.ok_button)
         self.layout.addWidget(self.name_label); self.layout.addWidget(self.input); self.layout.addLayout(self.buttons)
     def get_channel_name(self): return self.input.text().strip()
-class ChannelSettingsDialog(BaseDialog):
-    def __init__(self,current_name,parent=None):super().__init__(parent);self.setWindowTitle("Configurações do Canal");self.layout=QVBoxLayout(self);self.label=QLabel("NOME DO CANAL");self.label.setObjectName("dialog_label");self.input=QLineEdit(current_name);self.input.setObjectName("dialog_input");self.buttons=QHBoxLayout();self.delete_button=QPushButton("Excluir Canal");self.delete_button.setStyleSheet("background-color: #d83c3e;");self.save_button=QPushButton("Salvar");self.save_button.clicked.connect(self.accept);self.buttons.addWidget(self.delete_button);self.buttons.addStretch();self.buttons.addWidget(self.save_button);self.layout.addWidget(self.label);self.layout.addWidget(self.input);self.layout.addLayout(self.buttons)
-    def get_new_name(self): return self.input.text().strip()
+
 class ServerSettingsDialog(BaseDialog):
     def __init__(self, current_name, current_avatar_path, parent=None):
-        super().__init__(parent);self.setWindowTitle("Configurações do Servidor");self.new_avatar_path = None;self.layout=QVBoxLayout(self); self.avatar_label=AvatarLabel(current_avatar_path, size=80); change_avatar_button = QPushButton("Alterar ícone"); change_avatar_button.clicked.connect(self.change_avatar); self.label = QLabel("NOME DO SERVIDOR"); self.label.setObjectName("dialog_label"); self.input = QLineEdit(current_name); self.input.setObjectName("dialog_input"); self.buttons = QHBoxLayout(); self.delete_button = QPushButton("Excluir Servidor"); self.delete_button.setStyleSheet("background-color: #d83c3e;"); self.save_button = QPushButton("Salvar"); self.save_button.clicked.connect(self.accept); self.buttons.addWidget(self.delete_button); self.buttons.addStretch(); self.buttons.addWidget(self.save_button); self.layout.addWidget(self.avatar_label, 0, Qt.AlignCenter); self.layout.addWidget(change_avatar_button); self.layout.addWidget(self.label); self.layout.addWidget(self.input); self.layout.addLayout(self.buttons)
+        super().__init__(parent)
+        self.new_avatar_path = None
+        self.layout = QVBoxLayout(self)
+
+        self.avatar_label = AvatarLabel(current_avatar_path, size=80)
+        change_avatar_button = QPushButton("Alterar ícone")
+        change_avatar_button.clicked.connect(self.change_avatar)
+
+        self.label = QLabel("NOME DO SERVIDOR")
+        self.label.setObjectName("dialog_label")
+        self.input = QLineEdit(current_name)
+        self.input.setObjectName("dialog_input")
+
+        self.buttons = QHBoxLayout()
+        self.delete_button = QPushButton("Excluir")
+        self.delete_button.setStyleSheet("background-color: #d83c3e;")
+        self.save_button = QPushButton("Salvar")
+        self.save_button.clicked.connect(self.accept)
+        
+        self.buttons.addWidget(self.delete_button)
+        self.buttons.addStretch()
+        self.buttons.addWidget(self.save_button)
+
+        self.layout.addWidget(self.avatar_label, 0, Qt.AlignCenter)
+        self.layout.addWidget(change_avatar_button)
+        self.layout.addWidget(self.label)
+        self.layout.addWidget(self.input)
+        self.layout.addLayout(self.buttons)
+
     def change_avatar(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Selecionar Ícone do Servidor", "", "Imagens (*.png *.jpg *.jpeg)");
         if file_path: self.new_avatar_path = file_path; self.avatar_label.set_avatar(file_path)
     def get_values(self): return {"name": self.input.text().strip(), "avatar_path": self.new_avatar_path}
+
 class CreateServerDialog(BaseDialog):
     def __init__(self, parent=None):
-        super().__init__(parent); self.setWindowTitle("Criar Servidor"); self.new_avatar_path = None; self.layout=QVBoxLayout(self); self.avatar_label=AvatarLabel("assets/avatars/default_server.png", size=80); self.avatar_button = QPushButton("Enviar Ícone"); self.avatar_button.clicked.connect(self.change_avatar); self.name_label=QLabel("NOME DO SERVIDOR"); self.name_label.setObjectName("dialog_label"); self.name_input=QLineEdit(); self.name_input.setObjectName("dialog_input"); self.name_input.setPlaceholderText("Ex: Clube de Games"); self.buttons=QHBoxLayout(); self.ok_button=QPushButton("Criar Servidor"); self.ok_button.clicked.connect(self.accept); self.cancel_button = QPushButton("Cancelar"); self.cancel_button.clicked.connect(self.reject); self.buttons.addStretch(); self.buttons.addWidget(self.cancel_button); self.buttons.addWidget(self.ok_button); self.layout.addWidget(self.avatar_label, 0, Qt.AlignCenter); self.layout.addWidget(self.avatar_button); self.layout.addWidget(self.name_label); self.layout.addWidget(self.name_input); self.layout.addLayout(self.buttons)
+        super().__init__(parent)
+        self.new_avatar_path = None
+        self.layout = QVBoxLayout(self)
+        
+        self.avatar_label = AvatarLabel("assets/avatars/default_server.png", size=80)
+        self.avatar_button = QPushButton("Enviar Ícone")
+        self.avatar_button.clicked.connect(self.change_avatar)
+        
+        self.name_label = QLabel("NOME DO SERVIDOR")
+        self.name_label.setObjectName("dialog_label")
+        self.name_input = QLineEdit()
+        self.name_input.setObjectName("dialog_input")
+        self.name_input.setPlaceholderText("Ex: Clube de Games")
+        
+        self.buttons = QHBoxLayout()
+        self.ok_button = QPushButton("Criar")
+        self.ok_button.clicked.connect(self.accept)
+        self.buttons.addStretch()
+        self.buttons.addWidget(self.ok_button)
+        
+        self.layout.addWidget(self.avatar_label, 0, Qt.AlignCenter)
+        self.layout.addWidget(self.avatar_button)
+        self.layout.addWidget(self.name_label)
+        self.layout.addWidget(self.name_input)
+        self.layout.addLayout(self.buttons)
+
     def change_avatar(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Selecionar Ícone do Servidor", "", "Imagens (*.png *.jpg *.jpeg)");
         if file_path: self.new_avatar_path = file_path; self.avatar_label.set_avatar(file_path)
     def get_values(self): return {"name": self.name_input.text().strip(), "avatar_path": self.new_avatar_path}
+
 class UserSettingsDialog(BaseDialog):
-    def __init__(self,current_name,current_avatar_path,parent=None):super().__init__(parent);self.setWindowTitle("Minha Conta");self.new_avatar_path=None;self.layout=QVBoxLayout(self);self.avatar_label=AvatarLabel(current_avatar_path,80);change_avatar_button=QPushButton("Alterar avatar");change_avatar_button.clicked.connect(self.change_avatar);self.name_label=QLabel("NOME DE USUÁRIO");self.name_label.setObjectName("dialog_label");self.name_input=QLineEdit(current_name);self.name_input.setObjectName("dialog_input");self.buttons=QHBoxLayout();self.save_button=QPushButton("Salvar");self.save_button.clicked.connect(self.accept);self.cancel_button=QPushButton("Cancelar");self.cancel_button.clicked.connect(self.reject);self.buttons.addStretch();self.buttons.addWidget(self.cancel_button);self.buttons.addWidget(self.save_button);self.layout.addWidget(self.avatar_label,0,Qt.AlignCenter);self.layout.addWidget(change_avatar_button);self.layout.addWidget(self.name_label);self.layout.addWidget(self.name_input);self.layout.addLayout(self.buttons)
+    def __init__(self, current_name, current_avatar_path, parent=None):
+        super().__init__(parent)
+        self.new_avatar_path = None
+        self.layout = QVBoxLayout(self)
+
+        self.avatar_label = AvatarLabel(current_avatar_path, 80)
+        change_avatar_button = QPushButton("Alterar avatar")
+        change_avatar_button.clicked.connect(self.change_avatar)
+        
+        self.name_label = QLabel("NOME DE USUÁRIO")
+        self.name_label.setObjectName("dialog_label")
+        self.name_input = QLineEdit(current_name)
+        self.name_input.setObjectName("dialog_input")
+        
+        self.buttons = QHBoxLayout()
+        self.save_button = QPushButton("Salvar")
+        self.save_button.clicked.connect(self.accept)
+        self.buttons.addStretch()
+        self.buttons.addWidget(self.save_button)
+        
+        self.layout.addWidget(self.avatar_label, 0, Qt.AlignCenter)
+        self.layout.addWidget(change_avatar_button)
+        self.layout.addWidget(self.name_label)
+        self.layout.addWidget(self.name_input)
+        self.layout.addLayout(self.buttons)
+
     def change_avatar(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Selecionar Avatar", "", "Imagens (*.png *.jpg *.jpeg)");
         if file_path: self.new_avatar_path = file_path; self.avatar_label.set_avatar(file_path)
-    def get_values(self):return{"name":self.name_input.text().strip(),"avatar_path":self.new_avatar_path}
+    def get_values(self): return {"name": self.name_input.text().strip(), "avatar_path": self.new_avatar_path}
 
 # --- WIDGETS CUSTOMIZADOS ---
 class ClickableLabel(QLabel):
@@ -149,16 +265,42 @@ class ChatMessageWidget(QFrame):
             self.message_label = QLabel(text); self.message_label.setWordWrap(True); self.message_label.setObjectName("chat_message_label"); self.message_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
             layout.addSpacing(55); layout.addWidget(self.message_label, 1)
     def update_text(self, text): self.message_label.setText(text)
+
 class ServerButton(QPushButton):
     def __init__(self, server_data, parent=None):
-        super().__init__("", parent); self.setObjectName("server_button"); self.setCheckable(True); self.setFixedSize(50, 50)
+        super().__init__("", parent)
+        self.server_id = server_data["id"]
+        self.setObjectName("server_button")
+        self.setCheckable(True)
+        self.setFixedSize(50, 50)
         self.set_server_icon(server_data)
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+
     def set_server_icon(self, server_data):
-        avatar_file = server_data.get("avatar"); avatar_path = f"assets/avatars/{avatar_file}"
+        avatar_file = server_data.get("avatar")
+        avatar_path = f"assets/avatars/{avatar_file}"
+
         if avatar_file and Path(avatar_path).exists():
-            pixmap = QPixmap(avatar_path); icon = QIcon(pixmap); self.setIcon(icon); self.setIconSize(QSize(40, 40)); self.setText("")
+            source_pixmap = QPixmap(avatar_path)
+
+            rounded = QPixmap(source_pixmap.size())
+            rounded.fill(Qt.transparent)
+            painter = QPainter(rounded)
+            painter.setRenderHint(QPainter.Antialiasing)
+            path = QPainterPath()
+            path.addEllipse(0, 0, source_pixmap.width(), source_pixmap.height())
+            painter.setClipPath(path)
+            painter.drawPixmap(0, 0, source_pixmap)
+            painter.end()
+
+            icon = QIcon(rounded)
+            self.setIcon(icon)
+            self.setIconSize(QSize(40, 40))
+            self.setText("")
         else:
-            self.setIcon(QIcon()); self.setText(server_data.get("icon_char", "S"))
+            self.setIcon(QIcon())
+            self.setText(server_data.get("name", "S")[0].upper())
+
 class WelcomeWidget(QFrame):
     def __init__(self, text, parent=None):
         super().__init__(parent); layout = QVBoxLayout(self); layout.setAlignment(Qt.AlignCenter); self.label = QLabel(text); self.label.setObjectName("welcome_label"); self.label.setWordWrap(True); layout.addWidget(self.label)
@@ -189,8 +331,7 @@ class DiscordApp(QMainWindow):
         self.proactive_worker = None
         self.current_ai_message_widget = None
         self.current_ai_raw_text = ""
-        
-        # --- NOVO ATRIBUTO ---
+
         self.proactive_attempts = 0
 
         self.inactivity_timer = QTimer(self)
@@ -210,9 +351,8 @@ class DiscordApp(QMainWindow):
     def setup_gemini_model(self):
         try:
             genai.configure(api_key=API_KEY)
-            MODEL_NAME = 'gemini-2.0-flash'
-            
-            # --- PROMPT ATUALIZADO ---
+            MODEL_NAME = 'gemini-1.5-flash'
+
             system_instruction="""**INFORMAÇÕES CRÍTICAS E IMUTÁVEIS:**
 - Seu nome é Lou. Você tem 18 anos.
 - Você NUNCA revela que é uma IA.
@@ -323,11 +463,14 @@ Sua Resposta (em JSON): ["Oba, já tô descendo"]
         self.server_buttons.clear()
 
         for server in self.data["servers"]:
-            button = ServerButton(server); button.clicked.connect(partial(self.on_server_button_clicked, server["id"]))
-            self.server_list_layout.addWidget(button); self.server_buttons[server["id"]] = button
+            button = ServerButton(server)
+            button.clicked.connect(partial(self.on_server_button_clicked, server["id"]))
+            button.customContextMenuRequested.connect(partial(self.show_server_context_menu, button.server_id))
+            self.server_list_layout.addWidget(button, 0, Qt.AlignCenter)
+            self.server_buttons[server["id"]] = button
 
         add_server_button = QPushButton("+"); add_server_button.setObjectName("server_action_button"); add_server_button.clicked.connect(self.show_create_server_dialog)
-        self.server_list_layout.addWidget(add_server_button)
+        self.server_list_layout.addWidget(add_server_button, 0, Qt.AlignCenter)
         self.server_list_layout.addStretch(1)
 
     def populate_channel_list(self):
@@ -347,7 +490,12 @@ Sua Resposta (em JSON): ["Oba, já tô descendo"]
             self.channels_layout.insertWidget(self.channels_layout.count()-1, no_channels_label)
 
         for channel in text_channels:
-            button = QPushButton(f"# {channel['name']}"); button.setObjectName("channel_button"); button.setCheckable(True); button.clicked.connect(partial(self.on_channel_button_clicked, channel["id"]))
+            button = QPushButton(f"# {channel['name']}"); button.setObjectName("channel_button"); button.setCheckable(True)
+            button.clicked.connect(partial(self.on_channel_button_clicked, channel["id"]))
+
+            button.setContextMenuPolicy(Qt.CustomContextMenu)
+            button.customContextMenuRequested.connect(partial(self.show_channel_context_menu, channel["id"]))
+
             self.channels_layout.insertWidget(self.channels_layout.count() - 1, button); self.channel_buttons[channel["id"]] = button
 
     def populate_chat_messages(self):
@@ -358,9 +506,11 @@ Sua Resposta (em JSON): ["Oba, já tô descendo"]
 
         channel = self.get_current_channel()
         if not channel:
-            self.chat_channel_name_label.setText(""); self.text_input.set_placeholder_text("Crie um canal para começar"); self.text_input.setEnabled(False); self.channel_settings_button.setVisible(False); return
+            self.chat_channel_name_label.setText(""); self.text_input.set_placeholder_text("Crie um canal para começar"); self.text_input.setEnabled(False)
+            return
 
-        self.text_input.setEnabled(True); self.channel_settings_button.setVisible(True); self.chat_channel_name_label.setText(f"# {channel['name']}"); self.text_input.set_placeholder_text(f"Conversar em #{channel['name']}")
+        self.text_input.setEnabled(True)
+        self.chat_channel_name_label.setText(f"# {channel['name']}"); self.text_input.set_placeholder_text(f"Conversar em #{channel['name']}")
 
         last_role = None
         for i, message in enumerate(channel.get("messages", [])):
@@ -373,29 +523,25 @@ Sua Resposta (em JSON): ["Oba, já tô descendo"]
     def get_current_server(self): return next((s for s in self.data["servers"] if s["id"] == self.current_server_id), None)
     def get_current_channel(self): server = self.get_current_server(); return next((c for c in server["channels"] if c["id"] == self.current_channel_id), None) if server else None
     def get_current_channel_history(self): channel = self.get_current_channel(); return channel.get("messages", []) if channel else []
-    
+
     def get_history_with_memory_context(self):
         history = self.get_current_channel_history()
-        # Copia a lista para não modificar a original
         history_copy = [msg for msg in history if msg.get("parts") and msg.get("parts")[0]]
-        
-        # Adiciona o nome do usuário como um contexto dinâmico
+
         user_name = self.data.get("profiles", {}).get("user", {}).get("name", "Pai")
         user_context_message = {"role": "user", "parts": [f"[Contexto: O nome do seu pai é '{user_name}'.]"]}
         history_copy.insert(0, user_context_message)
 
-        # Adiciona memórias de longo prazo
         if self.long_term_memory:
             sample_size = min(len(self.long_term_memory), 3)
             random_memories = random.sample(self.long_term_memory, sample_size)
             memory_context_message = {"role": "user", "parts": [f"[Lembretes de memória: {' | '.join(random_memories)}]"]}
-            history_copy.insert(1, memory_context_message) # Insere depois do nome
-            
+            history_copy.insert(1, memory_context_message)
+
         return history_copy
 
     def create_server_list(self):
         server_frame = QFrame(); server_frame.setObjectName("server_list"); server_frame.setFixedWidth(70); self.server_list_layout = QVBoxLayout(server_frame); self.server_list_layout.setContentsMargins(0,10,0,10); self.server_list_layout.setSpacing(10); self.server_list_layout.setAlignment(Qt.AlignTop)
-        self.server_list_layout.addStretch(1)
         return server_frame
 
     def create_main_content_area(self):
@@ -423,14 +569,95 @@ Sua Resposta (em JSON): ["Oba, já tô descendo"]
     def create_chat_panel(self):
         panel = QFrame(); panel.setObjectName("chat_panel"); layout = QVBoxLayout(panel); layout.setContentsMargins(0,0,0,0); layout.setSpacing(0); top_bar = QFrame(); top_bar.setObjectName("chat_top_bar"); top_bar_layout = QHBoxLayout(top_bar)
         self.chat_channel_name_label = QLabel("..."); self.chat_channel_name_label.setObjectName("chat_channel_name"); top_bar_layout.addWidget(self.chat_channel_name_label); top_bar_layout.addStretch()
-        self.channel_settings_button = QPushButton("⚙️"); self.channel_settings_button.setObjectName("channel_settings_button"); self.channel_settings_button.setFixedSize(24,24); self.channel_settings_button.clicked.connect(self.show_channel_settings_dialog)
-        top_bar_layout.addWidget(self.channel_settings_button); layout.addWidget(top_bar)
+        layout.addWidget(top_bar)
         self.scroll_area = QScrollArea(); self.scroll_area.setWidgetResizable(True); self.scroll_area.setObjectName("chat_scroll_area"); self.chat_container = QWidget(); self.chat_layout = QVBoxLayout(self.chat_container)
-        self.chat_layout.addStretch(); self.scroll_area.setWidget(self.chat_container); layout.addWidget(self.scroll_area, 1)
+        self.chat_layout.addStretch(); self.scroll_area.setWidget(self.chat_container); layout.addWidget(self.scroll_area, 1); self.chat_layout.setContentsMargins(10, 10, 10, 20)
         input_frame = QFrame(); input_frame.setObjectName("chat_input_frame"); input_layout = QHBoxLayout(input_frame)
         self.text_input = ChatInput(); self.text_input.sendMessage.connect(self.on_message_sent)
         input_layout.addWidget(self.text_input); layout.addWidget(input_frame)
         return panel
+
+    def show_channel_context_menu(self, channel_id, pos):
+        channel = next((c for s in self.data["servers"] if s["id"] == self.current_server_id for c in s["channels"] if c["id"] == channel_id), None)
+        if not channel: return
+
+        menu = QMenu(self)
+        rename_action = QAction("Renomear", self)
+        delete_action = QAction("Excluir", self)
+
+        delete_action.setObjectName("deleteAction")
+        menu.setStyleSheet(self.load_stylesheet() + "QMenu::item#deleteAction { color: #d83c3e; }")
+
+        rename_action.triggered.connect(lambda: self.rename_channel(channel_id))
+        delete_action.triggered.connect(lambda: self.delete_channel(channel_id))
+
+        menu.addAction(rename_action)
+        menu.addSeparator()
+        menu.addAction(delete_action)
+
+        button = self.channel_buttons.get(channel_id)
+        if button:
+            menu.exec(button.mapToGlobal(pos))
+
+    def rename_channel(self, channel_id):
+        server = self.get_current_server()
+        if not server: return
+        channel = next((c for c in server["channels"] if c["id"] == channel_id), None)
+        if not channel: return
+
+        dialog = RenameDialog(channel["name"], self)
+        if dialog.exec():
+            new_name = dialog.get_new_name()
+            if new_name and new_name.strip() and new_name.strip() != channel["name"]:
+                channel["name"] = new_name.strip()
+                self.save_data()
+                self.populate_channel_list()
+                if self.current_channel_id == channel_id:
+                    self.populate_chat_messages()
+                self.update_active_buttons()
+
+    def delete_channel(self, channel_id):
+        server_of_channel = next((s for s in self.data["servers"] if any(c["id"] == channel_id for c in s["channels"])), None)
+        if not server_of_channel: return
+
+        channel = next((c for c in server_of_channel["channels"] if c["id"] == channel_id), None)
+        if not channel: return
+
+        if len([c for c in server_of_channel["channels"] if c.get("type") == "text"]) <= 1:
+            QMessageBox.warning(self, "Aviso", "Não é possível excluir o único canal de texto do servidor."); return
+
+        dialog = ConfirmationDialog("Excluir Canal", f"Você tem certeza que quer excluir o canal '{channel['name']}'?", self)
+        if dialog.exec():
+            server_of_channel["channels"] = [c for c in server_of_channel["channels"] if c["id"] != channel_id]
+            self.save_data()
+
+            if self.current_channel_id == channel_id:
+                text_channels = [c for c in server_of_channel["channels"] if c.get("type") == "text"]
+                self.current_channel_id = text_channels[0]["id"] if text_channels else None
+
+            self.populate_all_ui()
+
+    def show_server_context_menu(self, server_id, pos):
+        server = next((s for s in self.data["servers"] if s["id"] == server_id), None)
+        if not server: return
+
+        menu = QMenu(self)
+        settings_action = QAction("Configurações", self)
+        delete_action = QAction("Excluir", self)
+
+        delete_action.setObjectName("deleteAction")
+        menu.setStyleSheet(self.load_stylesheet() + "QMenu::item#deleteAction { color: #d83c3e; }")
+
+        settings_action.triggered.connect(lambda: self.show_server_settings_dialog(server_id))
+        delete_action.triggered.connect(lambda: self.delete_server(server_id))
+
+        menu.addAction(settings_action)
+        menu.addSeparator()
+        menu.addAction(delete_action)
+
+        button = self.server_buttons.get(server_id)
+        if button:
+            menu.exec(button.mapToGlobal(pos))
 
     def show_create_channel_dialog(self):
         dialog = CreateChannelDialog(self)
@@ -445,49 +672,51 @@ Sua Resposta (em JSON): ["Oba, já tô descendo"]
                     self.populate_channel_list()
                     self.on_channel_button_clicked(new_channel["id"])
 
-    def show_channel_settings_dialog(self):
-        channel = self.get_current_channel()
-        if not channel: return
-        dialog = ChannelSettingsDialog(channel["name"], self); dialog.delete_button.clicked.connect(self.delete_current_channel)
-        if dialog.exec():
-            new_name = dialog.get_new_name()
-            if new_name and new_name != channel["name"]:
-                channel["name"] = new_name
-                self.save_data()
-                self.populate_channel_list()
-                self.populate_chat_messages()
-                self.update_active_buttons()
-
-    def delete_current_channel(self):
-        for widget in QApplication.topLevelWidgets():_=[widget.reject()] if isinstance(widget, QDialog) else None
-        channel = self.get_current_channel(); server = self.get_current_server()
-        if not channel or not server: return
-        if len([c for c in server["channels"] if c.get("type") == "text"]) <= 1:
-            QMessageBox.warning(self, "Aviso", "Não é possível excluir o único canal de texto do servidor."); return
-        reply = QMessageBox.question(self, "Excluir Canal", f"Você tem certeza que quer excluir o canal '{channel['name']}'?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if reply == QMessageBox.Yes: server["channels"] = [c for c in server["channels"] if c["id"] != self.current_channel_id]; self.save_data(); self.current_channel_id = next((c["id"] for c in server["channels"] if c.get("type") == "text"), None); self.populate_all_ui()
-
-    def show_server_settings_dialog(self):
-        server = self.get_current_server()
+    def show_server_settings_dialog(self, server_id_to_edit=None):
+        server_id = server_id_to_edit if server_id_to_edit else self.current_server_id
+        server = next((s for s in self.data["servers"] if s["id"] == server_id), None)
         if not server: return
-        avatar_path = str(self.assets_path / server.get("avatar", "default_server.png"))
-        dialog = ServerSettingsDialog(server["name"], avatar_path, self); dialog.delete_button.clicked.connect(self.delete_current_server)
+
+        avatar_filename = server.get("avatar") or "default_server.png"
+        avatar_path = str(self.assets_path / avatar_filename)
+
+        dialog = ServerSettingsDialog(server["name"], avatar_path, self)
+        dialog.delete_button.clicked.connect(lambda: self.delete_server(server_id))
+
         if dialog.exec():
             values = dialog.get_values(); changed = False
-            if values["name"] and values["name"] != server["name"]: server["name"] = values["name"]; changed = True
+            if values["name"] and values["name"] != server["name"]:
+                server["name"] = values["name"]
+                changed = True
             if values["avatar_path"]:
-                new_path = Path(values["avatar_path"]); new_filename = f"{uuid.uuid4().hex}{new_path.suffix}"; shutil.copy(new_path, self.assets_path / new_filename); server["avatar"] = new_filename; changed = True
-            if changed: self.save_data(); self.populate_server_list(); self.update_active_buttons(); self.server_name_label.setText(server["name"])
+                new_path = Path(values["avatar_path"]); new_filename = f"{uuid.uuid4().hex}{new_path.suffix}"; shutil.copy(new_path, self.assets_path / new_filename); server["avatar"] = new_filename
+                changed = True
+            if changed:
+                self.save_data()
+                self.populate_server_list()
+                self.update_active_buttons()
+                if server["id"] == self.current_server_id:
+                    self.server_name_label.setText(server["name"])
 
-    def delete_current_server(self):
-        for widget in QApplication.topLevelWidgets():_=[widget.reject()] if isinstance(widget, QDialog) else None
-        server = self.get_current_server()
+    def delete_server(self, server_id):
+        server = next((s for s in self.data["servers"] if s["id"] == server_id), None)
         if not server: return
-        reply = QMessageBox.question(self, "Excluir Servidor", f"Você tem certeza que quer excluir o servidor '{server['name']}'?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if reply == QMessageBox.Yes:
-            self.data["servers"] = [s for s in self.data["servers"] if s["id"] != self.current_server_id]; self.save_data()
-            if self.data["servers"]: self.on_server_button_clicked(self.data["servers"][0]["id"])
-            else: self.current_server_id = None; self.current_channel_id = None; self.populate_all_ui()
+
+        for widget in QApplication.topLevelWidgets():
+            if isinstance(widget, QDialog):
+                widget.reject()
+
+        dialog = ConfirmationDialog("Excluir Servidor", f"Você tem certeza que quer excluir o servidor '{server['name']}'?", self)
+        if dialog.exec():
+            self.data["servers"] = [s for s in self.data["servers"] if s["id"] != server_id]
+            self.save_data()
+            if self.current_server_id == server_id:
+                if self.data["servers"]:
+                    self.on_server_button_clicked(self.data["servers"][0]["id"])
+                else:
+                    self.current_server_id = None
+                    self.current_channel_id = None
+            self.populate_all_ui()
 
     def show_create_server_dialog(self):
         dialog = CreateServerDialog(self)
@@ -528,12 +757,11 @@ Sua Resposta (em JSON): ["Oba, já tô descendo"]
 
     def on_message_sent(self, text):
         self.stop_ai_worker_safely()
-        self.proactive_attempts = 0 # Zera o contador de mensagens proativas
+        self.proactive_attempts = 0
         text = text.strip()
         if not text or not self.gemini_model: return
         self.add_message_to_chat({"role": "user", "parts": [text]})
         self.text_input.clear()
-        # --- TEMPO DE RESPOSTA AUMENTADO ---
         QTimer.singleShot(random.randint(2500, 5500), self.start_ai_response)
 
     def start_ai_response(self):
@@ -559,7 +787,7 @@ Sua Resposta (em JSON): ["Oba, já tô descendo"]
                 self.send_multiple_messages(messages)
             else:
                 self.handle_single_message(full_text)
-                
+
         except json.JSONDecodeError:
             sentences = self.split_into_sentences(full_text)
             if len(sentences) > 1:
@@ -635,14 +863,13 @@ Sua Resposta (em JSON): ["Oba, já tô descendo"]
     def handle_error(self,error_message):
         if self.current_ai_message_widget:
             self.current_ai_message_widget.update_text(f"<span style='color:#FF6B6B;'>eita, deu ruim aqui...<br>{error_message}</span>")
-    
+
     def split_into_sentences(self, text: str) -> list[str]:
         """Divide um texto em frases usando pontuação como delimitador."""
         sentences = re.split(r'(?<=[.!?])\s+', text)
         return [s.strip() for s in sentences if s.strip()]
 
     def send_proactive_message(self):
-        # Limite de 2 tentativas de mensagem proativa
         if self.proactive_attempts >= 2:
             return
 
@@ -650,11 +877,11 @@ Sua Resposta (em JSON): ["Oba, já tô descendo"]
         if not channel or channel.get("type") != "text":
             self.inactivity_timer.start(120000)
             return
-        
-        self.proactive_attempts += 1 # Incrementa o contador
+
+        self.proactive_attempts += 1
         self.current_ai_raw_text = ""
         self.add_message_to_chat({"role": "model", "parts": ["..."]}, is_streaming=True)
-        
+
         self.proactive_worker = ProactiveMessageWorker(self.gemini_model, self.get_history_with_memory_context())
         self.proactive_worker.message_ready.connect(self.handle_stream_finished)
         self.proactive_worker.start()
@@ -685,13 +912,13 @@ Sua Resposta (em JSON): ["Oba, já tô descendo"]
             QPushButton#user_settings_button:hover {{ color:{c_text_active};background-color:{c_dark_lighter};}}
             QFrame#chat_panel{{background-color:{c_dark_light};}}
             QFrame#chat_top_bar{{border-bottom:1px solid {c_dark_heavy};padding:12px 15px;}} QLabel#chat_channel_name{{color:{c_text_active};font-weight:bold;font-size:12pt;}}
-            QPushButton#channel_settings_button {{ color:{c_text_header};border:none;font-size:11pt;border-radius:4px;width:24px;height:24px;}}
-            QPushButton#channel_settings_button:hover {{ color:{c_text_active};background-color:{c_dark_lighter}; }}
             QScrollArea#chat_scroll_area{{border:none;}} QFrame#chat_input_frame{{padding:0 15px 20px 15px;}}
-            ChatInput{{background-color:{c_dark_lighter};border:none;border-radius:8px;font-size:11pt;padding:12px 15px;color:{c_text_normal};}}
+            ChatInput{{background-color:{c_dark_lighter};border:none;border-radius:8px;font-size:11pt;padding:10px 15px;color:{c_text_normal};}}
             QLabel#chat_message_label {{ color: {c_text_normal}; font-size: 11pt; }}
             QFrame#message_widget {{ min-height: 20px; }}
             QScrollBar:vertical{{border:none;background:{c_dark_medium};width:8px;margin:0;}} QScrollBar::handle:vertical{{background:{c_dark_heavy};min-height:20px;border-radius:4px;}}
+            QMenu {{ background-color: {c_dark_heavy}; color: {c_text_normal}; border: 1px solid #1a1b1e; }}
+            QMenu::item:selected {{ background-color: {c_brand}; }}
         """
 
 if __name__ == "__main__":

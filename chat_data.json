@@ -2,28 +2,15 @@
     "servers": [
         {
             "id": "s1",
-            "name": "Laboratório da Lou",
+            "name": "Cantinho da Lou",
             "icon_char": "L",
-            "avatar": null,
+            "avatar": "741e2ec72dcf425794a5535e018a6507.png",
             "channels": [
                 {
-                    "id": "c1_1",
-                    "name": "papo-ia",
+                    "id": "c_f40727",
+                    "name": "Teste",
                     "type": "text",
-                    "messages": [
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Olá. Este é o novo formato de mensagem."
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Legal. Agora com avatares."
-                            ]
-                        }
-                    ]
+                    "messages": []
                 }
             ]
         }
