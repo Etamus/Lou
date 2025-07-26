@@ -1,4 +1,4 @@
-# 💬 Lou - Plataforma de Chat de Texto com IA Integrada
+# 💬 Lou - IA de Conversação
 
 IA de conversação com foco em interatividade natural e alto nível de personalização via fine-tuning. Projetada para diálogos fluidos, resposta contextual e integração com memória a longo prazo.
 
