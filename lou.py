@@ -83,7 +83,7 @@ class BaseDialog(QDialog):
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
         self.setStyleSheet("QDialog { background-color: #36393f; color: #dcddde; border: 1px solid #282a2e; } QLabel#dialog_label { color: #b9bbbe; font-size: 9pt; font-weight: bold; } QLineEdit#dialog_input { background-color: #202225; color: #dcddde; border: 1px solid #202225; border-radius: 3px; padding: 8px; } QPushButton { background-color: #4f545c; color: #fff; border: none; padding: 8px 16px; border-radius: 3px; font-weight: bold;} QPushButton:hover { background-color: #5d636b; }")
     
-    # O MÉTODO event() FOI REMOVIDO DAQUI
+    # O MÉTODO event() FOI REMOVIDO DAQUI PARA CORRIGIR O FECHAMENTO INESPERADO
 
 class RenameDialog(BaseDialog):
     def __init__(self, current_name, parent=None):
@@ -764,12 +764,33 @@ Sua Resposta (em JSON): ["Oba, já tô descendo"]
         self.text_input.clear()
         QTimer.singleShot(random.randint(2500, 5500), self.start_ai_response)
 
+    # ########################################################################## #
+    # ##               INÍCIO DO TRECHO MODIFICADO COM LOGS                   ## #
+    # ########################################################################## #
+
     def start_ai_response(self):
-        channel = self.get_current_channel();
+        channel = self.get_current_channel()
         if not channel or channel.get("type") != "text": return
-        self.current_ai_raw_text = ""; self.add_message_to_chat({"role": "model", "parts": ["..."]}, is_streaming=True); history_with_context = self.get_history_with_memory_context()
-        self.worker = GeminiWorker(self.gemini_model, history_with_context); self.worker.chunk_ready.connect(self.handle_chunk); self.worker.stream_finished.connect(self.handle_stream_finished)
-        self.worker.error_occurred.connect(self.handle_error); self.worker.start()
+        
+        # --- LOG INÍCIO ---
+        print("\n\n--- LOG: Iniciando a resposta da IA ---")
+        history_with_context = self.get_history_with_memory_context()
+        try:
+            # Usando json.dumps para uma visualização bonita do histórico
+            print(f"Histórico enviado para a IA:\n{json.dumps(history_with_context, indent=2, ensure_ascii=False)}")
+        except Exception as e:
+            print(f"Não foi possível printar o histórico: {e}")
+        # --- LOG FIM ---
+
+        self.current_ai_raw_text = ""
+        self.add_message_to_chat({"role": "model", "parts": ["..."]}, is_streaming=True)
+        
+        # Passando a variável que já criamos para o worker
+        self.worker = GeminiWorker(self.gemini_model, history_with_context)
+        self.worker.chunk_ready.connect(self.handle_chunk)
+        self.worker.stream_finished.connect(self.handle_stream_finished)
+        self.worker.error_occurred.connect(self.handle_error)
+        self.worker.start()
 
     def handle_chunk(self, chunk_text):
         if self.current_ai_message_widget: self.current_ai_raw_text += chunk_text; self.current_ai_message_widget.update_text(self.current_ai_raw_text + "...")
@@ -779,37 +800,69 @@ Sua Resposta (em JSON): ["Oba, já tô descendo"]
             self.current_ai_message_widget.deleteLater()
             self.current_ai_message_widget = None
 
+        # --- LOG INÍCIO ---
+        print("\n--- LOG: Stream da IA finalizado ---")
+        print(f"Raw full_text recebido: >>>{full_text}<<<")
+        # --- LOG FIM ---
+
         full_text = full_text.strip().replace("```json", "").replace("```", "")
 
         try:
             messages = json.loads(full_text)
+            # --- LOG ---
+            print(f"Texto parseado como JSON com sucesso: {messages}")
             if isinstance(messages, list) and messages:
                 self.send_multiple_messages(messages)
             else:
+                # --- LOG ---
+                print("JSON era uma lista vazia ou não era uma lista, tratando como mensagem única.")
                 self.handle_single_message(full_text)
 
         except json.JSONDecodeError:
+            # --- LOG ---
+            print("Falha no parse de JSON. Tratando como texto plano e dividindo em sentenças.")
             sentences = self.split_into_sentences(full_text)
+            # --- LOG ---
+            print(f"Sentenças extraídas: {sentences}")
             if len(sentences) > 1:
                 self.send_multiple_messages(sentences)
             else:
                 self.handle_single_message(full_text)
 
     def handle_single_message(self, text):
+        # --- LOG INÍCIO ---
+        print("\n--- LOG: handle_single_message ---")
+        print(f"Processando mensagem única: >>>{text}<<<")
+        # --- LOG FIM ---
         clean_text = text.strip().strip('"')
+        # --- LOG ---
+        print(f"Texto limpo para adicionar ao chat: >>>{clean_text}<<<")
         self.add_message_to_chat({"role":"model","parts":[clean_text]})
         self.finalize_response()
 
     def send_multiple_messages(self, messages):
+        # --- LOG INÍCIO ---
+        print("\n--- LOG: send_multiple_messages ---")
+        print(f"Processando lote de mensagens: {messages}")
+        # --- LOG FIM ---
+        
         if not messages:
             self.finalize_response()
             return
         next_msg = messages.pop(0).strip()
+
+        # --- LOG ---
+        print(f"Próxima mensagem do lote a ser enviada: >>>{next_msg}<<<")
+
         if not next_msg:
             self.send_multiple_messages(messages)
             return
         self.add_message_to_chat({"role":"model","parts":[next_msg]})
         QTimer.singleShot(self._calculate_typing_delay(next_msg), lambda:self.send_multiple_messages(messages))
+
+    # ######################################################################## #
+    # ##                FIM DO TRECHO MODIFICADO COM LOGS                   ## #
+    # ######################################################################## #
 
     def finalize_response(self):
         history = self.get_current_channel_history()
