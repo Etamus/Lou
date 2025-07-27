@@ -1,4 +1,4 @@
-# 💬 Lou - IA de Conversação
+# 💬 Lou
 
 IA de conversação com foco em interatividade natural e alto nível de personalização via fine-tuning. Projetada para diálogos fluidos, resposta contextual e integração com memória a longo prazo.
 
