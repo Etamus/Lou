@@ -12,7 +12,7 @@ class AIFeaturesMixin:
     def setup_gemini_model(self):
         try:
             # Substitua pela sua chave ou carregue de um arquivo seguro
-            API_KEY = "AIzaSyBY9kbNA6gXX3H39hS4KVxR7XAa3ouGt1k" # <--- COLOQUE SUA API KEY AQUI
+            API_KEY = "" # <--- COLOQUE SUA API KEY AQUI
             if not API_KEY:
                 print("### AVISO: API_KEY não foi definida.###")
                 self.gemini_model = None
