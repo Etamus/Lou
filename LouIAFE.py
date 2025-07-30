@@ -12,7 +12,7 @@ class AIFeaturesMixin:
     def setup_gemini_model(self):
         try:
             # Substitua pela sua chave ou carregue de um arquivo seguro
-            API_KEY = "AIzaSyBY9kbNA6gXX3H39hS4KVxR7XAa3ouGt1k" # <--- COLOQUE SUA API KEY AQUI
+            API_KEY = "" # <--- COLOQUE SUA API KEY AQUI
             if not API_KEY:
                 print("### AVISO: API_KEY não foi definida. A IA não funcionará. ###")
                 self.gemini_model = None
@@ -69,9 +69,9 @@ Sua Resposta (em JSON): ["Hmm, acho que era o show do The Killers", "Foi bem leg
         self.worker.start()
 
     def handle_chunk(self, chunk_text):
-        if self.current_ai_message_widget:
-            self.current_ai_raw_text += chunk_text
-            self.current_ai_message_widget.update_text(self.current_ai_raw_text + "...")
+        # Apenas acumula o texto em segundo plano, sem atualizar a interface.
+        # A interface continuará mostrando apenas o "..." inicial.
+           self.current_ai_raw_text += chunk_text
 
     def handle_stream_finished(self, full_text):
         if self.current_ai_message_widget:

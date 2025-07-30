@@ -2,12 +2,12 @@
     "servers": [
         {
             "id": "s1",
-            "name": "Cantinho da Lou",
+            "name": "Grupo da Lou",
             "icon_char": "L",
-            "avatar": "741e2ec72dcf425794a5535e018a6507.png",
+            "avatar": "477a5fca8b0e46b090ef9c972fbd5a10.png",
             "channels": [
                 {
-                    "id": "c_f40727",
+                    "id": "c_336a25",
                     "name": "Teste",
                     "type": "text",
                     "messages": []

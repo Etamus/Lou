@@ -71,9 +71,6 @@ class LouApp(QMainWindow, AppLogicMixin, UIMixin, AIFeaturesMixin):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    # Garante que as fontes customizadas sejam carregadas se necessário
-    # from PySide6.QtGui import QFontDatabase
-    # QFontDatabase.addApplicationFont("path/to/font.ttf")
     window = LouApp()
     window.show()
     sys.exit(app.exec())
