@@ -1,3 +1,4 @@
+# LouBE.py
 import json
 import uuid
 import shutil
@@ -7,6 +8,9 @@ from functools import partial
 from PySide6.QtWidgets import QApplication, QMessageBox, QPushButton, QLabel, QWidget, QHBoxLayout, QVBoxLayout, QMenu
 from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QAction
+
+# Importa o novo worker de estilo
+from LouIABE import StyleExtractorWorker
 
 from LouFE import (
     RenameDialog, ConfirmationDialog, CreateChannelDialog, ServerSettingsDialog,
@@ -38,21 +42,33 @@ class AppLogicMixin:
         self.populate_all_ui()
 
     def load_or_create_data(self):
+        # Carrega dados principais
         if self.data_file.exists():
             try:
                 with open(self.data_file, "r", encoding="utf-8") as f: self.data = json.load(f)
             except (json.JSONDecodeError, KeyError): self.create_default_data()
         else: self.create_default_data()
+
         if "profiles" not in self.data: self.data["profiles"] = {"user":{"name":"Mateus","id_tag":"#1987","avatar":"default.png"},"model":{"name":"Lou","id_tag":"#AI","avatar":"lou.png"}}
         for server in self.data["servers"]:
             if "avatar" not in server: server["avatar"] = None
             server["channels"] = [c for c in server["channels"] if c.get("type") == "text"]
         self.save_data()
+
+        # Carrega memórias de fatos
         if self.memory_file.exists():
             try:
                 with open(self.memory_file, "r", encoding="utf-8") as f: self.long_term_memory = json.load(f)
             except json.JSONDecodeError: self.long_term_memory = []
         else: self.long_term_memory = []
+
+        # Carrega memórias de estilo
+        if self.style_file.exists():
+            try:
+                with open(self.style_file, "r", encoding="utf-8") as f: self.style_patterns = json.load(f)
+            except json.JSONDecodeError: self.style_patterns = []
+        else: self.style_patterns = []
+
 
     def create_default_data(self):
         self.data=json.loads('{"servers":[{"id":"s1","name":"Laboratório da Lou","icon_char":"L","avatar":null,"channels":[{"id":"c1_1","name":"papo-ia","type":"text","messages":[{"role":"model","parts":["Olá. Este é o novo formato de mensagem."]},{"role":"user","parts":["Legal. Agora com avatares."]}]}]}],"profiles":{"user":{"name":"Mateus","id_tag":"#1987","avatar":"default.png"},"model":{"name":"Lou","id_tag":"#AI","avatar":"lou.png"}}}')
@@ -66,6 +82,18 @@ class AppLogicMixin:
             for mem in new_memories:
                 if isinstance(mem, str) and mem not in self.long_term_memory: self.long_term_memory.append(mem)
             with open(self.memory_file, "w", encoding="utf-8") as f: json.dump(self.long_term_memory, f, indent=4, ensure_ascii=False)
+
+    def save_styles_to_bank(self, new_styles):
+        """Salva os novos padrões de estilo encontrados."""
+        if new_styles:
+            changed = False
+            for style in new_styles:
+                if isinstance(style, str) and style not in self.style_patterns:
+                    self.style_patterns.append(style)
+                    changed = True
+            if changed:
+                with open(self.style_file, "w", encoding="utf-8") as f:
+                    json.dump(self.style_patterns, f, indent=4, ensure_ascii=False)
 
     def populate_all_ui(self):
         if not self.data.get("servers"):
@@ -117,22 +145,39 @@ class AppLogicMixin:
     def get_current_channel_history(self): channel = self.get_current_channel(); return channel.get("messages", []) if channel else []
 
     def get_history_with_memory_context(self):
-        history = self.get_current_channel_history(); history_copy = [msg for msg in history if msg.get("parts") and msg.get("parts")[0]]; user_name = self.data.get("profiles", {}).get("user", {}).get("name", "Pai"); history_copy.insert(0, {"role": "user", "parts": [f"[Contexto: O nome do seu pai é '{user_name}'.]"]}); 
+        """Prepara o histórico da conversa, injetando contexto de memória e de estilo."""
+        history = self.get_current_channel_history()
+        history_copy = [msg for msg in history if msg.get("parts") and msg.get("parts")[0]]
+
+        user_name = self.data.get("profiles", {}).get("user", {}).get("name", "Pai")
+        # 1. Contexto do nome do usuário
+        history_copy.insert(0, {"role": "user", "parts": [f"[Contexto: O nome do seu pai é '{user_name}'.]"]})
+
+        # 2. Contexto de memória de fatos
         if self.long_term_memory:
-            sample_size = min(len(self.long_term_memory), 3); random_memories = __import__('random').sample(self.long_term_memory, sample_size)
-            history_copy.insert(1, {"role": "user", "parts": [f"[Lembretes de memória: {' | '.join(random_memories)}]"]})
+            sample_size = min(len(self.long_term_memory), 3)
+            random_memories = random.sample(self.long_term_memory, sample_size)
+            history_copy.insert(1, {"role": "user", "parts": [f"[Lembretes de memória de longo prazo: {' | '.join(random_memories)}]"]})
+
+        # 3. Contexto de memória de estilo
+        if self.style_patterns:
+            sample_size = min(len(self.style_patterns), 5) # Pega mais amostras de estilo
+            random_styles = random.sample(self.style_patterns, sample_size)
+            style_text = f"[{' | '.join(random_styles)}]"
+            history_copy.insert(1, {"role": "user", "parts": [f"[Contexto de Estilo do seu Pai (para você se inspirar): {style_text}]"]})
+
         return history_copy
 
     def show_channel_context_menu(self, channel_id, pos):
-        channel = next((c for s in self.data["servers"] if s["id"] == self.current_server_id for c in s["channels"] if c["id"] == channel_id), None); 
+        channel = next((c for s in self.data["servers"] if s["id"] == self.current_server_id for c in s["channels"] if c["id"] == channel_id), None);
         if not channel: return
         menu = QMenu(self); rename_action = QAction("Renomear", self); delete_action = QAction("Excluir", self); delete_action.setObjectName("deleteAction"); menu.setStyleSheet(self.load_stylesheet()); rename_action.triggered.connect(lambda: self.rename_channel(channel_id)); delete_action.triggered.connect(lambda: self.delete_channel(channel_id)); menu.addAction(rename_action); menu.addSeparator(); menu.addAction(delete_action)
         if button := self.channel_buttons.get(channel_id): menu.exec(button.mapToGlobal(pos))
 
     def rename_channel(self, channel_id):
-        server = self.get_current_server(); 
+        server = self.get_current_server();
         if not server: return
-        channel = next((c for c in server["channels"] if c["id"] == channel_id), None); 
+        channel = next((c for c in server["channels"] if c["id"] == channel_id), None);
         if not channel: return
         dialog = RenameDialog(channel["name"], self)
         if dialog.exec():
@@ -143,9 +188,9 @@ class AppLogicMixin:
                 self.update_active_buttons()
 
     def delete_channel(self, channel_id):
-        server_of_channel = next((s for s in self.data["servers"] if any(c["id"] == channel_id for c in s["channels"])), None); 
+        server_of_channel = next((s for s in self.data["servers"] if any(c["id"] == channel_id for c in s["channels"])), None);
         if not server_of_channel: return
-        channel = next((c for c in server_of_channel["channels"] if c["id"] == channel_id), None); 
+        channel = next((c for c in server_of_channel["channels"] if c["id"] == channel_id), None);
         if not channel: return
         if len([c for c in server_of_channel["channels"] if c.get("type") == "text"]) <= 1:
             QMessageBox.warning(self, "Aviso", "Não é possível excluir o único canal de texto do servidor."); return
@@ -158,7 +203,7 @@ class AppLogicMixin:
             self.populate_all_ui()
 
     def show_server_context_menu(self, server_id, pos):
-        server = next((s for s in self.data["servers"] if s["id"] == server_id), None); 
+        server = next((s for s in self.data["servers"] if s["id"] == server_id), None);
         if not server: return
         menu = QMenu(self); settings_action = QAction("Configurações", self); delete_action = QAction("Excluir", self); delete_action.setObjectName("deleteAction"); menu.setStyleSheet(self.load_stylesheet()); settings_action.triggered.connect(lambda: self.show_server_settings_dialog(server_id)); delete_action.triggered.connect(lambda: self.delete_server(server_id)); menu.addAction(settings_action); menu.addSeparator(); menu.addAction(delete_action)
         if button := self.server_buttons.get(server_id): menu.exec(button.mapToGlobal(pos))
@@ -173,7 +218,7 @@ class AppLogicMixin:
 
     def show_server_settings_dialog(self, server_id_to_edit=None):
         server_id = server_id_to_edit if server_id_to_edit else self.current_server_id
-        server = next((s for s in self.data["servers"] if s["id"] == server_id), None); 
+        server = next((s for s in self.data["servers"] if s["id"] == server_id), None);
         if not server: return
         avatar_filename = server.get("avatar") or "default_server.png"; avatar_path = str(self.assets_path / avatar_filename)
         dialog = ServerSettingsDialog(server["name"], avatar_path, self)
@@ -187,7 +232,7 @@ class AppLogicMixin:
                 if server["id"] == self.current_server_id: self.server_name_label.setText(server["name"])
 
     def delete_server(self, server_id):
-        server = next((s for s in self.data["servers"] if s["id"] == server_id), None); 
+        server = next((s for s in self.data["servers"] if s["id"] == server_id), None);
         if not server: return
         for widget in QApplication.topLevelWidgets():
             if isinstance(widget, ConfirmationDialog) or isinstance(widget, ServerSettingsDialog): widget.reject()
@@ -241,6 +286,22 @@ class AppLogicMixin:
         if not text or not self.gemini_model: return
         self.add_message_to_chat({"role": "user", "parts": [text]})
         self.text_input.clear()
+
+        # Ativa o aprendizado de estilo a cada 5 mensagens do usuário
+        self.user_message_count += 1
+        if self.user_message_count >= 5:
+            self.user_message_count = 0
+            history = self.get_current_channel_history()
+            # Pega as últimas 15 mensagens para análise de estilo
+            recent_messages = history[-15:]
+            # Formata o snippet para o worker
+            snippet = "\n".join([f"{self.data['profiles'][m['role']]['name']}: {m['parts'][0]}" for m in recent_messages])
+
+            self.style_worker = StyleExtractorWorker(snippet)
+            self.style_worker.styles_extracted.connect(self.save_styles_to_bank)
+            self.style_worker.finished.connect(self.style_worker.deleteLater)
+            self.style_worker.start()
+
         QTimer.singleShot(random.randint(2500, 5500), self.start_ai_response)
 
     def update_active_buttons(self):

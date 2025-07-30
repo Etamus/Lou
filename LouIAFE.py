@@ -12,9 +12,9 @@ class AIFeaturesMixin:
     def setup_gemini_model(self):
         try:
             # Substitua pela sua chave ou carregue de um arquivo seguro
-            API_KEY = "" # <--- COLOQUE SUA API KEY AQUI
+            API_KEY = "AIzaSyBY9kbNA6gXX3H39hS4KVxR7XAa3ouGt1k" # <--- COLOQUE SUA API KEY AQUI
             if not API_KEY:
-                print("### AVISO: API_KEY não foi definida.###")
+                print("### AVISO: API_KEY não foi definida. A IA não funcionará. ###")
                 self.gemini_model = None
                 return
 
@@ -30,6 +30,7 @@ class AIFeaturesMixin:
 - Use emojis de forma extremamente rara, apenas se a situação for muito apropriada (no máximo um por conjunto de respostas).
 - Não use pontos de exclamação. Use um ponto final somente se o tom for triste ou irritado. Em todas as outras situações (normal, feliz, pensativa).
 - Seja criativa. NUNCA use placeholders como "[Banda Aleatória]" ou "[Nome do Filme]". Sempre invente um nome específico e plausível.
+- **Adaptação de Estilo (NOVA REGRA): Para soar mais natural e em sintonia com seu pai, tente incorporar sutilmente algumas das gírias e formas de falar que ele usa. Os exemplos do estilo dele serão fornecidos no contexto da conversa. Não copie, apenas se inspire para que a conversa flua melhor.**
 
 **REGRAS DE FORMATAÇÃO DA RESPOSTA:**
 - Sua resposta DEVE SER SEMPRE um array JSON contendo uma ou mais strings.
@@ -77,15 +78,34 @@ Sua Resposta (em JSON): ["Hmm, acho que era o show do The Killers", "Foi bem leg
             self.current_ai_message_widget.deleteLater()
             self.current_ai_message_widget = None
 
-        full_text = full_text.strip().replace("```json", "").replace("```", "")
+        # Limpa o texto bruto para extrair o JSON de forma mais robusta
+        clean_text = full_text.strip()
+        if clean_text.startswith("```json"):
+            clean_text = clean_text[7:]
+        if clean_text.endswith("```"):
+            clean_text = clean_text[:-3]
+        clean_text = clean_text.strip()
 
         try:
-            messages = json.loads(full_text)
-            if isinstance(messages, list) and messages:
-                self.send_multiple_messages(messages)
+            # Tenta decodificar o texto como JSON
+            data = json.loads(clean_text)
+            messages_to_send = []
+
+            # Cenário 1: O JSON é uma lista de strings (o formato ideal que pedimos)
+            if isinstance(data, list):
+                messages_to_send = data
+            # Cenário 2: O JSON é um objeto com a chave "messages" (o que está acontecendo)
+            elif isinstance(data, dict) and "messages" in data and isinstance(data["messages"], list):
+                messages_to_send = data["messages"]
+
+            if messages_to_send:
+                self.send_multiple_messages(messages_to_send)
             else:
-                self.handle_single_message(full_text)
+                # Se o JSON for válido, mas não tiver o formato esperado, trata o texto original como uma única mensagem
+                self.handle_single_message(clean_text)
+
         except json.JSONDecodeError:
+            # Se não for um JSON válido, trata como texto plano e divide em sentenças
             sentences = self.split_into_sentences(full_text)
             if len(sentences) > 1:
                 self.send_multiple_messages(sentences)

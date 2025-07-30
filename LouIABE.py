@@ -95,3 +95,34 @@ class ProactiveMessageWorker(BaseWorker):
         except Exception as e:
             if self.is_running:
                 self.error_occurred.emit(f"Erro ao gerar mensagem proativa: {e}")
+
+class StyleExtractorWorker(BaseWorker):
+    """Worker para extrair padrões de estilo da escrita do usuário."""
+    styles_extracted = Signal(list)
+
+    def __init__(self, conversation_snippet):
+        super().__init__()
+        self.snippet = conversation_snippet
+
+    def run(self):
+        try:
+            extractor_model = genai.GenerativeModel('gemini-1.5-flash')
+            prompt = f"""
+            Analise o estilo de escrita de 'Mateus' no seguinte trecho de conversa.
+            Identifique gírias, abreviações, emojis recorrentes, vícios de linguagem ou formas de falar que ele mais usa.
+            Seja conciso. Retorne apenas uma lista JSON com strings descrevendo os padrões.
+            Exemplo de Retorno: ["usa a gíria 'pprt'", "abrevia 'você' para 'vc'", "costuma usar o emoji '😂'"]
+            Se não encontrar nada de relevante, retorne uma lista vazia [].
+
+            Conversa:
+            {self.snippet}
+
+            Resultado:
+            """
+            response = extractor_model.generate_content(prompt)
+            clean_response = response.text.strip().replace("```json", "").replace("```", "")
+            styles = json.loads(clean_response)
+            if isinstance(styles, list):
+                self.styles_extracted.emit(styles)
+        except (Exception, json.JSONDecodeError):
+            self.styles_extracted.emit([]) # Emite lista vazia em caso de erro

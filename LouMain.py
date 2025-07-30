@@ -25,6 +25,7 @@ class LouApp(QMainWindow, AppLogicMixin, UIMixin, AIFeaturesMixin):
         self.data_path.mkdir(parents=True, exist_ok=True)
         self.data_file = self.data_path / "chat_data.json"
         self.memory_file = self.data_path / "memory_bank.json"
+        self.style_file = self.data_path / "style_bank.json" # <-- NOVO
 
         self.data = {}
         self.long_term_memory = []
@@ -37,10 +38,13 @@ class LouApp(QMainWindow, AppLogicMixin, UIMixin, AIFeaturesMixin):
         self.gemini_model = None
         self.worker = None
         self.memory_worker = None
+        self.style_worker = None # <-- NOVO: Worker de estilo
         self.proactive_worker = None
         self.current_ai_message_widget = None
         self.current_ai_raw_text = ""
         self.proactive_attempts = 0
+        self.style_patterns = [] # <-- NOVO: Lista para guardar padrões de estilo
+        self.user_message_count = 0 # <-- NOVO: Contador de mensagens do usuário
 
         # --- Timers ---
         self.inactivity_timer = QTimer(self)
