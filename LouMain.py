@@ -31,7 +31,8 @@ class LouApp(QMainWindow, AppLogicMixin, UIMixin, AIFeaturesMixin):
         self.personality_file = self.data_path / "personality_prompt.json"
         
         self.data = {}
-        self.long_term_memory = []
+        self.long_term_memories = []
+        self.short_term_memories = []
         self.style_patterns = []
         self.personality_data = {}
         self.server_buttons = {}

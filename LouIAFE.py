@@ -3,108 +3,97 @@ import json
 import re
 import random
 import ast
-from datetime import datetime  # <-- A CORREÇÃO ESTÁ AQUI
+from datetime import datetime
 from PySide6.QtCore import QTimer
 from LouIABE import GeminiWorker, ProactiveMessageWorker, ContextUpdateWorker
-from LouFE import ChatMessageWidget
+from LouFE import ChatMessageWidget, DateSeparatorWidget
 import google.generativeai as genai
 
 class AIFeaturesMixin:
     """Agrupa métodos para integrar a IA com a interface."""
 
-    def _apply_formatting_rules(self, messages: list) -> list:
-        """
-        Aplica regras de formatação no código Python como uma 'rede de segurança',
-        forçando a separação de frases longas e a remoção de pontuação indesejada.
-        """
-        final_messages = []
-        WORD_LIMIT = 18  # Limite de palavras por balão de chat
-
-        for msg in messages:
-            # 1. Remove pontos de exclamação à força
-            msg = msg.replace('!', '')
-
-            # 2. Quebra frases que excedem o limite de palavras
-            words = msg.split()
-            if len(words) > WORD_LIMIT:
-                new_msg_chunk = []
-                for word in words:
-                    new_msg_chunk.append(word)
-                    if len(new_msg_chunk) >= WORD_LIMIT:
-                        final_messages.append(" ".join(new_msg_chunk))
-                        new_msg_chunk = []
-                if new_msg_chunk: # Adiciona o restante da frase
-                    final_messages.append(" ".join(new_msg_chunk))
+    def _sanitize_and_split_response(self, text: str) -> list:
+        if text.strip().startswith("GIF:"):
+            return [text.strip()]
+        emoji_pattern = re.compile("[\\U0001F600-\\U0001F64F\\U0001F300-\\U0001F5FF\\U0001F680-\\U0001F6FF\\U0001F700-\\U0001FAFF\\U00002702-\\U000027B0\\U000024C2-\\U0001F251]+", flags=re.UNICODE)
+        text = emoji_pattern.sub(r'', text).strip()
+        text = text.replace('!', '')
+        if text.endswith('.'):
+            text = text[:-1]
+        initial_sentences = re.split(r'(?<=[.?!…])\s+', text)
+        final_chunks = []
+        WORD_LIMIT = 18
+        for sentence in initial_sentences:
+            words = sentence.split()
+            if len(words) <= WORD_LIMIT:
+                if sentence.strip():
+                    final_chunks.append(sentence.strip())
+                continue
+            fragments = re.findall(r'[^,]+,?\s*|\S+', sentence)
+            current_chunk = ""
+            for frag in fragments:
+                frag = frag.strip()
+                if not frag: continue
+                if not current_chunk:
+                    current_chunk = frag
+                elif len((current_chunk + " " + frag).split()) > WORD_LIMIT:
+                    final_chunks.append(current_chunk)
+                    current_chunk = frag
+                else:
+                    current_chunk += " " + frag
+            if current_chunk:
+                final_chunks.append(current_chunk)
+        capitalized_chunks = []
+        for i, chunk in enumerate(final_chunks):
+            clean_chunk = chunk.strip().rstrip('.,')
+            if not clean_chunk: continue
+            if i > 0 and clean_chunk:
+                capitalized_chunks.append(clean_chunk[0].upper() + clean_chunk[1:])
             else:
-                final_messages.append(msg)
-        
-        return final_messages
+                capitalized_chunks.append(clean_chunk)
+        return capitalized_chunks
 
     def handle_stream_finished(self, full_text):
         if self.current_ai_message_widget:
-            self.current_ai_message_widget.deleteLater()
-            self.current_ai_message_widget = None
-
-        clean_text = full_text.strip()
-        if not clean_text:
-            print("--- AVISO: A IA retornou uma resposta vazia. ---")
-            return
-
-        initial_messages = []
-        parsed_successfully = False
-
+            self.current_ai_message_widget.deleteLater(); self.current_ai_message_widget = None
+        raw_text = full_text.strip()
+        if not raw_text:
+            print("--- AVISO: A IA criativa retornou uma resposta vazia. ---"); return
+        message_paragraph = ""
         try:
-            start_index = clean_text.find('{')
-            end_index = clean_text.rfind('}')
+            start_index = raw_text.find('{')
+            end_index = raw_text.rfind('}')
             if start_index != -1 and end_index != -1:
-                json_part = clean_text[start_index : end_index + 1]
+                json_part = raw_text[start_index : end_index + 1]
                 data = json.loads(json_part)
                 reasoning = data.get("reasoning", "Nenhum raciocínio fornecido.")
-                initial_messages = data.get("messages", [])
+                message_paragraph = data.get("messages", "")
                 action_taken = data.get("action_taken")
-                print("\n" + "="*20 + " Raciocínio da Lou " + "="*20)
-                print(f"  {reasoning}")
-                print("="*59 + "\n")
+                print("\n" + "="*20 + " Raciocínio da Lou " + "="*20); print(f"  {reasoning}"); print("="*59 + "\n")
                 if action_taken == "mentioned_late_hour":
                     self.has_mentioned_late_hour = True
                     print("--- Lou comentou sobre o horário. O lembrete não será enviado novamente nesta sessão. ---")
-                parsed_successfully = True
-        except (json.JSONDecodeError, AttributeError):
-            pass
-        
-        if not parsed_successfully:
-            try:
-                data = ast.literal_eval(clean_text)
-                if isinstance(data, list):
-                    initial_messages = data
-            except (ValueError, SyntaxError):
-                initial_messages = [clean_text]
-
-        # --- APLICAÇÃO DAS REGRAS DE FORMATAÇÃO ---
-        final_messages_to_send = self._apply_formatting_rules(initial_messages)
-        
+            else: message_paragraph = raw_text
+        except (json.JSONDecodeError, ValueError, AttributeError) as e:
+            print(f"--- AVISO: Falha no parse da IA. Tratando como texto bruto. Erro: {e} ---")
+            message_paragraph = raw_text
+        final_messages_to_send = self._sanitize_and_split_response(message_paragraph)
         if final_messages_to_send:
             self.send_multiple_messages(final_messages_to_send)
         else:
             self.finalize_response()
     
-    # ... O restante do arquivo (setup_gemini_model, start_ai_response, etc.) permanece o mesmo ...
-    # O código completo está abaixo para garantir a sincronia.
-
     def setup_gemini_model(self):
         try:
-            API_KEY = "AIzaSyBY9kbNA6gXX3H39hS4KVxR7XAa3ouGt1k" # <--- COLOQUE SUA API KEY AQUI
+            API_KEY = "" # <--- COLOQUE SUA API KEY AQUI
             if not API_KEY:
                 print("### AVISO: API_KEY não foi definida. A IA não funcionará. ###")
-                self.gemini_model = None
-                return
+                self.gemini_model = None; return
             genai.configure(api_key=API_KEY)
             MODEL_NAME = 'gemini-2.0-flash'
             system_instruction = self._build_system_instruction()
             self.gemini_model = genai.GenerativeModel(
-                MODEL_NAME,
-                system_instruction=system_instruction,
-                generation_config={"temperature": 0.9}
+                MODEL_NAME, system_instruction=system_instruction, generation_config={"temperature": 0.75}
             )
         except Exception as e:
             print(f"### ERRO CRÍTICO AO CONFIGURAR O MODELO: {e} ###")
@@ -126,15 +115,15 @@ class AIFeaturesMixin:
         if not self.personality_data: return "ERRO: Dados de personalidade não carregados."
         rules = self.personality_data.get("technical_rules", {})
         personality = self.personality_data.get("personality_definition", {})
-        prompt = "## FORMATO DE SAÍDA OBRIGATÓRIO\n"
-        prompt += "- Sua resposta DEVE ser um único objeto JSON contendo as chaves 'messages' e, opcionalmente, as chaves 'reasoning' e 'action_taken'.\n"
-        prompt += "- A chave 'reasoning' DEVE conter uma string explicando brevemente quais traços da sua personalidade influenciaram a resposta.\n"
-        prompt += "- A chave 'messages' DEVE conter um array de uma ou mais strings, que serão as mensagens exibidas no chat.\n"
-        prompt += "- Se você realizar uma ação especial solicitada no contexto (como mencionar o horário), a chave 'action_taken' DEVE conter uma string descrevendo a ação (ex: 'mentioned_late_hour').\n"
-        prompt += "\n".join(f"- {rule}" for rule in rules.get("output_format_rules", [])) + "\n"
+        prompt = "\n".join(f"- {rule}" for rule in rules.get("master_directive", [])) + "\n" if "master_directive" in rules else ""
+        prompt += "\n## FORMATO DE SAÍDA OBRIGATÓRIO\n"
+        prompt += "\n".join(f"- {rule}" for rule in rules.get("output_format", [])) + "\n"
+        prompt += "\n".join(f"- {rule}" for rule in rules.get("reasoning_rules", [])) + "\n"
         prompt += "\n## SUA FICHA DE PERSONAGEM (QUEM VOCÊ É)\n"
         prompt += "Você DEVE incorporar e agir de acordo com a seguinte personalidade em TODAS as suas respostas. Esta é a sua identidade.\n"
         prompt += "---\n" + self._format_personality_for_prompt(personality) + "---\n"
+        prompt += "\n## REGRAS DE ESTILO\n"
+        prompt += "\n".join(f"- {rule}" for rule in rules.get("personality_style", [])) + "\n"
         prompt += "\n## DIRETRIZ SOBRE EXEMPLOS\n" + rules.get("examples_guideline", "") + "\n"
         for i, example in enumerate(rules.get("examples", [])):
             prompt += f"\n**EXEMPLO {i+1}:**\n"
@@ -155,10 +144,6 @@ class AIFeaturesMixin:
         self.worker.start()
     def handle_chunk(self, chunk_text):
         self.current_ai_raw_text += chunk_text
-    def handle_single_message(self, text):
-        clean_text = text.strip().strip('"')
-        self.add_message_to_chat({"role":"model","parts":[clean_text]})
-        self.finalize_response()
     def send_multiple_messages(self, messages):
         if not messages:
             self.finalize_response()
@@ -169,34 +154,60 @@ class AIFeaturesMixin:
             return
         self.add_message_to_chat({"role":"model","parts":[next_msg]})
         QTimer.singleShot(self._calculate_typing_delay(next_msg), lambda:self.send_multiple_messages(messages))
-# Em LouIAFE.py, substitua o método finalize_response
-
     def finalize_response(self):
-        """Acionado após a IA terminar de responder, para iniciar o ciclo de aprendizado."""
         history = self.get_current_channel_history()
         if len(history) >= 2:
             snippet_messages = history[-4:]
             snippet_text = "\n".join([f"{self.data['profiles'].get(m['role'], {}).get('name', 'Desconhecido')}: {m['parts'][0]}" for m in snippet_messages])
-            
-            # Agora passa as memórias e estilos atuais para o worker
-            self.context_update_worker = ContextUpdateWorker(snippet_text, self.long_term_memory, self.style_patterns)
+            self.context_update_worker = ContextUpdateWorker(snippet_text, self.short_term_memories, self.style_patterns)
             self.context_update_worker.context_updated.connect(self._handle_context_update)
             self.context_update_worker.finished.connect(self.context_update_worker.deleteLater)
             self.context_update_worker.start()
-        
         self.inactivity_timer.start(random.randint(120000, 300000))
         self._clear_reply_state()
     def add_message_to_chat(self, message_data, is_loading=False, is_streaming=False, is_grouped=False):
         channel = self.get_current_channel()
         if not channel or not self.chat_layout: return
+
         if "timestamp" not in message_data:
             message_data["timestamp"] = datetime.now().isoformat()
+
+        # --- LÓGICA DE VERIFICAÇÃO DE DATA EM TEMPO REAL (CORRIGIDA) ---
+        if not is_loading:
+            # Pega todos os widgets de mensagem/separador já existentes no layout
+            existing_widgets = [self.chat_layout.itemAt(i).widget() for i in range(self.chat_layout.count() - 1)]
+            
+            # Procura pelo timestamp do último widget que é uma mensagem
+            last_message_widget = next((w for w in reversed(existing_widgets) if isinstance(w, ChatMessageWidget)), None)
+            
+            current_ts = datetime.fromisoformat(message_data["timestamp"])
+            needs_separator = False
+
+            if last_message_widget is None:
+                # Caso 1: Não há nenhuma mensagem no chat. Adiciona o separador.
+                needs_separator = True
+            else:
+                # Caso 2: Já existem mensagens. Compara a data da nova com a da última.
+                last_ts = datetime.fromisoformat(last_message_widget.message_data["timestamp"])
+                if current_ts.date() > last_ts.date():
+                    needs_separator = True
+            
+            if needs_separator:
+                separator_text = self._format_date_for_separator(current_ts)
+                separator = DateSeparatorWidget(separator_text)
+                self.chat_layout.insertWidget(self.chat_layout.count() - 1, separator)
+                is_grouped = False # Força a nova mensagem a não ser agrupada
+
         widget = ChatMessageWidget(message_data, self.data.get("profiles", {}), is_grouped, self)
         if widget.role == "model":
             widget.reply_clicked.connect(self._handle_reply_button_clicked)
+        
         if is_streaming: self.current_ai_message_widget = widget
+        
         self.chat_layout.insertWidget(self.chat_layout.count() - 1, widget)
         QTimer.singleShot(50, lambda: self.scroll_area.verticalScrollBar().setValue(self.scroll_area.verticalScrollBar().maximum()))
+
+        # Lógica de salvamento (permanece a mesma)
         if not is_loading and not is_streaming:
             channel = self.get_current_channel()
             if channel:
@@ -204,6 +215,7 @@ class AIFeaturesMixin:
                 if "is_reply_to" in msg_to_save:
                     original_text = msg_to_save["parts"][0].split("\n")[-1]
                     msg_to_save["parts"] = [original_text]
+                
                 if channel["messages"] and channel["messages"][-1]["parts"] == ["..."]:
                     channel["messages"][-1] = msg_to_save
                 else:
@@ -218,9 +230,6 @@ class AIFeaturesMixin:
     def handle_error(self, error_message):
         if self.current_ai_message_widget:
             self.current_ai_message_widget.update_text(f"<span style='color:#FF6B6B;'>eita, deu ruim aqui...<br>{error_message}</span>")
-    def split_into_sentences(self, text: str) -> list[str]:
-        sentences = re.split(r'(?<=[.!?])\s+', text)
-        return [s.strip() for s in sentences if s.strip()]
     def send_proactive_message(self):
         if self.proactive_attempts >= 2:
             print("--- Limite de mensagens proativas atingido. Lou vai aguardar. ---")
