@@ -1,7 +1,7 @@
 # LouMain.py
 import sys
 import random
-import json
+import json # Adicionado para o carregamento do prompt
 from pathlib import Path
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout
 from PySide6.QtCore import QTimer
@@ -28,12 +28,12 @@ class LouApp(QMainWindow, AppLogicMixin, UIMixin, AIFeaturesMixin):
         self.data_file = self.data_path / "chat_data.json"
         self.memory_file = self.data_path / "memory_bank.json"
         self.style_file = self.data_path / "style_bank.json"
-        self.personality_file = self.data_path / "personality_prompt.json"
+        self.personality_file = self.data_path / "personality_prompt.json" # NOVO
         
         self.data = {}
         self.long_term_memory = []
         self.style_patterns = []
-        self.personality_data = {}
+        self.personality_data = {} # NOVO
         self.server_buttons = {}
         self.channel_buttons = {}
         self.current_server_id = None
@@ -49,7 +49,7 @@ class LouApp(QMainWindow, AppLogicMixin, UIMixin, AIFeaturesMixin):
         self.current_ai_raw_text = ""
         self.proactive_attempts = 0
         self.available_gifs = [p.stem for p in self.gifs_path.glob("*.gif")]
-        self.has_mentioned_late_hour = False
+        self.has_mentioned_late_hour = False # <-- ADICIONE ESTA LINHA
 
         # --- Timers ---
         self.inactivity_timer = QTimer(self)
@@ -65,7 +65,8 @@ class LouApp(QMainWindow, AppLogicMixin, UIMixin, AIFeaturesMixin):
                 self.personality_data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
             print(f"### ERRO CRÍTICO: Não foi possível carregar o arquivo de personalidade: {e} ###")
-            self.personality_data = {}
+            # Futuramente, podemos mostrar um QMessageBox para o usuário aqui.
+            self.personality_data = {} # Garante que o app não quebre
 
         # --- Configuração Inicial ---
         self.setStyleSheet(self.load_stylesheet())
@@ -78,35 +79,6 @@ class LouApp(QMainWindow, AppLogicMixin, UIMixin, AIFeaturesMixin):
         self.setup_gemini_model()
         self.WelcomeWidget = WelcomeWidget
         self.setup_data_and_ui()
-
-    def closeEvent(self, event):
-        """
-        Executado quando o usuário clica no 'X' da janela.
-        Garante que todos os dados sejam salvos e os workers sejam finalizados.
-        """
-        # --- LÓGICA DE FINALIZAÇÃO ATUALIZADA ---
-        
-        # Para todos os workers de IA em segundo plano, com tratamento de erro
-        self.stop_ai_worker_safely()
-        
-        try:
-            if hasattr(self, 'context_update_worker') and self.context_update_worker and self.context_update_worker.isRunning():
-                self.context_update_worker.wait_for_finish()
-        except RuntimeError:
-            pass # Ignora o erro se o objeto já foi deletado, o que é o comportamento esperado.
-
-        try:
-            if hasattr(self, 'proactive_worker') and self.proactive_worker and self.proactive_worker.isRunning():
-                self.proactive_worker.wait_for_finish()
-        except RuntimeError:
-            pass # Ignora o erro se o objeto já foi deletado.
-            
-        # Salva o estado final dos dados do chat
-        self.save_data()
-        
-        # Aceita o evento de fechamento para permitir que a janela feche
-        event.accept()
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
