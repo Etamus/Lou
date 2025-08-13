@@ -5,8 +5,7 @@ import shutil
 import random
 from pathlib import Path
 from functools import partial
-from datetime import datetime
-
+from datetime import datetime, timedelta # Adicionado timedelta
 from PySide6.QtWidgets import QApplication, QMessageBox, QPushButton, QLabel, QWidget, QHBoxLayout, QVBoxLayout, QMenu
 from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QAction
@@ -20,6 +19,7 @@ class AppLogicMixin:
     """Agrupa a lógica de negócios e o gerenciamento de dados do aplicativo."""
 
     def setup_data_and_ui(self):
+        # ... (este método permanece o mesmo)
         self.load_or_create_data()
         if self.data["servers"]:
             if not self.current_server_id or self.current_server_id not in [s['id'] for s in self.data['servers']]:
@@ -28,40 +28,31 @@ class AppLogicMixin:
             if server and server["channels"]:
                 text_channels = [c for c in server['channels'] if c.get('type') == 'text']
                 if text_channels: self.current_channel_id = text_channels[0]['id']
-
         self.welcome_widget = self.WelcomeWidget("Crie ou selecione um servidor para começar.")
         self.main_layout.addWidget(self.welcome_widget)
-
         self.server_list_frame = self.create_server_list()
         self.main_content_splitter = self.create_main_content_area()
-
         self.main_layout.insertWidget(0, self.server_list_frame)
         self.main_layout.insertWidget(1, self.main_content_splitter, 1)
-
         self.populate_all_ui()
 
     def load_or_create_data(self):
-        # Carrega dados da conversa
+        # ... (este método permanece o mesmo)
         if self.data_file.exists():
             try:
                 with open(self.data_file, "r", encoding="utf-8") as f: self.data = json.load(f)
             except (json.JSONDecodeError, KeyError): self.create_default_data()
         else: self.create_default_data()
-
-        # Carrega memórias de fatos
         if self.memory_file.exists():
             try:
                 with open(self.memory_file, "r", encoding="utf-8") as f: self.long_term_memory = json.load(f)
             except json.JSONDecodeError: self.long_term_memory = []
         else: self.long_term_memory = []
-
-        # Carrega memórias de estilo
         if self.style_file.exists():
             try:
                 with open(self.style_file, "r", encoding="utf-8") as f: self.style_patterns = json.load(f)
             except json.JSONDecodeError: self.style_patterns = []
         else: self.style_patterns = []
-
         if "profiles" not in self.data: self.data["profiles"] = {"user":{"name":"Mateus","id_tag":"#1987","avatar":"default.png"},"model":{"name":"Lou","id_tag":"#AI","avatar":"lou.png"}}
         for server in self.data["servers"]:
             if "avatar" not in server: server["avatar"] = None
@@ -69,13 +60,16 @@ class AppLogicMixin:
         self.save_data()
 
     def create_default_data(self):
+        # ... (este método permanece o mesmo)
         self.data=json.loads('{"servers":[{"id":"s1","name":"Laboratório da Lou","icon_char":"L","avatar":null,"channels":[{"id":"c1_1","name":"papo-ia","type":"text","messages":[]}]}],"profiles":{"user":{"name":"Mateus","id_tag":"#1987","avatar":"default.png"},"model":{"name":"Lou","id_tag":"#AI","avatar":"lou.png"}}}')
         self.save_data()
 
     def save_data(self):
+        # ... (este método permanece o mesmo)
         with open(self.data_file, "w", encoding="utf-8") as f: json.dump(self.data, f, indent=4, ensure_ascii=False)
-    
+
     def save_memories_to_bank(self, new_memories):
+        # ... (este método permanece o mesmo)
         if not isinstance(new_memories, list): return
         changed = False
         for mem in new_memories:
@@ -87,6 +81,7 @@ class AppLogicMixin:
                 json.dump(self.long_term_memory, f, indent=4, ensure_ascii=False)
 
     def save_styles_to_bank(self, new_styles):
+        # ... (este método permanece o mesmo)
         if not isinstance(new_styles, list): return
         changed = False
         for style in new_styles:
@@ -98,11 +93,17 @@ class AppLogicMixin:
                 json.dump(self.style_patterns, f, indent=4, ensure_ascii=False)
 
     def _handle_context_update(self, context_data):
-        """Recebe os dados do ContextUpdateWorker e salva nos respectivos bancos."""
+        # ... (este método permanece o mesmo)
         self.save_memories_to_bank(context_data.get("memories", []))
         self.save_styles_to_bank(context_data.get("styles", []))
+
+    def _format_date_for_separator(self, dt_object):
+        # ... (este método permanece o mesmo)
+        meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
+        return f"{dt_object.day} de {meses[dt_object.month - 1]} de {dt_object.year}"
         
     def populate_all_ui(self):
+        # ... (este método permanece o mesmo)
         if not self.data.get("servers"):
             self.main_content_splitter.setVisible(False); self.welcome_widget.setVisible(True)
         else:
@@ -110,6 +111,7 @@ class AppLogicMixin:
         self.populate_server_list(); self.populate_channel_list(); self.populate_chat_messages(); self.update_active_buttons(); self.refresh_user_panels()
 
     def populate_server_list(self):
+        # ... (este método permanece o mesmo)
         while self.server_list_layout.count() > 0:
             item = self.server_list_layout.takeAt(0)
             if item.widget(): item.widget().deleteLater()
@@ -121,6 +123,7 @@ class AppLogicMixin:
         self.server_list_layout.addStretch(1)
 
     def populate_channel_list(self):
+        # ... (este método permanece o mesmo)
         while self.channels_layout.count() > 1: item = self.channels_layout.takeAt(0);_=[w.deleteLater() for w in [item.widget()] if w]
         self.channel_buttons.clear(); server = self.get_current_server()
         if not server: self.server_name_label.setText("Nenhum Servidor"); return
@@ -129,58 +132,48 @@ class AppLogicMixin:
         for channel in text_channels:
             button = QPushButton(f"# {channel['name']}"); button.setObjectName("channel_button"); button.setCheckable(True); button.clicked.connect(partial(self.on_channel_button_clicked, channel["id"])); button.setContextMenuPolicy(Qt.CustomContextMenu); button.customContextMenuRequested.connect(partial(self.show_channel_context_menu, channel["id"])); self.channels_layout.insertWidget(self.channels_layout.count() - 1, button); self.channel_buttons[channel["id"]] = button
 
-# Em LouBE.py, substitua este método
-
     def populate_chat_messages(self):
+        # ... (este método permanece o mesmo)
         from LouFE import DateSeparatorWidget
-
+        self.chat_container.setUpdatesEnabled(False)
         while self.chat_layout.count() > 1:
             item = self.chat_layout.takeAt(0)
             if item.widget(): item.widget().deleteLater()
-        
         channel = self.get_current_channel()
         if not channel:
             self.chat_channel_name_label.setText("")
             self.text_input.set_placeholder_text("Crie um canal para começar")
             self.text_input.setEnabled(False)
+            self.chat_container.setUpdatesEnabled(True)
             return
-
         self.text_input.setEnabled(True)
         self.chat_channel_name_label.setText(f"# {channel['name']}")
         self.text_input.set_placeholder_text(f"Conversar em #{channel['name']}")
-        
         last_role = None
-        last_date_obj = None # Usaremos o objeto de data para comparação
-        
+        last_date_obj = None
         for i, message in enumerate(channel.get("messages", [])):
             timestamp_str = message.get("timestamp")
             if timestamp_str:
                 dt_object = datetime.fromisoformat(timestamp_str)
                 current_date_obj = dt_object.date()
-                
                 if current_date_obj != last_date_obj:
-                    # Usa a nova função para formatar a data em português
                     separator_text = self._format_date_for_separator(dt_object)
                     separator = DateSeparatorWidget(separator_text)
                     self.chat_layout.insertWidget(self.chat_layout.count() - 1, separator)
                     last_date_obj = current_date_obj
                     last_role = None
-
             is_grouped = message.get("role") == last_role and last_role is not None
             self.add_message_to_chat(message, is_loading=True, is_grouped=is_grouped)
             last_role = message.get("role")
-
         QTimer.singleShot(100, lambda: self.scroll_area.verticalScrollBar().setValue(self.scroll_area.verticalScrollBar().maximum()))
+        self.chat_container.setUpdatesEnabled(True)
 
     def get_current_server(self): return next((s for s in self.data["servers"] if s["id"] == self.current_server_id), None)
     def get_current_channel(self): server = self.get_current_server(); return next((c for c in server["channels"] if c["id"] == self.current_channel_id), None) if server else None
     def get_current_channel_history(self): channel = self.get_current_channel(); return channel.get("messages", []) if channel else []
 
-# Em LouBE.py, substitua este método
-
     def get_history_with_memory_context(self):
         history = self.get_current_channel_history()
-        
         history_copy = []
         for msg in history:
             if msg.get("parts") and msg.get("parts")[0]:
@@ -188,45 +181,50 @@ class AppLogicMixin:
                 history_copy.append(clean_msg)
         
         agora = datetime.now()
+
+        # --- LÓGICA DE DETECÇÃO DE DEMORA ---
+        if history and history[-1].get("role") == "model" and history[-1].get("timestamp"):
+            last_lou_ts = datetime.fromisoformat(history[-1]["timestamp"])
+            time_since_last_message = agora - last_lou_ts
+            
+            # Limite de 3 horas para considerar "demora"
+            if time_since_last_message > timedelta(hours=3):
+                hours = int(time_since_last_message.total_seconds() // 3600)
+                delay_text = f"quase {hours+1} horas" if hours > 0 else f"{int(time_since_last_message.total_seconds() // 60)} minutos"
+                instrucao_demora = f"[Instrução Adicional: Seu pai demorou {delay_text} para responder. Se for natural, comente sobre a demora dele antes de responder ao conteúdo da mensagem.]"
+                history_copy.insert(0, {"role": "user", "parts": [instrucao_demora]})
+
+        # --- Lógica de Noção de Horário (Madrugada) ---
         hora_atual = agora.hour
-        
-        # --- LÓGICA DE NOÇÃO DE HORÁRIO APRIMORADA ---
-        # 1. Período alterado para 00:00 até 05:59
         if 0 <= hora_atual < 6 and not self.has_mentioned_late_hour:
-            # 2. Adiciona uma chance de 25% de fazer o comentário, tornando-o espontâneo
             if random.random() < 0.25:
-                instrucao_horario = "[Instrução Adicional: Está muito tarde (passa da meia-noite). Em um momento apropriado nesta resposta, comente de forma natural sobre o horário e talvez sugira que vocês deveriam dormir. Se o fizer, adicione a chave 'action_taken': 'mentioned_late_hour' ao seu JSON de resposta.]"
+                instrucao_horario = "[Instrução Adicional: Está muito tarde (passa da meia-noite). Em um momento apropriado nesta resposta, comente sobre o horário e talvez sugira que vocês deveriam dormir. Se o fizer, adicione a chave 'action_taken': 'mentioned_late_hour' ao seu JSON de resposta.]"
                 history_copy.insert(0, {"role": "user", "parts": [instrucao_horario]})
 
+        # --- Contextos Padrão ---
         dias = ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"]
         meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
         data_hora_formatada = f"{dias[agora.weekday()]}, {agora.day} de {meses[agora.month - 1]} de {agora.year}, {agora.strftime('%H:%M')}"
-        
         contexto_temporal = f"[Contexto de Tempo e Localização: A data e hora atuais são {data_hora_formatada}.]"
         history_copy.insert(0, {"role": "user", "parts": [contexto_temporal]})
-        
         try:
             user_name = self.personality_data["personality_definition"]["FamiliaELaçosFamiliares"]["NomeCompletoPai"]
         except KeyError:
             user_name = "Pai"
-            
         history_copy.insert(1, {"role": "user", "parts": [f"[Contexto Pessoal: O nome do seu pai é '{user_name}'.]"]})
-        
         if self.long_term_memory:
             sample_size = min(len(self.long_term_memory), 3)
             random_memories = random.sample(self.long_term_memory, sample_size)
             history_copy.insert(2, {"role": "user", "parts": [f"[Lembretes de Memória: {' | '.join(random_memories)}]"]})
-        
         if self.style_patterns:
             sample_size = min(len(self.style_patterns), 5)
             random_styles = random.sample(self.style_patterns, sample_size)
             history_copy.insert(2, {"role": "user", "parts": [f"[Estilo do seu Pai (para se inspirar): {', '.join(random_styles)}]"]})
-
         if self.available_gifs:
             gif_list_str = ", ".join([f"'{g}'" for g in self.available_gifs])
             gif_context = f"[Ferramentas: Você pode usar GIFs. Formato: 'GIF:nome_do_gif'. GIFs disponíveis: {gif_list_str}]"
             history_copy.insert(2, {"role": "user", "parts": [gif_context]})
-
+            
         return history_copy
 
     def _handle_reply_button_clicked(self, message_data):
@@ -242,11 +240,21 @@ class AppLogicMixin:
         if hasattr(self, 'reply_indicator'):
             self.reply_indicator.hide()
 
+# Em LouBE.py, substitua este método
+
     def on_message_sent(self, text):
+        # --- NOVA LÓGICA DE INTERRUPÇÃO ---
+        # Se uma resposta da IA está em andamento ("..."), limpe-a imediatamente.
+        if self.current_ai_message_widget:
+            self.current_ai_message_widget.deleteLater()
+            self.current_ai_message_widget = None
+
+        # O resto da lógica continua como antes
         self.stop_ai_worker_safely()
         self.proactive_attempts = 0
         text = text.strip()
         if not text: return
+
         message_to_send = {"role": "user", "parts": [text]}
         if self.current_reply_context:
             ia_name = self.data.get("profiles", {}).get("model", {}).get("name", "Lou")
@@ -255,8 +263,10 @@ class AppLogicMixin:
             message_to_send["parts"] = [final_text]
             message_to_send["is_reply_to"] = self.current_reply_context
             self._clear_reply_state()
+        
         self.add_message_to_chat(message_to_send)
         self.text_input.clear()
+        
         self.debounce_timer.start(random.randint(5000, 7000))
 
     def on_server_button_clicked(self, server_id):
@@ -380,10 +390,3 @@ class AppLogicMixin:
         if self.worker is not None:
             if self.worker.isRunning(): self.worker.wait_for_finish()
             self.worker = None
-
-# Adicione este método em LouBE.py, dentro da classe AppLogicMixin
-
-    def _format_date_for_separator(self, dt_object):
-        """Formata um objeto datetime para a string do separador em português."""
-        meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
-        return f"{dt_object.day} de {meses[dt_object.month - 1]} de {dt_object.year}"            
