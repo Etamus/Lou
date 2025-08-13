@@ -5,12 +5,10 @@ import shutil
 import random
 from pathlib import Path
 from functools import partial
+
 from PySide6.QtWidgets import QApplication, QMessageBox, QPushButton, QLabel, QWidget, QHBoxLayout, QVBoxLayout, QMenu
 from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QAction
-
-# Importa o novo worker de estilo
-from LouIABE import StyleExtractorWorker
 
 from LouFE import (
     RenameDialog, ConfirmationDialog, CreateChannelDialog, ServerSettingsDialog,
@@ -42,18 +40,12 @@ class AppLogicMixin:
         self.populate_all_ui()
 
     def load_or_create_data(self):
-        # Carrega dados principais
+        # Carrega dados da conversa
         if self.data_file.exists():
             try:
                 with open(self.data_file, "r", encoding="utf-8") as f: self.data = json.load(f)
             except (json.JSONDecodeError, KeyError): self.create_default_data()
         else: self.create_default_data()
-
-        if "profiles" not in self.data: self.data["profiles"] = {"user":{"name":"Mateus","id_tag":"#1987","avatar":"default.png"},"model":{"name":"Lou","id_tag":"#AI","avatar":"lou.png"}}
-        for server in self.data["servers"]:
-            if "avatar" not in server: server["avatar"] = None
-            server["channels"] = [c for c in server["channels"] if c.get("type") == "text"]
-        self.save_data()
 
         # Carrega memórias de fatos
         if self.memory_file.exists():
@@ -69,32 +61,46 @@ class AppLogicMixin:
             except json.JSONDecodeError: self.style_patterns = []
         else: self.style_patterns = []
 
+        if "profiles" not in self.data: self.data["profiles"] = {"user":{"name":"Mateus","id_tag":"#1987","avatar":"default.png"},"model":{"name":"Lou","id_tag":"#AI","avatar":"lou.png"}}
+        for server in self.data["servers"]:
+            if "avatar" not in server: server["avatar"] = None
+            server["channels"] = [c for c in server["channels"] if c.get("type") == "text"]
+        self.save_data()
 
     def create_default_data(self):
-        self.data=json.loads('{"servers":[{"id":"s1","name":"Laboratório da Lou","icon_char":"L","avatar":null,"channels":[{"id":"c1_1","name":"papo-ia","type":"text","messages":[{"role":"model","parts":["Olá. Este é o novo formato de mensagem."]},{"role":"user","parts":["Legal. Agora com avatares."]}]}]}],"profiles":{"user":{"name":"Mateus","id_tag":"#1987","avatar":"default.png"},"model":{"name":"Lou","id_tag":"#AI","avatar":"lou.png"}}}')
+        self.data=json.loads('{"servers":[{"id":"s1","name":"Laboratório da Lou","icon_char":"L","avatar":null,"channels":[{"id":"c1_1","name":"papo-ia","type":"text","messages":[]}]}],"profiles":{"user":{"name":"Mateus","id_tag":"#1987","avatar":"default.png"},"model":{"name":"Lou","id_tag":"#AI","avatar":"lou.png"}}}')
         self.save_data()
 
     def save_data(self):
         with open(self.data_file, "w", encoding="utf-8") as f: json.dump(self.data, f, indent=4, ensure_ascii=False)
-
+    
     def save_memories_to_bank(self, new_memories):
-        if new_memories:
-            for mem in new_memories:
-                if isinstance(mem, str) and mem not in self.long_term_memory: self.long_term_memory.append(mem)
-            with open(self.memory_file, "w", encoding="utf-8") as f: json.dump(self.long_term_memory, f, indent=4, ensure_ascii=False)
+        if not isinstance(new_memories, list): return
+        changed = False
+        for mem in new_memories:
+            if isinstance(mem, str) and mem not in self.long_term_memory:
+                self.long_term_memory.append(mem)
+                changed = True
+        if changed:
+            with open(self.memory_file, "w", encoding="utf-8") as f:
+                json.dump(self.long_term_memory, f, indent=4, ensure_ascii=False)
 
     def save_styles_to_bank(self, new_styles):
-        """Salva os novos padrões de estilo encontrados."""
-        if new_styles:
-            changed = False
-            for style in new_styles:
-                if isinstance(style, str) and style not in self.style_patterns:
-                    self.style_patterns.append(style)
-                    changed = True
-            if changed:
-                with open(self.style_file, "w", encoding="utf-8") as f:
-                    json.dump(self.style_patterns, f, indent=4, ensure_ascii=False)
+        if not isinstance(new_styles, list): return
+        changed = False
+        for style in new_styles:
+            if isinstance(style, str) and style not in self.style_patterns:
+                self.style_patterns.append(style)
+                changed = True
+        if changed:
+            with open(self.style_file, "w", encoding="utf-8") as f:
+                json.dump(self.style_patterns, f, indent=4, ensure_ascii=False)
 
+    def _handle_context_update(self, context_data):
+        """Recebe os dados do ContextUpdateWorker e salva nos respectivos bancos."""
+        self.save_memories_to_bank(context_data.get("memories", []))
+        self.save_styles_to_bank(context_data.get("styles", []))
+        
     def populate_all_ui(self):
         if not self.data.get("servers"):
             self.main_content_splitter.setVisible(False); self.welcome_widget.setVisible(True)
@@ -107,10 +113,8 @@ class AppLogicMixin:
             item = self.server_list_layout.takeAt(0)
             if item.widget(): item.widget().deleteLater()
         self.server_buttons.clear()
-
         for server in self.data["servers"]:
             button = ServerButton(server); button.clicked.connect(partial(self.on_server_button_clicked, server["id"])); button.customContextMenuRequested.connect(partial(self.show_server_context_menu, button.server_id)); self.server_list_layout.addWidget(button, 0, Qt.AlignCenter); self.server_buttons[server["id"]] = button
-
         add_server_button = QPushButton("+"); add_server_button.setObjectName("server_action_button"); add_server_button.clicked.connect(self.show_create_server_dialog)
         self.server_list_layout.addWidget(add_server_button, 0, Qt.AlignCenter)
         self.server_list_layout.addStretch(1)
@@ -144,36 +148,86 @@ class AppLogicMixin:
     def get_current_channel(self): server = self.get_current_server(); return next((c for c in server["channels"] if c["id"] == self.current_channel_id), None) if server else None
     def get_current_channel_history(self): channel = self.get_current_channel(); return channel.get("messages", []) if channel else []
 
+# Em LouBE.py
+
     def get_history_with_memory_context(self):
-        """Prepara o histórico da conversa, injetando contexto de memória e de estilo."""
         history = self.get_current_channel_history()
-        history_copy = [msg for msg in history if msg.get("parts") and msg.get("parts")[0]]
+        
+        history_copy = []
+        for msg in history:
+            if msg.get("parts") and msg.get("parts")[0]:
+                clean_msg = { "role": msg["role"], "parts": msg["parts"] }
+                history_copy.append(clean_msg)
 
         user_name = self.data.get("profiles", {}).get("user", {}).get("name", "Pai")
-        # 1. Contexto do nome do usuário
-        history_copy.insert(0, {"role": "user", "parts": [f"[Contexto: O nome do seu pai é '{user_name}'.]"]})
-
-        # 2. Contexto de memória de fatos
+        history_copy.insert(0, {"role": "user", "parts": [f"[Contexto Pessoal: O nome do seu pai é '{user_name}'.]"]})
+        
         if self.long_term_memory:
             sample_size = min(len(self.long_term_memory), 3)
             random_memories = random.sample(self.long_term_memory, sample_size)
-            history_copy.insert(1, {"role": "user", "parts": [f"[Lembretes de memória de longo prazo: {' | '.join(random_memories)}]"]})
-
-        # 3. Contexto de memória de estilo
+            history_copy.insert(1, {"role": "user", "parts": [f"[Lembretes de Memória: {' | '.join(random_memories)}]"]})
+        
         if self.style_patterns:
-            sample_size = min(len(self.style_patterns), 5) # Pega mais amostras de estilo
+            sample_size = min(len(self.style_patterns), 5)
             random_styles = random.sample(self.style_patterns, sample_size)
-            style_text = f"[{' | '.join(random_styles)}]"
-            history_copy.insert(1, {"role": "user", "parts": [f"[Contexto de Estilo do seu Pai (para você se inspirar): {style_text}]"]})
+            history_copy.insert(1, {"role": "user", "parts": [f"[Estilo do seu Pai (para se inspirar): {', '.join(random_styles)}]"]})
+
+        # --- NOVA LÓGICA DE INJEÇÃO DE GIFS ---
+        if self.available_gifs:
+            gif_list_str = ", ".join([f"'{g}'" for g in self.available_gifs])
+            gif_context = f"[Ferramentas: Você pode usar GIFs. Formato: 'GIF:nome_do_gif'. GIFs disponíveis: {gif_list_str}]"
+            history_copy.insert(1, {"role": "user", "parts": [gif_context]})
 
         return history_copy
+
+    def _handle_reply_button_clicked(self, message_data):
+        self.current_reply_context = message_data
+        self.reply_indicator.set_reply_message(message_data)
+        self.text_input.setFocus()
+
+    def _handle_reply_cancelled(self):
+        self._clear_reply_state()
+
+    def _clear_reply_state(self):
+        self.current_reply_context = None
+        if hasattr(self, 'reply_indicator'):
+            self.reply_indicator.hide()
+
+    def on_message_sent(self, text):
+        self.stop_ai_worker_safely()
+        self.proactive_attempts = 0
+        text = text.strip()
+        if not text: return
+        message_to_send = {"role": "user", "parts": [text]}
+        if self.current_reply_context:
+            ia_name = self.data.get("profiles", {}).get("model", {}).get("name", "Lou")
+            quoted_message = self.current_reply_context['parts'][0]
+            final_text = f"({ia_name}: {quoted_message})\n{text}"
+            message_to_send["parts"] = [final_text]
+            message_to_send["is_reply_to"] = self.current_reply_context
+            self._clear_reply_state()
+        self.add_message_to_chat(message_to_send)
+        self.text_input.clear()
+        self.debounce_timer.start(random.randint(2000, 3500))
+
+    def on_server_button_clicked(self, server_id):
+        self.stop_ai_worker_safely(); self.current_server_id = server_id; server = self.get_current_server()
+        if server and server["channels"]:
+            first_text_channel = next((c for c in server["channels"] if c.get("type") == "text"), None)
+            self.current_channel_id = first_text_channel["id"] if first_text_channel else None;
+        else: self.current_channel_id = None
+        self.populate_all_ui()
+
+    def on_channel_button_clicked(self, channel_id):
+        self.stop_ai_worker_safely(); self.current_channel_id = channel_id;
+        self.populate_chat_messages(); self.update_active_buttons()
 
     def show_channel_context_menu(self, channel_id, pos):
         channel = next((c for s in self.data["servers"] if s["id"] == self.current_server_id for c in s["channels"] if c["id"] == channel_id), None);
         if not channel: return
         menu = QMenu(self); rename_action = QAction("Renomear", self); delete_action = QAction("Excluir", self); delete_action.setObjectName("deleteAction"); menu.setStyleSheet(self.load_stylesheet()); rename_action.triggered.connect(lambda: self.rename_channel(channel_id)); delete_action.triggered.connect(lambda: self.delete_channel(channel_id)); menu.addAction(rename_action); menu.addSeparator(); menu.addAction(delete_action)
         if button := self.channel_buttons.get(channel_id): menu.exec(button.mapToGlobal(pos))
-
+    
     def rename_channel(self, channel_id):
         server = self.get_current_server();
         if not server: return
@@ -267,48 +321,11 @@ class AppLogicMixin:
         if not avatar_path.exists(): avatar_path = self.assets_path / "default.png"
         self.user_panel_avatar.set_avatar(str(avatar_path)); self.user_panel_name.setText(profile["name"])
 
-    def on_server_button_clicked(self, server_id):
-        self.stop_ai_worker_safely(); self.current_server_id = server_id; server = self.get_current_server()
-        if server and server["channels"]:
-            first_text_channel = next((c for c in server["channels"] if c.get("type") == "text"), None)
-            self.current_channel_id = first_text_channel["id"] if first_text_channel else None;
-        else: self.current_channel_id = None
-        self.populate_all_ui()
-
-    def on_channel_button_clicked(self, channel_id):
-        self.stop_ai_worker_safely(); self.current_channel_id = channel_id;
-        self.populate_chat_messages(); self.update_active_buttons()
-
-    def on_message_sent(self, text):
-        self.stop_ai_worker_safely()
-        self.proactive_attempts = 0
-        text = text.strip()
-        if not text or not self.gemini_model: return
-        self.add_message_to_chat({"role": "user", "parts": [text]})
-        self.text_input.clear()
-
-        # Ativa o aprendizado de estilo a cada 5 mensagens do usuário
-        self.user_message_count += 1
-        if self.user_message_count >= 5:
-            self.user_message_count = 0
-            history = self.get_current_channel_history()
-            # Pega as últimas 15 mensagens para análise de estilo
-            recent_messages = history[-15:]
-            # Formata o snippet para o worker
-            snippet = "\n".join([f"{self.data['profiles'][m['role']]['name']}: {m['parts'][0]}" for m in recent_messages])
-
-            self.style_worker = StyleExtractorWorker(snippet)
-            self.style_worker.styles_extracted.connect(self.save_styles_to_bank)
-            self.style_worker.finished.connect(self.style_worker.deleteLater)
-            self.style_worker.start()
-
-        QTimer.singleShot(random.randint(2500, 5500), self.start_ai_response)
-
     def update_active_buttons(self):
         for sid,btn in self.server_buttons.items(): btn.setChecked(sid == self.current_server_id)
         for cid,btn in self.channel_buttons.items():
             is_active = (cid == self.current_channel_id); btn.setChecked(is_active); btn.setObjectName("channel_button_active" if is_active else "channel_button"); btn.style().unpolish(btn); btn.style().polish(btn)
-
+    
     def stop_ai_worker_safely(self):
         self.inactivity_timer.stop()
         if self.worker is not None:

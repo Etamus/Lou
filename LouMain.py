@@ -1,3 +1,4 @@
+# LouMain.py
 import sys
 import random
 from pathlib import Path
@@ -19,40 +20,44 @@ class LouApp(QMainWindow, AppLogicMixin, UIMixin, AIFeaturesMixin):
         # --- Variáveis de Estado da Aplicação ---
         self.assets_path = Path("assets/avatars")
         self.assets_path.mkdir(parents=True, exist_ok=True)
-
-        # Define o caminho para a pasta de dados e a cria se não existir
+        self.gifs_path = Path("assets/gifs")
+        self.gifs_path.mkdir(parents=True, exist_ok=True)        
         self.data_path = Path("data")
         self.data_path.mkdir(parents=True, exist_ok=True)
         self.data_file = self.data_path / "chat_data.json"
-        self.memory_file = self.data_path / "memory_bank.json"
-        self.style_file = self.data_path / "style_bank.json" # <-- NOVO
-
+        self.memory_file = self.data_path / "memory_bank.json" # Reativado
+        self.style_file = self.data_path / "style_bank.json"   # Reativado
+        
         self.data = {}
-        self.long_term_memory = []
+        self.long_term_memory = [] # Reativado
+        self.style_patterns = []   # Reativado
         self.server_buttons = {}
         self.channel_buttons = {}
         self.current_server_id = None
         self.current_channel_id = None
+        self.current_reply_context = None
 
         # --- Variáveis de Estado da IA ---
         self.gemini_model = None
         self.worker = None
-        self.memory_worker = None
-        self.style_worker = None # <-- NOVO: Worker de estilo
+        self.context_update_worker = None # Novo worker unificado
         self.proactive_worker = None
         self.current_ai_message_widget = None
         self.current_ai_raw_text = ""
         self.proactive_attempts = 0
-        self.style_patterns = [] # <-- NOVO: Lista para guardar padrões de estilo
-        self.user_message_count = 0 # <-- NOVO: Contador de mensagens do usuário
+        self.available_gifs = [p.stem for p in self.gifs_path.glob("*.gif")] # <-- ADICIONE ESTA LINHA
 
         # --- Timers ---
         self.inactivity_timer = QTimer(self)
         self.inactivity_timer.setSingleShot(True)
         self.inactivity_timer.timeout.connect(self.send_proactive_message)
 
+        # Cronômetro para agrupar mensagens rápidas do usuário (debounce)
+        self.debounce_timer = QTimer(self)
+        self.debounce_timer.setSingleShot(True)
+        self.debounce_timer.timeout.connect(self.start_ai_response)
+
         # --- Configuração Inicial ---
-        # A UIMixin fornece o método load_stylesheet
         self.setStyleSheet(self.load_stylesheet())
         
         central_widget = QWidget()
@@ -61,12 +66,9 @@ class LouApp(QMainWindow, AppLogicMixin, UIMixin, AIFeaturesMixin):
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)
 
-        # A AIFeaturesMixin fornece o método setup_gemini_model
         self.setup_gemini_model()
         
-        # A AppLogicMixin fornece o método setup_data_and_ui,
-        # que por sua vez usa os métodos da UIMixin para construir a interface.
-        self.WelcomeWidget = WelcomeWidget # Passa a classe para o Mixin
+        self.WelcomeWidget = WelcomeWidget
         self.setup_data_and_ui()
 
 if __name__ == "__main__":

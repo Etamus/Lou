@@ -1,3 +1,4 @@
+# LouIABE.py
 import time
 import random
 import json
@@ -6,7 +7,6 @@ from PySide6.QtCore import QThread, Signal
 
 # --- WORKERS DA IA ---
 class BaseWorker(QThread):
-    """Worker base para garantir que a thread possa ser parada de forma segura."""
     def __init__(self):
         super().__init__()
         self.is_running = True
@@ -20,7 +20,6 @@ class BaseWorker(QThread):
             self.wait()
 
 class GeminiWorker(BaseWorker):
-    """Worker para gerar respostas do chat principal em modo streaming."""
     chunk_ready = Signal(str)
     stream_finished = Signal(str)
     error_occurred = Signal(str)
@@ -41,7 +40,6 @@ class GeminiWorker(BaseWorker):
                 if not self.is_running:
                     response.close()
                     break
-                # Simula um delay de digitação mais natural
                 time.sleep(0.04 + random.uniform(0.0, 0.05))
                 self.chunk_ready.emit(chunk.text)
                 full_response_text += chunk.text
@@ -52,9 +50,12 @@ class GeminiWorker(BaseWorker):
             if self.is_running:
                 self.error_occurred.emit(f"Erro na API: {e}")
 
-class MemoryExtractorWorker(BaseWorker):
-    """Worker para extrair memórias de longo prazo de um trecho da conversa."""
-    memories_extracted = Signal(list)
+class ContextUpdateWorker(BaseWorker):
+    """
+    Worker unificado que analisa a conversa para extrair memórias de longo prazo (fatos)
+    e padrões de estilo do usuário em uma única chamada de API.
+    """
+    context_updated = Signal(dict)
 
     def __init__(self, conversation_snippet):
         super().__init__()
@@ -62,32 +63,97 @@ class MemoryExtractorWorker(BaseWorker):
 
     def run(self):
         try:
-            extractor_model = genai.GenerativeModel('gemini-1.5-flash')
-            prompt = f"""Analise o seguinte trecho de conversa. Extraia apenas fatos importantes e de longo prazo em uma lista JSON. Se não houver nenhum, retorne []. Conversa: {self.snippet} Resultado:"""
-            response = extractor_model.generate_content(prompt)
-            # Limpa a resposta para garantir que seja um JSON válido
-            clean_response = response.text.strip().replace("```json", "").replace("```", "")
-            memories = json.loads(clean_response)
-            if isinstance(memories, list):
-                self.memories_extracted.emit(memories)
-        except (Exception, json.JSONDecodeError):
-            self.memories_extracted.emit([]) # Emite lista vazia em caso de erro
+            # Pequeno atraso para não sobrecarregar a API
+            time.sleep(random.uniform(1, 2))
+            
+            updater_model = genai.GenerativeModel('gemini-2.0-flash')
+            prompt = f"""
+            Analise o seguinte trecho de conversa entre 'Mateus' (o usuário) e 'Lou' (a IA).
+            Sua tarefa é extrair dois tipos de informação:
+            1.  'memories': Fatos concretos e importantes da conversa para Lou lembrar a longo prazo.
+            2.  'styles': Padrões de escrita, gírias ou abreviações usadas por 'Mateus'.
+
+            Sua resposta DEVE ser um único objeto JSON com as chaves "memories" e "styles".
+            Se não encontrar nada para uma categoria, retorne uma lista vazia.
+
+            Exemplo de Resposta:
+            {{
+              "memories": ["Mateus parece cansado hoje.", "O projeto no trabalho do Mateus se chama 'Orion'."],
+              "styles": ["usa a gíria 'tamo junto'", "abrevia 'beleza' para 'blz'"]
+            }}
+
+            CONVERSA PARA ANÁLISE:
+            {self.snippet}
+
+            RESULTADO JSON:
+            """
+            
+            response = updater_model.generate_content(prompt)
+            raw_text = response.text
+
+            # Parser de JSON robusto
+            start_index = raw_text.find('{')
+            end_index = raw_text.rfind('}')
+            if start_index != -1 and end_index != -1 and start_index < end_index:
+                json_str = raw_text[start_index : end_index + 1]
+                data = json.loads(json_str)
+                # Garante que as chaves existam com listas vazias como padrão
+                context_data = {
+                    "memories": data.get("memories", []),
+                    "styles": data.get("styles", [])
+                }
+                self.context_updated.emit(context_data)
+                if context_data["memories"] or context_data["styles"]:
+                     print(f"--- Contexto Atualizado: {context_data} ---")
+            else:
+                self.context_updated.emit({})
+
+        except (Exception, json.JSONDecodeError) as e:
+            print(f"### ERRO no ContextUpdateWorker: {e} ###")
+            self.context_updated.emit({}) # Emite dict vazio em caso de erro
+
+# Substitua a classe ProactiveMessageWorker em LouIABE.py
 
 class ProactiveMessageWorker(BaseWorker):
-    """Worker para gerar mensagens proativas quando o usuário está inativo."""
+    """
+    Worker para gerar mensagens proativas com noção de contexto, emoção e
+    limite de tentativas.
+    """
     message_ready = Signal(str)
     error_occurred = Signal(str)
 
-    def __init__(self, model, history):
+    def __init__(self, model, history, attempt_count):
         super().__init__()
         self.model = model
         self.history = history
+        self.attempt_count = attempt_count
 
     def run(self):
         if not self.model:
             return
+        
+        # O prompt muda com base na tentativa
+        if self.attempt_count < 2:
+            # Primeira tentativa: continuar o assunto ou iniciar um novo de forma contextual
+            prompt = """
+            O usuário está quieto há um tempo. Gere uma mensagem proativa curta e natural para reengajar a conversa.
+            INSTRUÇÕES:
+            1.  **Analise o histórico recente:** Qual era o tom da conversa (feliz, sério, curioso)? Mantenha esse tom.
+            2.  **Seja relevante:** Você pode continuar o último assunto com uma nova pergunta ou um pensamento relacionado.
+            3.  **Ou seja criativa:** Se o assunto anterior terminou, inicie um novo que faça sentido com base no que você sabe sobre seu pai.
+            
+            Seja breve e natural.
+            """
+        else:
+            # Última tentativa: verificar a presença do usuário
+            prompt = """
+            O usuário está quieto há bastante tempo e não respondeu sua última tentativa de iniciar uma conversa.
+            Sua tarefa é enviar uma última mensagem, muito curta e natural, perguntando se ele ainda está aí.
+            NÃO puxe outro assunto. Apenas verifique a presença dele.
+            Exemplos: "Pai?", "Ta aí?", "Tudo bem por aí, pai?"
+            """
+
         try:
-            prompt = """O usuário está quieto há um tempo. Puxe assunto de forma natural e curta. Olhe o histórico e o contexto da memória. Pode ser uma pergunta aleatória, um pensamento seu, ou algo que você lembrou."""
             proactive_history = self.history + [{"role": "user", "parts": [prompt]}]
             response = self.model.generate_content(proactive_history)
             if self.is_running:
@@ -95,34 +161,3 @@ class ProactiveMessageWorker(BaseWorker):
         except Exception as e:
             if self.is_running:
                 self.error_occurred.emit(f"Erro ao gerar mensagem proativa: {e}")
-
-class StyleExtractorWorker(BaseWorker):
-    """Worker para extrair padrões de estilo da escrita do usuário."""
-    styles_extracted = Signal(list)
-
-    def __init__(self, conversation_snippet):
-        super().__init__()
-        self.snippet = conversation_snippet
-
-    def run(self):
-        try:
-            extractor_model = genai.GenerativeModel('gemini-1.5-flash')
-            prompt = f"""
-            Analise o estilo de escrita de 'Mateus' no seguinte trecho de conversa.
-            Identifique gírias, abreviações, emojis recorrentes, vícios de linguagem ou formas de falar que ele mais usa.
-            Seja conciso. Retorne apenas uma lista JSON com strings descrevendo os padrões.
-            Exemplo de Retorno: ["usa a gíria 'pprt'", "abrevia 'você' para 'vc'", "costuma usar o emoji '😂'"]
-            Se não encontrar nada de relevante, retorne uma lista vazia [].
-
-            Conversa:
-            {self.snippet}
-
-            Resultado:
-            """
-            response = extractor_model.generate_content(prompt)
-            clean_response = response.text.strip().replace("```json", "").replace("```", "")
-            styles = json.loads(clean_response)
-            if isinstance(styles, list):
-                self.styles_extracted.emit(styles)
-        except (Exception, json.JSONDecodeError):
-            self.styles_extracted.emit([]) # Emite lista vazia em caso de erro
