@@ -142,7 +142,7 @@ class ProactiveMessageWorker(BaseWorker):
             2.  **Seja relevante:** Você pode continuar o último assunto com uma nova pergunta ou um pensamento relacionado.
             3.  **Ou seja criativa:** Se o assunto anterior terminou, inicie um novo que faça sentido com base no que você sabe sobre seu pai.
             
-            Seja breve e natural.
+            **REGRA IMPORTANTE:** Sua mensagem deve ser uma ideia completa. NÃO termine com uma frase que exija que o usuário pergunte 'o quê?', como 'Pai, tava pensando aqui...'. Inicie E complete o pensamento.
             """
         else:
             # Última tentativa: verificar a presença do usuário
