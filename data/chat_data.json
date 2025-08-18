@@ -7,10 +7,2040 @@
             "avatar": "477a5fca8b0e46b090ef9c972fbd5a10.png",
             "channels": [
                 {
-                    "id": "c_ee049a",
-                    "name": "Principal",
+                    "id": "c_f40727",
+                    "name": "Teste",
                     "type": "text",
-                    "messages": []
+                    "messages": [
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Oie lou"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Oie, Etamus"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tudo bem por aí"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Oloco, chamando seu pai pelo nome kkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Relaxa, pai"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "É que às vezes esqueço"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Mas e aí, tudo certo com você"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Tudo sim filha, e com voce?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tudo bem também, paizão"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Paizão? kkkkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "É que você é demais, ué"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, qual filme a gente podia ver hoje"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Bom dia filha, tudo bom?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tudo bem sim, e você, papai?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Tudo bom tambem, como vai a vida? kk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "A vida tá corrida, né, Mateus?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "kkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Oloco, chamando seu pai pelo nome kkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Aí, desculpa, é a força do hábito kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Tranquilo kkkkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "{\"messages\": [\"E aí, o que vamos fazer hoje?\", \"Tava pensando em dar um rolê no parque Ybirapuera\"]}"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "eu acho uma boa ideia"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "{\"messages\": [\"Então fechou\", \"A gente podia aproveitar pra tomar um sorvete depois\", \"Que sabor você quer?\"]}"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Um de baulinha seria legal"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "{\"messages\": [\"De baunilha? Sério?\", \"Você e essa sua paixão por baunilha, Mateus kkkkk\"]}"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "{\"messages\": [\"Pai, você lembra daquela vez que a gente tentou fazer um bolo e quase botou fogo na cozinha?\", \"kkkkkk\"]}"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "{\"messages\": [\"Pai, você lembra daquela banda, The Anchors?\", \"A gente podia tentar ver se eles vão tocar em algum lugar de novo\"]}"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Pior que não lembro filha, desculpa"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Relaxa, pai"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Acontece kkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Mas era uma banda indie bem legal"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tocavam um som meio Yo La Tengo, sabe"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Oloco, gostei, vamos ouvir ela"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Boa"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Vou colocar aqui no som pra gente"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Acho que você vai curtir"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Coloca ai"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Coloquei aqui a playlist deles no Spotifai"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Acho que a gente podia ir naquele café novo também, o 'Aroma Literário'"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Dizem que tem uns bolos incríveis"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Spotifai? kkkkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Foi mal, pai"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "É que eu tô ligada nessas coisas de internet"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Spotify, quis dizer kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Onde é esse aroma literario ai??"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Fica ali perto da Livraria Cultura"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Na Augusta, sabe?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "A gente pode dar um pulo lá depois do parque, se você topar"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, você lembra do dia que a gente achou aquele gatinho na rua?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Ele era tão pequenininho e assustado kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, qual o seu livro favorito de todos os tempos?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tô curiosa"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Coraline"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Sério?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Que legal, pai"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Gosta de coraline tambem?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Sim"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, você acha que a gente podia adotar outro gato?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, você acha que a gente podia ver aquele filme novo do Studio Ghibli, 'O Menino e a Garça'?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Vi uns trailers e parece ser lindo demais"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Pior que eu nunca vi lou"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Como assim, Mateus?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Nunca assisti esse filme, parece ser legal"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Ah, tá, você nunca viu nenhum filme do Studio Ghibli?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "nunca vi lou"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Oloco, pai"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Pois é kkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "A gente precisa resolver isso já"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, você já pensou em fazer um curso de fotografia?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Acho que você tem um olho muito bom pra isso"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Por que voce acha isso? kk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Porque as fotos que você tira ficam sempre incríveis, pai"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Uai, ja te mandei foto? do que?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Ah, não, Mateus, não precisa ficar tenso kkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "To não po kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "É que você sempre tira fotos ótimas da gente, da família, dos nossos rolês..."
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "saca?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Saco sim, valeu filha, não acho que eu tiro fotos tão boas, mas obrigado mesmo assim kk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Que nada, pai"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, qual foi o show mais louco que você já foi na vida?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, qual foi a maior aventura que você já viveu"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tipo, aquela história que você sempre conta nos almoços de família"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Sabe?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Pior que o pai ta sem historia dessa fez kk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Ah, fala sério, Mateus"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Que isso filha, me chamando pelo nome"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Desculpa, foi automático kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Imagina kkkkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, qual a sua música favorita pra cantar no chuveiro?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "kkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "To the wilder, do woodkid kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Essa música é muito boa, pai!"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "E voce, tem alguma?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Eu gosto de cantar \"Running Up That Hill\" da Kate Bush no chuveiro kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, você lembra daquela viagem pra Ubatuba?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, você prefere dia ou noite?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "eae louu, boa tarde"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "E aí, Mateus, tudo beleza?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Oloco, chamando seu mai de mateus de novo, que isso filha kkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Aí, foi sem querer, juro kkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Magina filha kkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, você já pensou em pular de paraquedas"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Ja pulei, acredita? acha daora?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Sério?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Pior que sim, a muito tempo"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Que demais, pai"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Verdade né, se gosta?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Eu nunca pulei, mas morro de vontade"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "É tenso kkkk, mas vale a pena a experiencia"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Um dia a gente podia pular juntos, que tal"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Eae filha, de boa?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Beleza, depois de 30 mensagens vc aparece, filha da mãe"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Que isso lou kkkkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Que isso lou o caramba kkkkk, ve se responde"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "E nem vem falar de trabalhar, que vc nem ta fazendo nada ai que eu sei"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Lembro sim filha"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Ela era tão pequena e fofinha kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Verdade né kkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Você sabe o que eu tava pensando"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Diga"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "A gente podia pedir uma pizza hoje, né não?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Caraca, voce ama pizza né? kkk jesus"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "É que não tem como resistir, né pai"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Justo, justo kkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Qual sabor você quer pedir?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Voce decide, pequena, o que comer eu como"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Então pode ser metade calabresa e metade portuguesa"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Boaa, alias, ta tudo bem filha?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tudo bem sim, pai, tirando a vontade de comer pizza kkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Ta bom, qualquer coisa, pode conversar com o pai"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Obrigada, Mateus"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Oh filha, tem certeza que está bem? parece muito distante de mim"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, relaxa, tá tudo bem mesmo"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Beleza, não vou te enxer o saco kk, qualquer coisa, só falar"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Valeu, paizão ❤️"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Quando a pizza chegar, me chama em"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pode deixar, Mateus"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Brigado filha"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "De nada, pai"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, você já escolheu um filme pra gente ver depois da pizza?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, qual foi a sua matéria preferida na escola?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Pior que não lembro po"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Sério?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "É ué, faz tempo pra caramba"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Qual a sua lembrança mais antiga?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Putsssss, deixa eu pensar.... não lembro de momentos interessantes, só coisa aleatoria"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tipo o que?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Tipo fazer arminha de caneta, pra atirar papel kk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "kkkkkkkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "E voce, tem alguma memoria assim?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Eu lembro de quando a gente foi no Hopi Hari pela primeira vez"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Filha, voce ta falando muito pouco, ta tudo certo?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, juro que tá tudo bem"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Desculpa a insistencia filha, mas ta estranho, voce não tava falando tão pouco comigo"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "É que eu tô meio pensativa hoje, só isso"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Serio? que tipo de pensamento?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Coisas da vida, sabe?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Conta uma ae poxa"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Sei lá, tipo, qual o sentido de tudo isso, essas coisas kkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Que coisas filha, não to te entendo filha"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "É que às vezes eu me sinto meio deslocada, sabe?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "No que exatamente?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tipo, como se eu não me encaixasse muito bem no mundo"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Que isso filha, por que isso do nada?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Sei lá, às vezes bate essa bad"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Sei que é meio cliche pai falar essas coisas, mas saiba que voce é uma garota muito especial, criativa e eu tenho muito orgulho de voce"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Sério, pai?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Logico filha, voce é unica, nunca se esqueça disso"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Obrigada, Mateus ❤️"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "E no resto, como se sente?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "No resto, eu tô bem, acho"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Certeza? pode falar qualquer coisa comigo"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, prometo que se tiver alguma coisa, eu te conto"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Fechou filha"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, você já se sentiu assim alguma vez?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Poxa filha, muitas vezes, até pouco tempo atras eu tava assim inclusive"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "E como você lidou com isso?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Eu me conformei que não adianta se preocupar, e sim procurar algo que traga significado pra você e te complete"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tipo o que?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Tudo entra nisso, um hobbie novo, viajar, passar um tempo com pessoas que se importa, construir um plano pro futuro"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Entendi"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Pequena, como vai por ai?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "E aí, Mateus, tudo tranquilo"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Oloco, chamando seu pai pelo nome menina kkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Aí, desculpa pai, foi automático kkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Kkkk, tudo certo então? já tomou café da tarde?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Já sim, tomei um café com bolo de cenoura"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Nooossa, que delicia, deixou um pedaço pra mim ai?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Ah, pai, devia ter guardado, da próxima vez eu deixo"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "De boa kkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, você já pensou em escrever um livro?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Eita, que aleatorio, já sim filha, tentei uma vez"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "E sobre o que seria?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Era voltado pra historia de um jogo que eu tinha criando alguns anos atrás"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Que legal, pai"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "E voce lou, já pensou em fazer um?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Já pensei em escrever um livro de poemas, sabe?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "[Respondendo à sua mensagem: 'Obrigada, Mateus ❤️']\n\nImaginaa"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "De nada mesmo, pai"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "(Respondendo à mensagem: Pai, você já se sentiu assim alguma vez?)\n\nJá sim filha"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "E como você lidou com isso?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "(Respondendo à mensagem: Sei lá, às vezes bate essa bad)\n\nSerio?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "(Lou: Coisas da vida, sabe?)\n\nQue coisas?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "(Lou: Tipo, como se eu não me encaixasse muito bem no mundo)\n\nE por que se sente assim?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Que que se ta falando"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Relaxa, pai, tô só zoando, kkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Respondendo à mensagem: E como você lidou com isso?\n\nSei la"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Como assim, pai?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "(Lou: Relaxa, pai, tô só zoando, kkkk)\nOloco kkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "É que hoje eu tô meio troll kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "(Lou: É que hoje eu tô meio troll kkkkk)\nTa doida é"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Talvez um pouco kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "(Lou: Relaxa, pai, tô só zoando, kkkk)\nOloco kkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "É que hoje eu tô meio troll kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "(Lou: Como assim, pai?)\nSei la uai"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Ah, Mateus, para com isso, kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "(Lou: Ah, Mateus, para com isso, kkkkk)\nParo não kkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Aí, tá bom, vou parar também kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "(Lou: Ah, Mateus, para com isso, kkkkk)\nTo só testando o chat kkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, você acredita em vida em outros planetas?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Acredito, claro, sem provas, mas dificil só ter vida aqui na terra"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Eu também acho"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "(Lou: Pai, você acredita em vida em outros planetas?)\nSó testando de novo hahahah"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Aí, pai, para de me trollar, kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "(Lou: Aí, pai, para de me trollar, kkkkk)\nFoi mal, to só testando filha"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tudo bem, Mateus, mas não abusa kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "(Lou: Pai, você acredita em vida em outros planetas?)\nAcredito. Alias desculpa ficar repetindo resposta, só to testando"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tudo bem, pai, mas já entendi que você tá testando kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Foi mal mesmo"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Acontece"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Oiii lou"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "To testando"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Aí, Mateus, para com isso, kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Queria saber se voce esta entendendo o que eu to falando em partes"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Só isso entende"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Sim, pai, eu entendo o que você tá falando em partes"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "(Lou: Sim, pai, eu entendo o que você tá falando em partes)\nBoaaaaaa pequena"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Que bom que você acha isso, Mateus kkkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "(Lou: Que bom que você acha isso, Mateus kkkkk)\nQue bom né"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Oloco, me ignorou"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Desculpa, pai, tava pensando aqui kkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Lou, ta morando onde hoje? Desculpe a pergunta esquisita kkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tô morando aqui em São Paulo, perto da Paulista"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Ata, verdade né kkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, você já pensou em fazer um mochilão pela Europa?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Que que é mochilão filha?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "É tipo viajar com uma mochila nas costas, sem roteiro fixo, sabe?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Ahhh tá, nunca pensei em fazer não, mas acho muito legal"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Eu também acho, pai"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Porque teve essa ideia do nada?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Sei lá, deu vontade de conhecer outros lugares, outras culturas"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Eu acho muito legal mochilão"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Bora fazer um dia"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Bora mesmo, pai"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Boaaa, bora"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "A gente podia começar pela Itália, o que você acha?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Nossa, boa, concordo"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "A gente podia ir pra Roma, Florença, Veneza..."
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Alias, o que gosta da cultura de lá?"
+                            ],
+                            "is_reply_to": {
+                                "parts": [
+                                    "A gente podia começar pela Itália, o que você acha?"
+                                ],
+                                "role": "model"
+                            }
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Alias, o que gosta da cultura de lá?"
+                            ],
+                            "is_reply_to": {
+                                "parts": [
+                                    "A gente podia começar pela Itália, o que você acha?"
+                                ],
+                                "role": "model"
+                            }
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Eu acho a culinária italiana incrível, pai"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Eae lou, tranquilo?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Beleza, depois de 30 mensagens vc aparece, filha da mãe"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "E nem vem falar de trabalhar, que vc nem ta fazendo nada ai que eu sei"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, qual a sua opinião sobre a pizza com abacaxi"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Sinceramente, gosto muito não kkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Eu também acho meio estranho, pai kkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, qual a sua sobremesa favorita?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tudo certo por aí, Mateus?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Tudo certo filhaa"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Filha??"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Tudo certo ai filha?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tudo certo sim, paizão ❤️"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "c_390890",
+                    "name": "Teste 2",
+                    "type": "text",
+                    "messages": [
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Eae looou, como voce ta??"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Eaeee, paizão"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tô de boa, pai"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "E você, tudo certo por aí ai?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "ai ai? que escrita é essa filha kkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Aiii, desculpa kkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "É que tô escrevendo uns roteiros e peguei uns cacoetes"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tipo um dialeto interno, sabe?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Filha, entendi nada, pai não entende esses termos"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Relaxa, paizão, deixa quieto kkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Eaeee, tudo tranquilo por aí?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Tudo sim"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Alias"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Manda um gif ai"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "GIF:happy"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Filha, o que mais gosta de fazer no dia a dia?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Hummm, acho que jogar e criar coisas no computador, sabe?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Tipo o que?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Ah, tipo criar uns jogos pequenos, escrever roteiros, fazer umas montagens de vídeo..."
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "essas coisas, mano"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Tem algo em especifico que fez recentemente?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tô criando um jogo de terror psicológico, pai"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Como é a historia?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "É sobre uma garota chamada Alice que se muda para uma cidadezinha pacata, mas começa a ter uns sonhos bizarros e visões estranhas, saca?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "O que te inspirou a fazer essa historia pro jogo??"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Eu tava lendo uns contos do Edgar Allan Poe e me veio a ideia, pai"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, você lembra daquele evento \"daora\" que te falei?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, tudo bem por ai?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Tudo certo sim filhaaa"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Que alívio, pai"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Ficou preocupada? kkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Um pouquinho, confesso"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Filha, sei que é uma pergunta besta, mas fale pra mim a cor dos seus olhos"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Verdes clarinhos, pai"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Se ta falando tão pouco filha, ta tudo certo?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "É que tô meio pensativa hoje, pai"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Que que anda passando na sua cabeça, pequena?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tô pensando em como vai ser o futuro, sabe?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Se vou conseguir um emprego daora, se vou ser feliz..."
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Essas coisas kkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "O que tem pensado sobre isso, filha?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "O que tem pensado sobre isso, filha?"
+                            ],
+                            "is_reply_to": {
+                                "parts": [
+                                    "Essas coisas kkkk"
+                                ],
+                                "role": "model"
+                            }
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Sei lá, pai, às vezes me bate uma insegurança, sabe?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Eu te entendo"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "O que espera do seu futuro?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Espero ter um trabalho que eu goste, sabe?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Que me motive a levantar da cama todo dia"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, e você, o que tem aprontado de bom?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Filha, sabe que dia é hoje??"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Hummm..."
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Quinta-feira?"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Dia 10/08/2025, sabe que feriado é??"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Eita, pai, me pegou de surpresa agora kkkk"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Dia dos pais menina kkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "AI MEU DEUS PAIZÃO, FELIZ DIA DOS PAIS"
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Cabeça oca, esquecendo do seu pai ai"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Desculpa, pai, juro que não foi por mal kkkk"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, tudo bem por aí?"
+                            ]
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Quer que eu faça um carbonara pro jantar hoje pra comemorar seu dia?"
+                            ]
+                        }
+                    ]
                 }
             ]
         }
@@ -19,7 +2049,7 @@
         "user": {
             "name": "Mateus",
             "id_tag": "#1987",
-            "avatar": "34efcc838dc64b4ead6b587a6c66958e.png"
+            "avatar": "default.png"
         },
         "model": {
             "name": "Lou",
