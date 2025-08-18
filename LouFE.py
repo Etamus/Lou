@@ -374,8 +374,21 @@ class UIMixin:
         self.user_panel_name = QLabel(profile.get("name", "User")); self.user_panel_name.setObjectName("user_name_label")
         self.user_panel_id = QLabel(profile.get("id_tag", "#0000")); self.user_panel_id.setObjectName("user_id_label")
         name_layout.addWidget(self.user_panel_name); name_layout.addWidget(self.user_panel_id)
+        
+        # --- NOVOS BOTÕES ---
+        # Botão para editar personalidade
+        self.edit_personality_button = QPushButton("✏️") # Ícone de lápis
+        self.edit_personality_button.setObjectName("user_settings_button")
+        self.edit_personality_button.setToolTip("Editar Personalidade da Lou")
+        self.edit_personality_button.clicked.connect(self._open_personality_editor)
+
+        # Botão para configurações do usuário
         settings_button = QPushButton("⚙️"); settings_button.setObjectName("user_settings_button"); settings_button.clicked.connect(self.show_user_settings_dialog)
-        layout.addWidget(self.user_panel_avatar); layout.addLayout(name_layout); layout.addStretch(); layout.addWidget(settings_button); return panel
+        
+        layout.addWidget(self.user_panel_avatar); layout.addLayout(name_layout); layout.addStretch()
+        layout.addWidget(self.edit_personality_button) # Adiciona o novo botão
+        layout.addWidget(settings_button); 
+        return panel
     def create_chat_panel(self):
         panel = QFrame(); panel.setObjectName("chat_panel"); layout = QVBoxLayout(panel); layout.setContentsMargins(0,0,0,0); layout.setSpacing(0); top_bar = QFrame(); top_bar.setObjectName("chat_top_bar"); top_bar_layout = QHBoxLayout(top_bar)
         self.chat_channel_name_label = QLabel("..."); self.chat_channel_name_label.setObjectName("chat_channel_name"); top_bar_layout.addWidget(self.chat_channel_name_label); top_bar_layout.addStretch()
