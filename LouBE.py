@@ -173,21 +173,30 @@ class AppLogicMixin:
 
     def get_history_with_memory_context(self):
         history = self.get_current_channel_history()
-        
-        # --- MUDANÇA PRINCIPAL: LIMITA O HISTÓRICO DE CHAT ---
-        # A IA agora só verá as últimas 20 mensagens para contexto imediato.
+        # Limita o histórico para evitar maus hábitos
         recent_history = history[-20:]
         
         history_copy = []
-        for msg in recent_history: # Usa o histórico recente
+        for msg in recent_history:
             if msg.get("parts") and msg.get("parts")[0]:
                 clean_msg = { "role": msg["role"], "parts": msg["parts"] }
                 history_copy.append(clean_msg)
         
+        # --- LÓGICA DE SUBSTITUIÇÃO DO ÚLTIMO PROMPT ---
+        if hasattr(self, '_prompt_override') and self._prompt_override and history_copy and history_copy[-1]["role"] == "user":
+            text_for_ai = self._prompt_override
+            if "is_reply_to" in self.get_current_channel_history()[-1]:
+                ia_name = self.data.get("profiles", {}).get("model", {}).get("name", "Lou")
+                quoted_message = self.get_current_channel_history()[-1]["is_reply_to"]['parts'][0]
+                text_for_ai = f"({ia_name}: {quoted_message})\n{self._prompt_override}"
+            
+            history_copy[-1]["parts"] = [text_for_ai]
+            self._prompt_override = None
+            if self.current_reply_context: self._clear_reply_state()
+
         agora = datetime.now()
         
         high_priority_instructions = []
-        # A lógica de demora agora usa o histórico completo para encontrar a última fala da Lou
         last_lou_message = next((msg for msg in reversed(history) if msg.get("role") == "model"), None)
         if last_lou_message and last_lou_message.get("timestamp"):
             last_lou_ts = datetime.fromisoformat(last_lou_message["timestamp"])
@@ -219,22 +228,18 @@ class AppLogicMixin:
         except KeyError: user_name = "Pai"
         history_copy.insert(1, {"role": "user", "parts": [f"[Contexto Pessoal: O nome do seu pai é '{user_name}'.]"]})
         
-        # Injeção de memórias agora é ainda mais crucial
         if self.long_term_memories:
             sample_size = min(len(self.long_term_memories), 2)
             random_memories = random.sample(self.long_term_memories, sample_size)
             history_copy.insert(2, {"role": "user", "parts": [f"[Lembretes de Longo Prazo (Sua História): {' | '.join(random_memories)}]"]})
-        
         if self.short_term_memories:
             sample_size = min(len(self.short_term_memories), 3)
             recent_memories = self.short_term_memories[-sample_size:]
             history_copy.insert(2, {"role": "user", "parts": [f"[Lembretes de Curto Prazo (Resumos Recentes): {' | '.join(recent_memories)}]"]})
-
         if self.style_patterns:
             sample_size = min(len(self.style_patterns), 5)
             random_styles = random.sample(self.style_patterns, sample_size)
             history_copy.insert(2, {"role": "user", "parts": [f"[Estilo do seu Pai (para se inspirar): {', '.join(random_styles)}]"]})
-
         if self.available_gifs:
             gif_list_str = ", ".join([f"'{g}'" for g in self.available_gifs])
             gif_context = f"[Ferramentas: Você pode usar GIFs. Formato: 'GIF:nome_do_gif'. GIFs disponíveis: {gif_list_str}]"
@@ -256,6 +261,19 @@ class AppLogicMixin:
         original_text = text.strip()
         if not original_text: return
         
+        # --- LÓGICA DE INTERCEPTAÇÃO DE HORAS ---
+        # Verifica se a mensagem do usuário é uma pergunta sobre o tempo
+        if re.search(r'\b(horas?|horário)\b', original_text, re.IGNORECASE):
+            agora = datetime.now()
+            hora_certa = agora.strftime('%H:%M')
+            # Reescreve a pergunta em uma instrução para a IA, injetando a hora correta
+            text_for_ai = f"[Instrução: O usuário perguntou as horas. A hora correta é {hora_certa}. Formule uma resposta natural no seu personagem, incorporando esta informação.]"
+            # Armazena temporariamente para a IA usar
+            self._prompt_override = text_for_ai
+        else:
+            # Se não for uma pergunta sobre horas, a IA vê o texto original
+            self._prompt_override = original_text
+
         # Lógica de Interrupção
         if self.current_ai_message_widget:
             self.current_ai_message_widget.deleteLater(); self.current_ai_message_widget = None
@@ -265,24 +283,11 @@ class AppLogicMixin:
         # Adiciona a mensagem ORIGINAL do usuário ao chat e ao histórico
         message_to_send = {"role": "user", "parts": [original_text]}
         if self.current_reply_context:
-            ia_name = self.data.get("profiles", {}).get("model", {}).get("name", "Lou")
-            quoted_message = self.current_reply_context['parts'][0]
             message_to_send["is_reply_to"] = self.current_reply_context
             self.reply_indicator.hide() 
+        
         self.add_message_to_chat(message_to_send)
         self.text_input.clear()
-
-        # --- NOVA LÓGICA DE REESCRITA DE PROMPT ---
-        text_for_ai = original_text
-        # Verifica se é uma pergunta sobre o tempo
-        if re.search(r'\b(horas?|horário)\b', original_text, re.IGNORECASE):
-            agora = datetime.now()
-            hora_certa = agora.strftime('%H:%M')
-            # Reescreve a pergunta em uma instrução para a IA, injetando a hora correta
-            text_for_ai = f"[Instrução: O usuário perguntou as horas. A hora correta é {hora_certa}. Formule uma resposta natural no seu personagem, incorporando esta informação.]"
-        
-        # Armazena o texto que a IA deve ver (original ou reescrito)
-        self._prompt_override = text_for_ai
         
         self.debounce_timer.start(random.randint(5000, 7000))
     def on_server_button_clicked(self, server_id):
