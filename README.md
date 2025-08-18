@@ -1,72 +1,86 @@
 # ✨ Lou
 
-Inteligência artificial com personalidade customizável, projetada para diálogos naturais, interações contextuais profundas e memória a longo prazo.
+**Lou** é uma inteligência artificial com personalidade customizável, projetada para **diálogos naturais**, **interações contextuais profundas** e um **sistema de memória a curto/longo prazo**.
 
 ---
 
 ## Funcionalidades Principais
 
-### Interface de Mensagens
-- **Gerenciamento Completo:** Crie, renomeie, exclua e personalize servidores (grupos) e canais de texto com ícones customizáveis.
-- **Diálogos Intuitivos:** Todas as janelas de gerenciamento possuem um design limpo, mantendo a consistência visual.
-- **Personalização de Perfil:** Altere seu nome de usuário e foto de perfil, com as mudanças sendo refletidas instantaneamente nas novas mensagens e na interface.
+###  Interface de Gerenciamento
+- **Gerenciamento Completo:** Crie, renomeie e exclua servidores (grupos) e canais de texto.  
+- **Personalização de Perfil (2 em 1):** Altere seu nome e avatar em uma única janela, com botão ↻ para alternar e editar também o nome e avatar da IA (Lou).  
+- **Editor de Personalidade:** Interface intuitiva com menu lateral para editar cada detalhe da Lou diretamente do arquivo `personality_prompt.json`.  
+- **Backup e Restauração:** Crie e carregue backups da personalidade.  
+- **Atualização em Tempo Real:** Alterações aplicadas instantaneamente, sem reiniciar o app.  
 
 ### Chat Moderno e Contextual
-- **Timestamp e Data:** Cada mensagem exibe a hora de envio, e o histórico é visualmente separado por dia com um marcador de data.
-- **Sistema de Resposta:** Responda a mensagens específicas da IA, com um indicador visual que mostra a qual mensagem você está respondendo.
-- **Suporte a GIFs:** A IA pode enviar GIFs animados (armazenados localmente em `assets/gifs`) quando achar apropriado para se expressar.
-- **Layout Inteligente:** A largura dos balões de chat se ajusta para otimizar a leitura, e o layout de mensagens com GIFs é tratado de forma especial para não quebrar a interface.
+- **Timestamp e Data Inteligente:** Mensagens com hora e separadores "Hoje"/"Ontem".  
+- **Sistema de Resposta:** Respostas a mensagens específicas com indicador visual.  
+- **Suporte a GIFs:** GIFs animados armazenados em `assets/gifs`.  
+- **Layout Inteligente:** Balões de texto e mensagens com GIFs otimizados para leitura.  
 
 ---
 
-## Comportamento da Lou
+## Comportamento e Inteligência da Lou
 
 ### Personalidade Profunda e Customizável
-- **Ficha de Personagem Externa:** A personalidade completa da Lou (identidade, traços, psicologia, medos, hobbies, etc.) é carregada a partir de um único arquivo `personality_prompt.json`, permitindo total customização sem alterar o código.
-- **Noção de Tempo e Espaço:** A IA sabe a data e hora atuais, permitindo interações contextuais sobre o período do dia, datas especiais e feriados.
-- **Raciocínio Transparente (Debug):** O terminal exibe uma breve explicação do "raciocínio" da IA, mostrando quais traços de personalidade ela usou para formular sua resposta.
+- **Ficha Externa:** Arquivo `personality_prompt.json` define identidade, traços, psicologia, medos, hobbies etc.  
+- **Noção de Tempo e Realidade:**  
+  - Reconhece a data e hora exata em cada interação.  
+  - Comenta atrasos do usuário ("sumiu por horas?").  
+  - Sempre responde a hora atual com precisão.  
+- **Raciocínio Transparente (Debug):** Terminal exibe quais traços e regras foram usados em cada resposta.  
 
 ### Memória e Aprendizado Contínuo
-- **Aprendizado Unificado:** Após cada conversa, um worker (`ContextUpdateWorker`) analisa a interação e extrai simultaneamente:
-  - **Memórias Factuais:** Fatos importantes para consistência a longo prazo (`memory_bank.json`).
-  - **Padrões de Estilo:** Gírias e formas de falar do usuário para adaptação (`style_bank.json`).
-- **Interação Natural:**
-  - **Debouncing de Mensagens:** A IA aguarda você terminar de digitar múltiplas mensagens em sequência para respondê-las como um único pensamento, evitando respostas apressadas e erros.
-  - **Fala Proativa com Limites:** Se o chat ficar inativo, a Lou tentará reengajar a conversa de forma contextual. Após um número limitado de tentativas sem resposta, ela perguntará pela sua presença e depois aguardará em silêncio.
+- **Memória Dupla:**  
+  - **Longo Prazo (Backstory):** `memory_bank.json` com história e fatos imutáveis.  
+  - **Curto Prazo (Diário):** Resumos de interações garantem continuidade da conversa.  
+- **Aprendizado de Estilo:** Adapta-se ao jeito de escrever do usuário (gírias, abreviações).  
+
+### Comportamento Natural e à Prova de Falhas
+- **Debouncing de Mensagens:** Responde após você terminar de digitar várias mensagens.  
+- **Fala Proativa com Autocorreção:** Se inativo, tenta reengajar até gerar frase completa.  
+- **Limite de Proatividade:** Após 2 tentativas, pergunta pela sua presença e depois silencia.  
 
 ---
 
-## Estrutura Técnica
+## 🛠️ Estrutura Técnica
 
 ### Arquitetura Modular em Python
-- **Código Organizado:** O projeto é dividido em módulos com responsabilidades claras (`LouFE.py` para front-end, `LouBE.py` para lógica, `LouIAFE.py` para integração da IA, etc.).
-- **Interface com PySide6:** A interface gráfica é construída utilizando o framework moderno Qt for Python.
-- **Comunicação Assíncrona com a IA:** Todas as chamadas para a API Gemini são feitas em `QThread`s separadas para garantir que a interface nunca congele, mesmo durante o processamento de respostas ou a análise de contexto.
+- **Código Organizado:**  
+  - `LouFE.py` → front-end  
+  - `LouBE.py` → lógica  
+  - `LouIAFE.py` → integração IA  
+- **Interface com PySide6:** Baseada no Qt for Python.  
+- **Comunicação Assíncrona:** Chamadas Gemini via `QThreads` (interface nunca congela).  
 
 ### Robustez e Tratamento de Erros
-- **Parser de Respostas Inteligente:** O sistema é resiliente a variações no formato da resposta da IA. Ele é capaz de processar JSONs perfeitos, JSONs com erros de formatação (como aspas escapadas) e até mesmo texto plano com quebras de linha, sempre extraindo as mensagens corretamente.
-- **Gerenciamento de Recursos:** GIFs são carregados e exibidos de forma otimizada para não consumir memória excessiva, e os workers de IA são criados e destruídos de forma segura para evitar `race conditions`.
+- **Higienizador de Respostas:** Formata frases, remove emojis/pontuação proibida, capitaliza corretamente.  
+- **Gerenciamento de Recursos:** GIFs com `QMovie`, ícones com `QSvgRenderer`.  
+- **Salvamento Garantido:** Dados e histórico salvos automaticamente ao fechar o app.  
 
 ---
 
-## Como Executar
+## ⚙️ Como Executar
 
-1.  **Pré-requisitos:**
-    - Python 3.10+
-    - Uma chave de API da **Google Gemini**.
+### Pré-requisitos
+- Python **3.10+**  
+- Chave de API **Google Gemini**  
 
-2.  **Instalação:**
-    ```bash
-    # Instale as dependências
-    pip install PySide6 google-generativeai
-    ```
+### Instalação
+```bash
+# Instale as dependências
+pip install PySide6 google-generativeai
+```
 
-3.  **Configuração:**
+### Configuração
+```bash
     - Crie as pastas `assets/avatars` e `assets/gifs` e adicione seus avatares e GIFs.
     - Crie a pasta `data` e adicione o arquivo `personality_prompt.json` com a estrutura da personalidade da Lou.
     - Insira sua chave da API da Gemini no arquivo `LouIAFE.py` na variável `API_KEY`.
+```
 
-4.  **Execução:**
-    ```bash
+### Execução
+```bash
     python LouMain.py
-    ```
+```
