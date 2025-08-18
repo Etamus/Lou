@@ -172,29 +172,94 @@ class CreateServerDialog(BaseDialog):
 # Em LouFE.py, substitua esta classe
 
 class UserSettingsDialog(BaseDialog):
-    def __init__(self, current_name, current_avatar_path, parent=None):
+    def __init__(self, profiles_data, assets_path, parent=None):
         super().__init__(parent)
+        self.profiles_data = profiles_data
+        self.assets_path = assets_path
+        self.current_profile_key = "user" # Começa editando o perfil do usuário
         self.new_avatar_path = None
+
         self.layout = QVBoxLayout(self)
-        self.avatar_label = AvatarLabel(current_avatar_path, 80, clickable=True)
-        self.avatar_label.setToolTip("Clique para alterar o avatar")
+        
+        # --- Botão para alternar entre perfis (sem o 'X') ---
+        self.switch_button = QPushButton("↻")
+        self.switch_button.setObjectName("dialogCloseButton")
+        self.switch_button.setToolTip("Alternar perfil")
+        self.switch_button.clicked.connect(self._toggle_profile_view)
+        
+        top_bar_layout = QHBoxLayout()
+        top_bar_layout.addStretch()
+        top_bar_layout.addWidget(self.switch_button)
+        self.layout.addLayout(top_bar_layout) # Adiciona a barra do topo
+
+        # --- Widgets da UI (serão atualizados dinamicamente) ---
+        self.avatar_label = AvatarLabel("", 80, clickable=True)
         self.avatar_label.clicked.connect(self.change_avatar)
-        self.name_label = QLabel("NOME DE USUÁRIO"); self.name_label.setObjectName("dialog_label")
-        self.name_input = QLineEdit(current_name); self.name_input.setObjectName("dialog_input")
+        
+        self.title_label = QLabel(""); self.title_label.setObjectName("dialog_label")
+        self.name_input = QLineEdit(); self.name_input.setObjectName("dialog_input")
+        
+        # --- Botões de Ação ---
         self.buttons = QHBoxLayout()
         cancel_button = QPushButton("Cancelar"); cancel_button.setObjectName("secondaryButton")
         cancel_button.clicked.connect(self.reject)
         self.save_button = QPushButton("Salvar"); self.save_button.setObjectName("primaryButton")
         self.save_button.clicked.connect(self.accept)
         self.buttons.addStretch(); self.buttons.addWidget(cancel_button); self.buttons.addWidget(self.save_button)
+        
         self.layout.addWidget(self.avatar_label, 0, Qt.AlignCenter)
         self.layout.addSpacing(10)
-        self.layout.addWidget(self.name_label); self.layout.addWidget(self.name_input)
+        self.layout.addWidget(self.title_label)
+        self.layout.addWidget(self.name_input)
         self.layout.addLayout(self.buttons)
+
+        self._update_ui_for_profile() # Popula a UI com o perfil inicial (usuário)
+
+    def _toggle_profile_view(self):
+        """Alterna a visualização entre o perfil do usuário e o da Lou."""
+        self.new_avatar_path = None # Reseta o caminho do avatar ao trocar
+        if self.current_profile_key == "user":
+            self.current_profile_key = "model"
+        else:
+            self.current_profile_key = "user"
+        
+        self._update_ui_for_profile()
+
+    def _update_ui_for_profile(self):
+        """Atualiza os widgets da UI com os dados do perfil selecionado."""
+        profile_data = self.profiles_data[self.current_profile_key]
+        
+        # Define o título (TEXTO ALTERADO)
+        if self.current_profile_key == "user":
+            self.title_label.setText("NOME DE USUÁRIO")
+            self.switch_button.setToolTip("Alternar para o perfil da Lou")
+        else:
+            self.title_label.setText("NOME DA IA")
+            self.switch_button.setToolTip("Alternar para o seu perfil")
+        
+        # Define o nome no campo de input
+        self.name_input.setText(profile_data.get("name", ""))
+        
+        # Define o avatar
+        avatar_path = self.assets_path / profile_data.get("avatar", "default.png")
+        if not avatar_path.exists():
+            avatar_path = self.assets_path / "default.png"
+        self.avatar_label.set_avatar(str(avatar_path))
+        self.avatar_label.setToolTip(f"Clique para alterar o avatar de {profile_data.get('name', '')}")
+
     def change_avatar(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Selecionar Avatar", "", "Imagens (*.png *.jpg *.jpeg)")
-        if file_path: self.new_avatar_path = file_path; self.avatar_label.set_avatar(file_path)
-    def get_values(self): return {"name": self.name_input.text().strip(), "avatar_path": self.new_avatar_path}
+        if file_path:
+            self.new_avatar_path = file_path
+            self.avatar_label.set_avatar(file_path)
+
+    def get_values(self):
+        """Retorna qual perfil foi editado e os novos valores."""
+        return {
+            "profile_key": self.current_profile_key,
+            "name": self.name_input.text().strip(),
+            "avatar_path": self.new_avatar_path
+        }
 
 # --- O restante do arquivo (ChatMessageWidget, UIMixin, etc.) permanece o mesmo ---
 # (O código foi omitido por brevidade, mas você deve mantê-lo no seu arquivo)

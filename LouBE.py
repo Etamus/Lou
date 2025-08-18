@@ -380,13 +380,33 @@ class AppLogicMixin:
                 if values["avatar_path"]: new_path = Path(values["avatar_path"]); new_filename = f"{uuid.uuid4().hex}{new_path.suffix}"; shutil.copy(new_path, self.assets_path / new_filename); new_server["avatar"] = new_filename
                 self.data["servers"].append(new_server); self.save_data(); self.populate_server_list(); self.on_server_button_clicked(new_server["id"])
     def show_user_settings_dialog(self):
-        profile = self.data["profiles"]["user"]; avatar_path = str(self.assets_path / profile.get("avatar", "default.png"))
-        dialog = UserSettingsDialog(profile["name"], avatar_path, self)
+        # Passa todos os perfis para o diálogo, em vez de apenas um
+        dialog = UserSettingsDialog(self.data["profiles"], self.assets_path, self)
+        
         if dialog.exec():
             values = dialog.get_values()
-            if values["name"] and values["name"] != profile["name"]: profile["name"] = values["name"]
-            if values["avatar_path"]: new_path = Path(values["avatar_path"]); new_filename = f"{uuid.uuid4().hex}{new_path.suffix}"; shutil.copy(new_path, self.assets_path / new_filename); profile["avatar"] = new_filename
-            self.save_data(); self.refresh_user_panels()
+            
+            profile_key_to_edit = values["profile_key"] # 'user' ou 'model'
+            profile_to_edit = self.data["profiles"][profile_key_to_edit]
+            
+            changed = False
+            # Atualiza o nome se foi alterado
+            if values["name"] and values["name"] != profile_to_edit["name"]:
+                profile_to_edit["name"] = values["name"]
+                changed = True
+            
+            # Atualiza o avatar se um novo foi selecionado
+            if values["avatar_path"]:
+                new_path = Path(values["avatar_path"])
+                new_filename = f"{uuid.uuid4().hex}{new_path.suffix}"
+                shutil.copy(new_path, self.assets_path / new_filename)
+                profile_to_edit["avatar"] = new_filename
+                changed = True
+            
+            if changed:
+                self.save_data()
+                self.refresh_user_panels() # Atualiza o painel do usuário
+                self.populate_chat_messages() # Recarrega as mensagens para mostrar o novo avatar/nome
     def refresh_user_panels(self):
         profile = self.data["profiles"]["user"]; avatar_path = self.assets_path / profile.get("avatar", "default.png")
         if not avatar_path.exists(): avatar_path = self.assets_path / "default.png"
