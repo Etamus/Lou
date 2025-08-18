@@ -1,4 +1,4 @@
-# Lou: Framework de Persona Digital Hiper-Realista
+# Lou
 
 Lou é uma plataforma avançada para a criação e interação com personas digitais de alta fidelidade.  
 Projetada com uma arquitetura modular e um motor de IA de múltiplas camadas, ela transcende os chatbots tradicionais ao simular uma personalidade coesa, memória contínua e uma consciência situacional sofisticada.
