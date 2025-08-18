@@ -13,7 +13,7 @@ from PySide6.QtGui import QAction
 
 from LouFE import (
     RenameDialog, ConfirmationDialog, CreateChannelDialog, ServerSettingsDialog,
-    CreateServerDialog, UserSettingsDialog, ServerButton
+    CreateServerDialog, UserSettingsDialog, ServerButton, InfoDialog
 )
 
 class AppLogicMixin:
@@ -323,7 +323,9 @@ class AppLogicMixin:
         channel = next((c for c in server_of_channel["channels"] if c["id"] == channel_id), None);
         if not channel: return
         if len([c for c in server_of_channel["channels"] if c.get("type") == "text"]) <= 1:
-            QMessageBox.warning(self, "Aviso", "Não é possível excluir o único canal de texto do servidor."); return
+            dialog = InfoDialog("Aviso", "Não é possível excluir o único canal de texto do servidor.", self)
+            dialog.exec()
+            return
         dialog = ConfirmationDialog("Excluir Canal", f"Você tem certeza que quer excluir o canal '{channel['name']}'?", self, add_close_button=False)
         if dialog.exec():
             server_of_channel["channels"] = [c for c in server_of_channel["channels"] if c["id"] != channel_id]; self.save_data()

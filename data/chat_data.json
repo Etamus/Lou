@@ -7,7 +7,7 @@
             "avatar": "477a5fca8b0e46b090ef9c972fbd5a10.png",
             "channels": [
                 {
-                    "id": "c_65f44b",
+                    "id": "c_b307a8",
                     "name": "Principal",
                     "type": "text",
                     "messages": []
@@ -19,7 +19,7 @@
         "user": {
             "name": "Mateus",
             "id_tag": "#1987",
-            "avatar": "34efcc838dc64b4ead6b587a6c66958e.png"
+            "avatar": "sam.png"
         },
         "model": {
             "name": "Lou",
