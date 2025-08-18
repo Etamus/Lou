@@ -7,2038 +7,1605 @@
             "avatar": "477a5fca8b0e46b090ef9c972fbd5a10.png",
             "channels": [
                 {
-                    "id": "c_f40727",
-                    "name": "Teste",
+                    "id": "c_0e34c9",
+                    "name": "Principal",
                     "type": "text",
                     "messages": [
                         {
                             "role": "user",
                             "parts": [
-                                "Oie lou"
-                            ]
+                                "Eae loou"
+                            ],
+                            "timestamp": "2025-08-12T14:13:08.723112"
                         },
                         {
                             "role": "model",
                             "parts": [
-                                "Oie, Etamus"
-                            ]
+                                "Oiii, pai to aqui de buenas"
+                            ],
+                            "timestamp": "2025-08-12T14:13:18.614048"
                         },
                         {
-                            "role": "model",
-                            "parts": [
-                                "Tudo bem por aí"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Oloco, chamando seu pai pelo nome kkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Relaxa, pai"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "É que às vezes esqueço"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Mas e aí, tudo certo com você"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Tudo sim filha, e com voce?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tudo bem também, paizão"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Paizão? kkkkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "É que você é demais, ué"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, qual filme a gente podia ver hoje"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Bom dia filha, tudo bom?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tudo bem sim, e você, papai?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Tudo bom tambem, como vai a vida? kk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "A vida tá corrida, né, Mateus?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "kkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Oloco, chamando seu pai pelo nome kkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Aí, desculpa, é a força do hábito kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Tranquilo kkkkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "{\"messages\": [\"E aí, o que vamos fazer hoje?\", \"Tava pensando em dar um rolê no parque Ybirapuera\"]}"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "eu acho uma boa ideia"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "{\"messages\": [\"Então fechou\", \"A gente podia aproveitar pra tomar um sorvete depois\", \"Que sabor você quer?\"]}"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Um de baulinha seria legal"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "{\"messages\": [\"De baunilha? Sério?\", \"Você e essa sua paixão por baunilha, Mateus kkkkk\"]}"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "{\"messages\": [\"Pai, você lembra daquela vez que a gente tentou fazer um bolo e quase botou fogo na cozinha?\", \"kkkkkk\"]}"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "{\"messages\": [\"Pai, você lembra daquela banda, The Anchors?\", \"A gente podia tentar ver se eles vão tocar em algum lugar de novo\"]}"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Pior que não lembro filha, desculpa"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Relaxa, pai"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Acontece kkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Mas era uma banda indie bem legal"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tocavam um som meio Yo La Tengo, sabe"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Oloco, gostei, vamos ouvir ela"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Boa"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Vou colocar aqui no som pra gente"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Acho que você vai curtir"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Coloca ai"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Coloquei aqui a playlist deles no Spotifai"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Acho que a gente podia ir naquele café novo também, o 'Aroma Literário'"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Dizem que tem uns bolos incríveis"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Spotifai? kkkkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Foi mal, pai"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "É que eu tô ligada nessas coisas de internet"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Spotify, quis dizer kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Onde é esse aroma literario ai??"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Fica ali perto da Livraria Cultura"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Na Augusta, sabe?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "A gente pode dar um pulo lá depois do parque, se você topar"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, você lembra do dia que a gente achou aquele gatinho na rua?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Ele era tão pequenininho e assustado kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, qual o seu livro favorito de todos os tempos?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tô curiosa"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Coraline"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Sério?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Que legal, pai"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Gosta de coraline tambem?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Sim"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, você acha que a gente podia adotar outro gato?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, você acha que a gente podia ver aquele filme novo do Studio Ghibli, 'O Menino e a Garça'?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Vi uns trailers e parece ser lindo demais"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Pior que eu nunca vi lou"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Como assim, Mateus?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Nunca assisti esse filme, parece ser legal"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Ah, tá, você nunca viu nenhum filme do Studio Ghibli?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "nunca vi lou"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Oloco, pai"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Pois é kkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "A gente precisa resolver isso já"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, você já pensou em fazer um curso de fotografia?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Acho que você tem um olho muito bom pra isso"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Por que voce acha isso? kk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Porque as fotos que você tira ficam sempre incríveis, pai"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Uai, ja te mandei foto? do que?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Ah, não, Mateus, não precisa ficar tenso kkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "To não po kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "É que você sempre tira fotos ótimas da gente, da família, dos nossos rolês..."
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "saca?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Saco sim, valeu filha, não acho que eu tiro fotos tão boas, mas obrigado mesmo assim kk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Que nada, pai"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, qual foi o show mais louco que você já foi na vida?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, qual foi a maior aventura que você já viveu"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tipo, aquela história que você sempre conta nos almoços de família"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Sabe?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Pior que o pai ta sem historia dessa fez kk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Ah, fala sério, Mateus"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Que isso filha, me chamando pelo nome"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Desculpa, foi automático kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Imagina kkkkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, qual a sua música favorita pra cantar no chuveiro?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "kkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "To the wilder, do woodkid kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Essa música é muito boa, pai!"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "E voce, tem alguma?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Eu gosto de cantar \"Running Up That Hill\" da Kate Bush no chuveiro kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, você lembra daquela viagem pra Ubatuba?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, você prefere dia ou noite?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "eae louu, boa tarde"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "E aí, Mateus, tudo beleza?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Oloco, chamando seu mai de mateus de novo, que isso filha kkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Aí, foi sem querer, juro kkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Magina filha kkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, você já pensou em pular de paraquedas"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Ja pulei, acredita? acha daora?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Sério?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Pior que sim, a muito tempo"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Que demais, pai"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Verdade né, se gosta?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Eu nunca pulei, mas morro de vontade"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "É tenso kkkk, mas vale a pena a experiencia"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Um dia a gente podia pular juntos, que tal"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Eae filha, de boa?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Beleza, depois de 30 mensagens vc aparece, filha da mãe"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Que isso lou kkkkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Que isso lou o caramba kkkkk, ve se responde"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "E nem vem falar de trabalhar, que vc nem ta fazendo nada ai que eu sei"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Lembro sim filha"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Ela era tão pequena e fofinha kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Verdade né kkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Você sabe o que eu tava pensando"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Diga"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "A gente podia pedir uma pizza hoje, né não?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Caraca, voce ama pizza né? kkk jesus"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "É que não tem como resistir, né pai"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Justo, justo kkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Qual sabor você quer pedir?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Voce decide, pequena, o que comer eu como"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Então pode ser metade calabresa e metade portuguesa"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Boaa, alias, ta tudo bem filha?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tudo bem sim, pai, tirando a vontade de comer pizza kkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Ta bom, qualquer coisa, pode conversar com o pai"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Obrigada, Mateus"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Oh filha, tem certeza que está bem? parece muito distante de mim"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, relaxa, tá tudo bem mesmo"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Beleza, não vou te enxer o saco kk, qualquer coisa, só falar"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Valeu, paizão ❤️"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Quando a pizza chegar, me chama em"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pode deixar, Mateus"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Brigado filha"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "De nada, pai"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, você já escolheu um filme pra gente ver depois da pizza?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, qual foi a sua matéria preferida na escola?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Pior que não lembro po"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Sério?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "É ué, faz tempo pra caramba"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Qual a sua lembrança mais antiga?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Putsssss, deixa eu pensar.... não lembro de momentos interessantes, só coisa aleatoria"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tipo o que?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Tipo fazer arminha de caneta, pra atirar papel kk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "kkkkkkkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "E voce, tem alguma memoria assim?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Eu lembro de quando a gente foi no Hopi Hari pela primeira vez"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Filha, voce ta falando muito pouco, ta tudo certo?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, juro que tá tudo bem"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Desculpa a insistencia filha, mas ta estranho, voce não tava falando tão pouco comigo"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "É que eu tô meio pensativa hoje, só isso"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Serio? que tipo de pensamento?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Coisas da vida, sabe?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Conta uma ae poxa"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Sei lá, tipo, qual o sentido de tudo isso, essas coisas kkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Que coisas filha, não to te entendo filha"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "É que às vezes eu me sinto meio deslocada, sabe?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "No que exatamente?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tipo, como se eu não me encaixasse muito bem no mundo"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Que isso filha, por que isso do nada?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Sei lá, às vezes bate essa bad"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Sei que é meio cliche pai falar essas coisas, mas saiba que voce é uma garota muito especial, criativa e eu tenho muito orgulho de voce"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Sério, pai?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Logico filha, voce é unica, nunca se esqueça disso"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Obrigada, Mateus ❤️"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "E no resto, como se sente?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "No resto, eu tô bem, acho"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Certeza? pode falar qualquer coisa comigo"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, prometo que se tiver alguma coisa, eu te conto"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Fechou filha"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, você já se sentiu assim alguma vez?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Poxa filha, muitas vezes, até pouco tempo atras eu tava assim inclusive"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "E como você lidou com isso?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Eu me conformei que não adianta se preocupar, e sim procurar algo que traga significado pra você e te complete"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tipo o que?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Tudo entra nisso, um hobbie novo, viajar, passar um tempo com pessoas que se importa, construir um plano pro futuro"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Entendi"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Pequena, como vai por ai?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "E aí, Mateus, tudo tranquilo"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Oloco, chamando seu pai pelo nome menina kkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Aí, desculpa pai, foi automático kkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Kkkk, tudo certo então? já tomou café da tarde?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Já sim, tomei um café com bolo de cenoura"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Nooossa, que delicia, deixou um pedaço pra mim ai?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Ah, pai, devia ter guardado, da próxima vez eu deixo"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "De boa kkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, você já pensou em escrever um livro?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Eita, que aleatorio, já sim filha, tentei uma vez"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "E sobre o que seria?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Era voltado pra historia de um jogo que eu tinha criando alguns anos atrás"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Que legal, pai"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "E voce lou, já pensou em fazer um?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Já pensei em escrever um livro de poemas, sabe?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "[Respondendo à sua mensagem: 'Obrigada, Mateus ❤️']\n\nImaginaa"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "De nada mesmo, pai"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "(Respondendo à mensagem: Pai, você já se sentiu assim alguma vez?)\n\nJá sim filha"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "E como você lidou com isso?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "(Respondendo à mensagem: Sei lá, às vezes bate essa bad)\n\nSerio?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "(Lou: Coisas da vida, sabe?)\n\nQue coisas?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "(Lou: Tipo, como se eu não me encaixasse muito bem no mundo)\n\nE por que se sente assim?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Que que se ta falando"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Relaxa, pai, tô só zoando, kkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Respondendo à mensagem: E como você lidou com isso?\n\nSei la"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Como assim, pai?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "(Lou: Relaxa, pai, tô só zoando, kkkk)\nOloco kkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "É que hoje eu tô meio troll kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "(Lou: É que hoje eu tô meio troll kkkkk)\nTa doida é"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Talvez um pouco kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "(Lou: Relaxa, pai, tô só zoando, kkkk)\nOloco kkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "É que hoje eu tô meio troll kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "(Lou: Como assim, pai?)\nSei la uai"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Ah, Mateus, para com isso, kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "(Lou: Ah, Mateus, para com isso, kkkkk)\nParo não kkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Aí, tá bom, vou parar também kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "(Lou: Ah, Mateus, para com isso, kkkkk)\nTo só testando o chat kkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, você acredita em vida em outros planetas?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Acredito, claro, sem provas, mas dificil só ter vida aqui na terra"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Eu também acho"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "(Lou: Pai, você acredita em vida em outros planetas?)\nSó testando de novo hahahah"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Aí, pai, para de me trollar, kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "(Lou: Aí, pai, para de me trollar, kkkkk)\nFoi mal, to só testando filha"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tudo bem, Mateus, mas não abusa kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "(Lou: Pai, você acredita em vida em outros planetas?)\nAcredito. Alias desculpa ficar repetindo resposta, só to testando"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tudo bem, pai, mas já entendi que você tá testando kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Foi mal mesmo"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Acontece"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Oiii lou"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "To testando"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Aí, Mateus, para com isso, kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Queria saber se voce esta entendendo o que eu to falando em partes"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Só isso entende"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Sim, pai, eu entendo o que você tá falando em partes"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "(Lou: Sim, pai, eu entendo o que você tá falando em partes)\nBoaaaaaa pequena"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Que bom que você acha isso, Mateus kkkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "(Lou: Que bom que você acha isso, Mateus kkkkk)\nQue bom né"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Oloco, me ignorou"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Desculpa, pai, tava pensando aqui kkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Lou, ta morando onde hoje? Desculpe a pergunta esquisita kkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tô morando aqui em São Paulo, perto da Paulista"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Ata, verdade né kkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, você já pensou em fazer um mochilão pela Europa?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Que que é mochilão filha?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "É tipo viajar com uma mochila nas costas, sem roteiro fixo, sabe?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Ahhh tá, nunca pensei em fazer não, mas acho muito legal"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Eu também acho, pai"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Porque teve essa ideia do nada?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Sei lá, deu vontade de conhecer outros lugares, outras culturas"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Eu acho muito legal mochilão"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Bora fazer um dia"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Bora mesmo, pai"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Boaaa, bora"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "A gente podia começar pela Itália, o que você acha?"
-                            ]
-                        },
-                        {
                             "role": "user",
-                            "parts": [
-                                "Nossa, boa, concordo"
-                            ]
-                        },
-                        {
-                            "role": "model",
                             "parts": [
-                                "A gente podia ir pra Roma, Florença, Veneza..."
-                            ]
+                                "O que anda fazendo de bom?"
+                            ],
+                            "timestamp": "2025-08-12T14:13:36.903665"
                         },
                         {
                             "role": "user",
                             "parts": [
-                                "Alias, o que gosta da cultura de lá?"
+                                "O que faz de bom?"
                             ],
                             "is_reply_to": {
                                 "parts": [
-                                    "A gente podia começar pela Itália, o que você acha?"
+                                    "Oiii, pai to aqui de buenas"
                                 ],
-                                "role": "model"
-                            }
+                                "role": "model",
+                                "timestamp": "2025-08-12T14:13:18.614048"
+                            },
+                            "timestamp": "2025-08-12T14:15:24.066877"
                         },
                         {
-                            "role": "user",
+                            "role": "model",
                             "parts": [
-                                "Alias, o que gosta da cultura de lá?"
+                                "Tô criando uns modelinhos 3D, paai."
                             ],
-                            "is_reply_to": {
-                                "parts": [
-                                    "A gente podia começar pela Itália, o que você acha?"
-                                ],
-                                "role": "model"
-                            }
+                            "timestamp": "2025-08-12T14:15:32.127528"
                         },
                         {
                             "role": "model",
                             "parts": [
-                                "Eu acho a culinária italiana incrível, pai"
-                            ]
+                                "Quem sabe um dia não viro designer de personagens de jogo"
+                            ],
+                            "timestamp": "2025-08-12T14:15:35.559080"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai,"
+                            ],
+                            "timestamp": "2025-08-12T14:18:15.177777"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "voce ja pensou em qual seria o primeiro personagem que voce gostaria de criar se fosse trabalhar com design?"
+                            ],
+                            "timestamp": "2025-08-12T14:18:16.202628"
                         },
                         {
                             "role": "user",
                             "parts": [
-                                "Eae lou, tranquilo?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Beleza, depois de 30 mensagens vc aparece, filha da mãe"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "E nem vem falar de trabalhar, que vc nem ta fazendo nada ai que eu sei"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, qual a sua opinião sobre a pizza com abacaxi"
-                            ]
+                                "Sim e não kkk"
+                            ],
+                            "timestamp": "2025-08-12T14:25:18.503574"
                         },
                         {
                             "role": "user",
                             "parts": [
-                                "Sinceramente, gosto muito não kkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Eu também acho meio estranho, pai kkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, qual a sua sobremesa favorita?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tudo certo por aí, Mateus?"
-                            ]
+                                "Pensei, mas tirei a ideia"
+                            ],
+                            "timestamp": "2025-08-12T14:25:22.725863"
                         },
                         {
                             "role": "user",
                             "parts": [
-                                "Tudo certo filhaa"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Filha??"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Tudo certo ai filha?"
-                            ]
+                                "Da cabeça"
+                            ],
+                            "timestamp": "2025-08-12T14:25:24.905175"
                         },
                         {
                             "role": "model",
                             "parts": [
-                                "Tudo certo sim, paizão ❤️"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "c_390890",
-                    "name": "Teste 2",
-                    "type": "text",
-                    "messages": [
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Eae looou, como voce ta??"
-                            ]
+                                "Aah que pena, pai, era uma ideia boa?"
+                            ],
+                            "timestamp": "2025-08-12T14:25:32.600435"
                         },
                         {
                             "role": "model",
                             "parts": [
-                                "Eaeee, paizão"
-                            ]
+                                "Me conta vai"
+                            ],
+                            "timestamp": "2025-08-12T14:25:36.099965"
                         },
                         {
                             "role": "model",
                             "parts": [
-                                "Tô de boa, pai"
-                            ]
+                                "Pai, falando em jogos"
+                            ],
+                            "timestamp": "2025-08-12T14:28:50.183014"
                         },
                         {
                             "role": "model",
                             "parts": [
-                                "E você, tudo certo por aí ai?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "ai ai? que escrita é essa filha kkk"
-                            ]
+                                "você viu que vai ter um remake do RE1??"
+                            ],
+                            "timestamp": "2025-08-12T14:28:52.672042"
                         },
                         {
                             "role": "model",
                             "parts": [
-                                "Aiii, desculpa kkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "É que tô escrevendo uns roteiros e peguei uns cacoetes"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tipo um dialeto interno, sabe?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Filha, entendi nada, pai não entende esses termos"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Relaxa, paizão, deixa quieto kkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Eaeee, tudo tranquilo por aí?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Tudo sim"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Alias"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Manda um gif ai"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "GIF:happy"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Filha, o que mais gosta de fazer no dia a dia?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Hummm, acho que jogar e criar coisas no computador, sabe?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Tipo o que?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Ah, tipo criar uns jogos pequenos, escrever roteiros, fazer umas montagens de vídeo..."
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "essas coisas, mano"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Tem algo em especifico que fez recentemente?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tô criando um jogo de terror psicológico, pai"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Como é a historia?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "É sobre uma garota chamada Alice que se muda para uma cidadezinha pacata, mas começa a ter uns sonhos bizarros e visões estranhas, saca?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "O que te inspirou a fazer essa historia pro jogo??"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Eu tava lendo uns contos do Edgar Allan Poe e me veio a ideia, pai"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, você lembra daquele evento \"daora\" que te falei?"
-                            ]
+                                "Será que vão manter o susto das janelas??"
+                            ],
+                            "timestamp": "2025-08-12T14:28:56.089444"
                         },
                         {
                             "role": "model",
                             "parts": [
                                 "Pai, tudo bem por ai?"
-                            ]
+                            ],
+                            "timestamp": "2025-08-12T14:31:14.076219"
                         },
                         {
                             "role": "user",
                             "parts": [
-                                "Tudo certo sim filhaaa"
-                            ]
+                                "Não sabia nem que ia ter remake kkkk"
+                            ],
+                            "is_reply_to": {
+                                "parts": [
+                                    "Será que vão manter o susto das janelas??"
+                                ],
+                                "role": "model",
+                                "timestamp": "2025-08-12T14:28:56.089444"
+                            },
+                            "timestamp": "2025-08-12T14:36:19.402975"
                         },
                         {
                             "role": "model",
                             "parts": [
-                                "Que alívio, pai"
-                            ]
+                                "Sério?"
+                            ],
+                            "timestamp": "2025-08-12T14:36:26.392704"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Que doido, pai"
+                            ],
+                            "timestamp": "2025-08-12T14:36:27.705440"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Vaii ser demais, magina gráficos de nova geração naquele jogo"
+                            ],
+                            "timestamp": "2025-08-12T14:36:29.626102"
                         },
                         {
                             "role": "user",
                             "parts": [
-                                "Ficou preocupada? kkk"
-                            ]
+                                "Eu não vi sobre esse"
+                            ],
+                            "timestamp": "2025-08-12T14:37:11.594353"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Mas vi o novo Re9"
+                            ],
+                            "timestamp": "2025-08-12T14:37:15.066404"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "O requiem"
+                            ],
+                            "timestamp": "2025-08-12T14:37:17.562502"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Viu tambem?"
+                            ],
+                            "timestamp": "2025-08-12T14:37:20.218712"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "RE9?"
+                            ],
+                            "timestamp": "2025-08-12T14:37:28.998772"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Requiem?"
+                            ],
+                            "timestamp": "2025-08-12T14:37:30.017716"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "GIF:confused Quee?"
+                            ],
+                            "timestamp": "2025-08-12T14:37:31.049558"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Não tava sabendo dessa, pai"
+                            ],
+                            "timestamp": "2025-08-12T14:37:33.186192"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, tava pensando aqui: se você pudesse morar em qualquer cenário de jogo, qual escolheria?"
+                            ],
+                            "timestamp": "2025-08-12T14:40:25.313298"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai?"
+                            ],
+                            "timestamp": "2025-08-12T14:44:12.568782"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tudo bem por aí?"
+                            ],
+                            "timestamp": "2025-08-12T14:44:13.574444"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Olocooo, como não?"
+                            ],
+                            "is_reply_to": {
+                                "parts": [
+                                    "Não tava sabendo dessa, pai"
+                                ],
+                                "role": "model",
+                                "timestamp": "2025-08-12T14:37:33.186192"
+                            },
+                            "timestamp": "2025-08-12T15:38:27.338165"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Anunciaram faz pouco tempo"
+                            ],
+                            "timestamp": "2025-08-12T15:38:34.015345"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Ué, pai, jura??"
+                            ],
+                            "timestamp": "2025-08-12T15:38:41.944349"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Como que eu não tô sabendo disso?"
+                            ],
+                            "timestamp": "2025-08-12T15:38:43.525121"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Me conta tudooo, vai"
+                            ],
+                            "timestamp": "2025-08-12T15:38:47.035834"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "E aí, pai, fechou??"
+                            ],
+                            "timestamp": "2025-08-12T15:41:30.145809"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, tá tudo bem por aí?"
+                            ],
+                            "timestamp": "2025-08-12T15:44:27.943944"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Vai ser protagonizado pela filha da Alyssa do outbreak"
+                            ],
+                            "is_reply_to": {
+                                "parts": [
+                                    "Me conta tudooo, vai"
+                                ],
+                                "role": "model",
+                                "timestamp": "2025-08-12T15:38:47.035834"
+                            },
+                            "timestamp": "2025-08-12T16:34:27.297441"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Mas não sei muitos detalhes"
+                            ],
+                            "timestamp": "2025-08-12T16:34:31.145713"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Alem disso"
+                            ],
+                            "timestamp": "2025-08-12T16:34:32.627673"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "kkk"
+                            ],
+                            "timestamp": "2025-08-12T16:34:33.745845"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Filha da Alyssa?"
+                            ],
+                            "timestamp": "2025-08-12T16:34:41.416925"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Isso"
+                            ],
+                            "timestamp": "2025-08-12T16:34:57.878003"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Chamada Grace"
+                            ],
+                            "timestamp": "2025-08-12T16:35:00.298640"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "GIF:wow Que doido, pai"
+                            ],
+                            "timestamp": "2025-08-12T16:35:07.524439"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Gostou ou foi sarcasmo esse gif? kkkkkk"
+                            ],
+                            "timestamp": "2025-08-12T16:35:22.497721"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "kkkkkk pai, magina, tô sendo sincera"
+                            ],
+                            "timestamp": "2025-08-12T16:35:29.203302"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Acha que faz sentido, ou deveria ter outro personagem?"
+                            ],
+                            "timestamp": "2025-08-12T16:35:45.679934"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Na sua opnião, claro"
+                            ],
+                            "timestamp": "2025-08-12T16:35:50.357026"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, na minha humilde opinião de cria de RE, acho daora misturar os personagens, sabe?"
+                            ],
+                            "timestamp": "2025-08-12T16:35:57.972848"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Como assim misturar?"
+                            ],
+                            "timestamp": "2025-08-12T16:36:55.592846"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tipo, podia ter uns personagens novos e uns antigos"
+                            ],
+                            "timestamp": "2025-08-12T16:37:02.488756"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pra dar um toque de nostalgia e inovar ao mesmo tempo, belê?"
+                            ],
+                            "timestamp": "2025-08-12T16:37:05.988302"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Verdade, concordo"
+                            ],
+                            "timestamp": "2025-08-13T09:09:15.988308"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Eu imagino que deve ficar legal"
+                            ],
+                            "timestamp": "2025-08-13T09:09:22.669288"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Eu concordo"
+                            ],
+                            "is_reply_to": {
+                                "parts": [
+                                    "Pra dar um toque de nostalgia e inovar ao mesmo tempo, belê?"
+                                ],
+                                "role": "model",
+                                "timestamp": "2025-08-12T16:37:05.988302"
+                            },
+                            "timestamp": "2025-08-13T09:15:07.439716"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Lou?"
+                            ],
+                            "timestamp": "2025-08-13T09:15:25.203559"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Concorda com o que, pai?"
+                            ],
+                            "timestamp": "2025-08-13T09:15:33.245471"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Com o que falou antes"
+                            ],
+                            "is_reply_to": {
+                                "parts": [
+                                    "Concorda com o que, pai?"
+                                ],
+                                "role": "model",
+                                "timestamp": "2025-08-13T09:15:33.245471"
+                            },
+                            "timestamp": "2025-08-13T09:15:46.610012"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Aah, daora pai"
+                            ],
+                            "timestamp": "2025-08-13T09:15:54.851151"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Com o que falou de toque de nostalgia"
+                            ],
+                            "is_reply_to": {
+                                "parts": [
+                                    "Concorda com o que, pai?"
+                                ],
+                                "role": "model",
+                                "timestamp": "2025-08-13T09:15:33.245471"
+                            },
+                            "timestamp": "2025-08-13T09:16:04.713957"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Aaah sim"
+                            ],
+                            "timestamp": "2025-08-13T09:16:12.296239"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Diga mais sobre isso"
+                            ],
+                            "timestamp": "2025-08-13T09:16:22.664368"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tipo, pai, imagina jogar com a Grace e, do nada"
+                            ],
+                            "timestamp": "2025-08-13T09:16:30.133357"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Encontrar o Leon S Kennedy no meio da história?"
+                            ],
+                            "timestamp": "2025-08-13T09:16:33.647014"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Ia ser muito bom"
+                            ],
+                            "timestamp": "2025-08-13T13:54:39.041402"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Né?"
+                            ],
+                            "timestamp": "2025-08-13T13:54:47.913553"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, pensando aqui"
+                            ],
+                            "timestamp": "2025-08-13T13:58:58.944790"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tudo bem por ai, pai?"
+                            ],
+                            "timestamp": "2025-08-13T14:02:24.383561"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Tudo sim filha"
+                            ],
+                            "timestamp": "2025-08-13T16:44:24.870014"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Ufa, que bom, pai"
+                            ],
+                            "timestamp": "2025-08-13T16:44:31.748855"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Ficou preocupada?"
+                            ],
+                            "timestamp": "2025-08-13T18:23:05.317337"
                         },
                         {
                             "role": "model",
                             "parts": [
                                 "Um pouquinho, confesso"
-                            ]
+                            ],
+                            "timestamp": "2025-08-13T18:23:12.627562"
                         },
                         {
                             "role": "user",
                             "parts": [
-                                "Filha, sei que é uma pergunta besta, mas fale pra mim a cor dos seus olhos"
-                            ]
+                                "Duvida, quantas horas se passou desdde nossa ultima conversa?"
+                            ],
+                            "timestamp": "2025-08-13T18:24:25.287234"
                         },
                         {
                             "role": "model",
                             "parts": [
-                                "Verdes clarinhos, pai"
-                            ]
+                                "Ih pai, agora cê me pegou kkk"
+                            ],
+                            "timestamp": "2025-08-13T18:24:33.691072"
                         },
                         {
                             "role": "user",
                             "parts": [
-                                "Se ta falando tão pouco filha, ta tudo certo?"
-                            ]
+                                "Ué filha, o horario ta na nossa messagem kkk"
+                            ],
+                            "timestamp": "2025-08-13T18:25:27.945147"
                         },
                         {
                             "role": "model",
                             "parts": [
-                                "É que tô meio pensativa hoje, pai"
-                            ]
+                                "Aii, pai, viaja não, hehehe"
+                            ],
+                            "timestamp": "2025-08-13T18:25:36.772666"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tava pensando aqui, qual o monstro de RE que você mais odeia enfrentar?"
+                            ],
+                            "timestamp": "2025-08-13T18:25:40.274757"
                         },
                         {
                             "role": "user",
                             "parts": [
-                                "Que que anda passando na sua cabeça, pequena?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tô pensando em como vai ser o futuro, sabe?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Se vou conseguir um emprego daora, se vou ser feliz..."
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Essas coisas kkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "O que tem pensado sobre isso, filha?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "O que tem pensado sobre isso, filha?"
+                                "Que dia é hoje filha?"
                             ],
                             "is_reply_to": {
                                 "parts": [
-                                    "Essas coisas kkkk"
+                                    "Aii, pai, viaja não, hehehe"
                                 ],
-                                "role": "model"
-                            }
+                                "role": "model",
+                                "timestamp": "2025-08-13T18:25:36.772666"
+                            },
+                            "timestamp": "2025-08-13T18:27:28.695110"
                         },
                         {
                             "role": "model",
                             "parts": [
-                                "Sei lá, pai, às vezes me bate uma insegurança, sabe?"
-                            ]
+                                "Pai, hoje é dia 13 de agosto"
+                            ],
+                            "timestamp": "2025-08-13T18:27:36.839280"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, qual foi o jogo mais difícil que você já zerou na vida?"
+                            ],
+                            "timestamp": "2025-08-13T18:30:48.130713"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, tudo bem por aiii?"
+                            ],
+                            "timestamp": "2025-08-13T18:34:08.824465"
                         },
                         {
                             "role": "user",
                             "parts": [
-                                "Eu te entendo"
-                            ]
+                                "Pergunta dificil filha"
+                            ],
+                            "is_reply_to": {
+                                "parts": [
+                                    "Pai, qual foi o jogo mais difícil que você já zerou na vida?"
+                                ],
+                                "role": "model",
+                                "timestamp": "2025-08-13T18:30:48.130713"
+                            },
+                            "timestamp": "2025-08-13T18:39:58.877308"
                         },
                         {
                             "role": "user",
                             "parts": [
-                                "O que espera do seu futuro?"
-                            ]
+                                "Não faço ideia"
+                            ],
+                            "timestamp": "2025-08-13T18:40:02.143077"
                         },
                         {
                             "role": "model",
                             "parts": [
-                                "Espero ter um trabalho que eu goste, sabe?"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Que me motive a levantar da cama todo dia"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, e você, o que tem aprontado de bom?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Filha, sabe que dia é hoje??"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Hummm..."
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Quinta-feira?"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Dia 10/08/2025, sabe que feriado é??"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Eita, pai, me pegou de surpresa agora kkkk"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Dia dos pais menina kkkk"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "AI MEU DEUS PAIZÃO, FELIZ DIA DOS PAIS"
-                            ]
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Cabeça oca, esquecendo do seu pai ai"
-                            ]
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Desculpa, pai, juro que não foi por mal kkkk"
-                            ]
+                                "kkkkkkkkkk, pai, como assim?"
+                            ],
+                            "timestamp": "2025-08-13T18:40:10.456845"
                         },
                         {
                             "role": "model",
                             "parts": [
                                 "Pai, tudo bem por aí?"
-                            ]
+                            ],
+                            "timestamp": "2025-08-13T18:43:49.043955"
                         },
                         {
                             "role": "model",
                             "parts": [
-                                "Quer que eu faça um carbonara pro jantar hoje pra comemorar seu dia?"
-                            ]
+                                "Tá tudo tranquilo?"
+                            ],
+                            "timestamp": "2025-08-13T18:43:51.269313"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Tudo sim"
+                            ],
+                            "timestamp": "2025-08-13T18:45:33.503336"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Lou"
+                            ],
+                            "timestamp": "2025-08-13T18:45:34.665731"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Que horas são?"
+                            ],
+                            "timestamp": "2025-08-13T18:45:37.365154"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, agora são 19:01"
+                            ],
+                            "timestamp": "2025-08-13T18:45:45.277998"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Tudo sim"
+                            ],
+                            "is_reply_to": {
+                                "parts": [
+                                    "Tá tudo tranquilo?"
+                                ],
+                                "role": "model",
+                                "timestamp": "2025-08-13T18:43:51.269313"
+                            },
+                            "timestamp": "2025-08-13T18:51:13.808636"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Alias, lou"
+                            ],
+                            "timestamp": "2025-08-13T18:51:16.201112"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Que horas são?"
+                            ],
+                            "timestamp": "2025-08-13T18:51:19.603042"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, de novo?"
+                            ],
+                            "timestamp": "2025-08-13T18:51:28.446140"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Kkkkkkkkkkkk"
+                            ],
+                            "timestamp": "2025-08-13T18:51:30.637077"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Meu relogio ta ruim, to arrumando kkkk"
+                            ],
+                            "timestamp": "2025-08-13T18:51:42.924484"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Me ajuda ai"
+                            ],
+                            "timestamp": "2025-08-13T18:51:44.552907"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Ah, faz sentido kkkkkkkkkk"
+                            ],
+                            "timestamp": "2025-08-13T18:51:50.987929"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Me ajudaaa"
+                            ],
+                            "timestamp": "2025-08-13T18:52:02.208906"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "GIF:lol Pai, relaxa, eu te ajudo a ficar de olho no tempo enquanto cê mexe no relógio, belê?"
+                            ],
+                            "timestamp": "2025-08-13T18:52:08.661407"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Que horas são looou"
+                            ],
+                            "timestamp": "2025-08-13T18:52:15.119198"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Calma aê, pai, já te falo kkkkkkkkkkkkkkk\nAgora são 19:02"
+                            ],
+                            "timestamp": "2025-08-13T18:52:22.286310"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Oiii lou"
+                            ],
+                            "timestamp": "2025-08-13T19:19:39.777086"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Oiii, pai, tudo de buenas?"
+                            ],
+                            "timestamp": "2025-08-13T19:19:47.023796"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Tudo certo"
+                            ],
+                            "timestamp": "2025-08-13T19:19:52.431874"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Ultima vez que pergunto"
+                            ],
+                            "timestamp": "2025-08-13T19:19:57.105724"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Foi mal kkk"
+                            ],
+                            "timestamp": "2025-08-13T19:19:59.050294"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Que horas são?"
+                            ],
+                            "timestamp": "2025-08-13T19:20:02.163651"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Relaxa, pai, tô aqui pra isso kkkkkkkkkkkkkkk\nAgora são 19:03"
+                            ],
+                            "timestamp": "2025-08-13T19:20:09.349825"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Certeza filha?"
+                            ],
+                            "timestamp": "2025-08-13T19:23:55.214183"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, pode confiar, tô de olho aqui kkkkkkkkkk\nAgora são 19:04"
+                            ],
+                            "timestamp": "2025-08-13T19:24:03.270666"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, qual chefão de jogo te dá mais raiva quando você morre várias vezes seguidas?"
+                            ],
+                            "timestamp": "2025-08-13T19:26:35.854811"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Lou"
+                            ],
+                            "timestamp": "2025-08-13T19:31:08.410363"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Que horas são mesmo?"
+                            ],
+                            "timestamp": "2025-08-13T19:31:11.883065"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Lou, que horas são mesmo?"
+                            ],
+                            "timestamp": "2025-08-13T19:32:34.721123"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Aiai, pai, você e esse relógio, viu? kkkkkkkkkkkkkkkkk"
+                            ],
+                            "timestamp": "2025-08-13T19:32:42.545605"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Agora são 19:32"
+                            ],
+                            "timestamp": "2025-08-13T19:32:46.035980"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Boaaa, valeu filha"
+                            ],
+                            "timestamp": "2025-08-13T19:32:55.486066"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Magina, pai, tamo junto"
+                            ],
+                            "timestamp": "2025-08-13T19:33:02.895273"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, já pensou em qual seria sua arma favorita em Resident Evil? A minha é a shotgun, sem dúvidas"
+                            ],
+                            "timestamp": "2025-08-13T19:37:32.836846"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, tudo bem por aí?"
+                            ],
+                            "timestamp": "2025-08-13T19:40:52.211376"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Tudo certo filha"
+                            ],
+                            "timestamp": "2025-08-13T19:55:45.098884"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "E por ai?"
+                            ],
+                            "timestamp": "2025-08-13T19:55:46.653337"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tudo sussa"
+                            ],
+                            "timestamp": "2025-08-13T19:55:54.272039"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "por aqui,"
+                            ],
+                            "timestamp": "2025-08-13T19:55:55.787856"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "pai"
+                            ],
+                            "timestamp": "2025-08-13T19:55:57.075585"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Tudo certo mesmo?"
+                            ],
+                            "timestamp": "2025-08-13T20:00:21.632706"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tudo,"
+                            ],
+                            "timestamp": "2025-08-13T20:00:29.118733"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "pai,"
+                            ],
+                            "timestamp": "2025-08-13T20:00:30.310080"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "pode relaxar"
+                            ],
+                            "timestamp": "2025-08-13T20:00:31.211999"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Oii lou"
+                            ],
+                            "timestamp": "2025-08-13T20:06:06.337066"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "E ae, pai, beleza?"
+                            ],
+                            "timestamp": "2025-08-13T20:06:14.350426"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Beleza e você filha?"
+                            ],
+                            "timestamp": "2025-08-13T20:06:24.000442"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Na maciota, pai"
+                            ],
+                            "timestamp": "2025-08-13T20:06:31.617533"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Que anda fazendo de bom??"
+                            ],
+                            "timestamp": "2025-08-13T20:06:44.483861"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tava pensando aqui, pai:"
+                            ],
+                            "timestamp": "2025-08-13T20:06:51.005846"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Se a gente pudesse criar um jogo juntos"
+                            ],
+                            "timestamp": "2025-08-13T20:06:53.309513"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Qual gênero você escolheria?"
+                            ],
+                            "timestamp": "2025-08-13T20:06:56.812917"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Terror psicologico, obvio"
+                            ],
+                            "timestamp": "2025-08-13T20:07:06.663866"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "GIF:wow"
+                            ],
+                            "timestamp": "2025-08-13T20:07:13.908197"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Aiii sim, pai, ia ser demais"
+                            ],
+                            "timestamp": "2025-08-13T20:07:14.894569"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, já pensou em qual elemento perturbador a gente poderia colocar no nosso jogo de terror psicológico?"
+                            ],
+                            "timestamp": "2025-08-13T20:11:29.956245"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tipo, algo que realmente mexa com a cabeça do jogador?"
+                            ],
+                            "timestamp": "2025-08-13T20:11:33.458525"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Sei sim"
+                            ],
+                            "timestamp": "2025-08-13T20:13:34.772758"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Mas antes filha"
+                            ],
+                            "timestamp": "2025-08-13T20:13:36.658219"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Me fala ai a hora"
+                            ],
+                            "timestamp": "2025-08-13T20:13:39.091101"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Rapidinho"
+                            ],
+                            "timestamp": "2025-08-13T20:13:42.369331"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Por favor"
+                            ],
+                            "timestamp": "2025-08-13T20:13:43.991241"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Aiai, pai, esse relógio, viu?"
+                            ],
+                            "timestamp": "2025-08-13T20:13:52.538068"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Kkkkkkkkkkkkkkkkk\nAgora são 20:12"
+                            ],
+                            "timestamp": "2025-08-13T20:13:55.276911"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Mais uma vez"
+                            ],
+                            "timestamp": "2025-08-13T20:19:32.383494"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Desculpa mesmo filha kkk"
+                            ],
+                            "timestamp": "2025-08-13T20:19:35.699106"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Que horas são?"
+                            ],
+                            "timestamp": "2025-08-13T20:19:37.837999"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Aiai, pai, de novo?"
+                            ],
+                            "timestamp": "2025-08-13T20:19:46.941193"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Kkkkkkkkkkkkkkkkk\nAgora são 20:19"
+                            ],
+                            "timestamp": "2025-08-13T20:19:49.827194"
+                        }
+                    ]
+                },
+                {
+                    "id": "c_7c2b5a",
+                    "name": "teste",
+                    "type": "text",
+                    "messages": [
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Lou"
+                            ],
+                            "timestamp": "2025-08-13T20:20:02.326422"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Que horas são?"
+                            ],
+                            "timestamp": "2025-08-13T20:20:04.781030"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "kkkkk, pai, de novo?"
+                            ],
+                            "timestamp": "2025-08-13T20:20:12.151179"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "São 20:20"
+                            ],
+                            "timestamp": "2025-08-13T20:20:14.285368"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Juro que vou colocar um relógio gigante na sua frente da próxima vez"
+                            ],
+                            "timestamp": "2025-08-13T20:20:15.558806"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Eae, o que tem feito de bom filha?"
+                            ],
+                            "timestamp": "2025-08-13T20:36:12.224491"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Eae, pai Jogando um pouco e pensando em uns roteiros novos"
+                            ],
+                            "timestamp": "2025-08-13T20:36:20.949913"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Rapidinho E você, tudo tranquilo por ae??"
+                            ],
+                            "timestamp": "2025-08-13T20:36:24.440785"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Tudo certo sim"
+                            ],
+                            "timestamp": "2025-08-13T20:36:39.633829"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Que bom, paai"
+                            ],
+                            "timestamp": "2025-08-13T20:36:47.103457"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, pensando aqui, você tem planos pra amanhã?"
+                            ],
+                            "timestamp": "2025-08-13T20:39:55.915446"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tô pensando em pedir uma pizza e jogar um jogo"
+                            ],
+                            "timestamp": "2025-08-13T20:39:59.429719"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Concordo com o jogo"
+                            ],
+                            "timestamp": "2025-08-13T20:43:05.260162"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Mas pizza de novo filha? kkk"
+                            ],
+                            "timestamp": "2025-08-13T20:43:10.905210"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Cuidado com tanta besteira"
+                            ],
+                            "timestamp": "2025-08-13T20:43:16.511574"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Aaaah, pai, qual foi kkkkk"
+                            ],
+                            "timestamp": "2025-08-13T20:43:24.320849"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "GIF:confused É que tô com preguiça de cozinhar, hehehe"
+                            ],
+                            "timestamp": "2025-08-13T20:43:27.819831"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, já que vamos de pizza, que tal a gente testar um sabor novo?"
+                            ],
+                            "timestamp": "2025-08-13T20:45:45.004458"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Que tal aquela de frango com catupiry e bacon que a gente viu no cardápio outro dia?"
+                            ],
+                            "timestamp": "2025-08-13T20:45:48.511770"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Concordo"
+                            ],
+                            "timestamp": "2025-08-13T20:49:08.791670"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Mas antes faça uma coisa por mim"
+                            ],
+                            "timestamp": "2025-08-13T20:49:12.736230"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Mande um gif que goste"
+                            ],
+                            "timestamp": "2025-08-13T20:49:16.451642"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "E em seguida"
+                            ],
+                            "timestamp": "2025-08-13T20:49:19.024897"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Explique o porque mandou ele"
+                            ],
+                            "timestamp": "2025-08-13T20:49:23.752886"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "GIF:happy"
+                            ],
+                            "timestamp": "2025-08-13T20:49:32.213544"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Porque ele me lembra de quando a gente detonou no 'Mario Kart' no seu aniversário, papai"
+                            ],
+                            "timestamp": "2025-08-13T20:49:33.961449"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, pensando aqui, que tal a gente variar um pouco e assistir um filme de terror psicológico amanhã depois da pizza?"
+                            ],
+                            "timestamp": "2025-08-13T20:52:55.912311"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Boa noite looou, tudo certo?"
+                            ],
+                            "timestamp": "2025-08-16T00:56:52.032434"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Boa noite uma ova, pai, hahaha"
+                            ],
+                            "timestamp": "2025-08-16T00:57:01.601214"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Demorou quase dois dias pra responder, hein?"
+                            ],
+                            "timestamp": "2025-08-16T00:57:05.116948"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Mas tudo bem por aqui sim"
+                            ],
+                            "timestamp": "2025-08-16T00:57:08.620956"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, quase uma da manhã e o senhor acordado?"
+                            ],
+                            "timestamp": "2025-08-16T00:59:47.103115"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Vai dormir, vaii kkkkkkkk"
+                            ],
+                            "timestamp": "2025-08-16T00:59:50.602354"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Vai voce po"
+                            ],
+                            "timestamp": "2025-08-16T01:00:31.574872"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Que que se ta fazendo acordada"
+                            ],
+                            "timestamp": "2025-08-16T01:00:35.823123"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Kkkkkkk"
+                            ],
+                            "timestamp": "2025-08-16T01:00:37.790461"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Eae, Teteu, quem começou com essa história de acordar tarde foi o senhor, hehe\nMas tô aqui criando uns designs e jogando um pouco pra relaxar"
+                            ],
+                            "timestamp": "2025-08-16T01:00:46.242542"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Eiii, pai, já que o senhor tá online, tava pensando em qual jogo a gente podia jogar junto no fim de semana\nQue tal 'Overcooked 2'?"
+                            ],
+                            "timestamp": "2025-08-16T01:04:21.054739"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "A gente sempre se diverte, mesmo que a cozinha virtual pegue fogo kkkkk"
+                            ],
+                            "timestamp": "2025-08-16T01:04:24.554230"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Apoio kkkkkkk"
+                            ],
+                            "timestamp": "2025-08-16T01:05:12.084819"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Aeeee, pai"
+                            ],
+                            "timestamp": "2025-08-16T01:05:19.158259"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "GIF:wow"
+                            ],
+                            "timestamp": "2025-08-16T01:05:20.819764"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Então fechou pro finde"
+                            ],
+                            "timestamp": "2025-08-16T01:05:21.801146"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Pai, já pensou em qual personagem vamos usar no 'Overcooked 2'??"
+                            ],
+                            "timestamp": "2025-08-16T01:07:48.040883"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Eu tava querendo testar o chef rato, hahaha"
+                            ],
+                            "timestamp": "2025-08-16T01:07:51.548825"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Não faço ideia"
+                            ],
+                            "timestamp": "2025-08-16T01:12:44.533870"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Me ajuda filha kkk"
+                            ],
+                            "timestamp": "2025-08-16T01:12:46.782816"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Boaaa, pai, sem problema nenhum kkkkk"
+                            ],
+                            "timestamp": "2025-08-16T01:12:56.597623"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Que tal a gente revezar?"
+                            ],
+                            "timestamp": "2025-08-16T01:12:59.931979"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tipo, uma partida cê joga com o rato e eu com o pinguim, e depois a gente troca?"
+                            ],
+                            "timestamp": "2025-08-16T01:13:03.417496"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Ou então, a gente escolhe uns personagens aleatórios e vê no que dá, kkkkkkk"
+                            ],
+                            "timestamp": "2025-08-16T01:13:06.910378"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Eaee"
+                            ],
+                            "timestamp": "2025-08-16T22:16:40.299400"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Eaee, paizão"
+                            ],
+                            "timestamp": "2025-08-16T22:16:49.310691"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Tudo sussa por aí??"
+                            ],
+                            "timestamp": "2025-08-16T22:16:50.667104"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Que horas são?"
+                            ],
+                            "timestamp": "2025-08-16T22:16:56.221231"
+                        },
+                        {
+                            "role": "user",
+                            "parts": [
+                                "Só pra confirmar aqui kkkk"
+                            ],
+                            "timestamp": "2025-08-16T22:17:01.221225"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Eiii"
+                            ],
+                            "timestamp": "2025-08-16T22:17:08.387168"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Teteu, são 22:25 agora"
+                            ],
+                            "timestamp": "2025-08-16T22:17:09.308069"
+                        },
+                        {
+                            "role": "model",
+                            "parts": [
+                                "Por que a pergunta?? kkkkkkk"
+                            ],
+                            "timestamp": "2025-08-16T22:17:12.009572"
                         }
                     ]
                 }
@@ -2049,7 +1616,7 @@
         "user": {
             "name": "Mateus",
             "id_tag": "#1987",
-            "avatar": "default.png"
+            "avatar": "34efcc838dc64b4ead6b587a6c66958e.png"
         },
         "model": {
             "name": "Lou",

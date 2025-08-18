@@ -7,6 +7,7 @@ from PySide6.QtCore import Qt, Signal, QSize
 from PySide6.QtGui import (
     QFont, QKeyEvent, QPainter, QPen, QColor, QIcon, QCursor, QPixmap, QPainterPath, QAction, QMovie
 )
+from datetime import datetime
 
 # --- DIÁLOGOS DE CONFIGURAÇÃO ---
 class BaseDialog(QDialog):
@@ -216,6 +217,8 @@ class ReplyIndicatorWidget(QFrame):
         if len(text) > 60: text = text[:60] + "..."
         self.message_label.setText(text)
         self.show()
+# Em LouFE.py, substitua a classe ChatMessageWidget
+
 class ChatMessageWidget(QFrame):
     reply_clicked = Signal(dict)
     def __init__(self, message_data, profiles, is_grouped=False, parent=None):
@@ -230,20 +233,19 @@ class ChatMessageWidget(QFrame):
         profile = self.profiles.get(self.role, {})
         name = profile.get("name", "Unknown")
         text_content = message_data.get("parts", [""])[0]
+        timestamp_str = message_data.get("timestamp")
         is_a_reply = "is_reply_to" in self.message_data and self.role == "user"
         if is_a_reply:
             text_content = text_content.split("\n")[-1]
         is_gif = text_content.startswith("GIF:")
         main_vertical_layout = QVBoxLayout(self)
-        if is_a_reply:
-            top_margin = 15
-        elif is_grouped:
-            top_margin = 1
-        else:
-            top_margin = 10
+        if is_a_reply: top_margin = 15
+        elif is_grouped: top_margin = 1
+        else: top_margin = 10
         main_vertical_layout.setContentsMargins(0, top_margin, 0, 0)
         main_vertical_layout.setSpacing(0)
         if is_a_reply:
+            # ... (código do banner de resposta)
             reply_data = self.message_data["is_reply_to"]
             reply_profile = self.profiles.get(reply_data.get("role", "model"), {})
             reply_banner_widget = QWidget()
@@ -264,6 +266,7 @@ class ChatMessageWidget(QFrame):
             reply_banner_layout.addWidget(reply_text)
             reply_banner_layout.addStretch()
             main_vertical_layout.addWidget(reply_banner_widget)
+            
         body_container = QWidget()
         body_layout = QHBoxLayout(body_container)
         body_layout.setContentsMargins(15, 1, 15, 1)
@@ -275,9 +278,23 @@ class ChatMessageWidget(QFrame):
             if not Path(avatar_path).exists(): avatar_path = "assets/avatars/default.png"
             avatar = AvatarLabel(avatar_path)
             body_layout.addWidget(avatar, 0, Qt.AlignTop)
+
+            # --- NOVO LAYOUT PARA NOME + HORA ---
+            name_time_layout = QHBoxLayout()
+            name_time_layout.setSpacing(8)
             name_label = QLabel(name)
             name_label.setStyleSheet(f"color: {'#5865f2' if is_user else '#eb459e'}; font-weight: bold;")
-            text_content_layout.addWidget(name_label)
+            
+            time_label = QLabel("")
+            if timestamp_str:
+                dt_object = datetime.fromisoformat(timestamp_str)
+                time_label.setText(dt_object.strftime("%H:%M"))
+            time_label.setStyleSheet("color: #96989d; font-size: 9pt;")
+            
+            name_time_layout.addWidget(name_label)
+            name_time_layout.addWidget(time_label)
+            name_time_layout.addStretch()
+            text_content_layout.addLayout(name_time_layout)
         else:
             body_layout.addSpacing(55)
         if is_gif:
@@ -312,16 +329,15 @@ class ChatMessageWidget(QFrame):
             self.setStyleSheet("QPushButton#replyButton { background-color: #40444b; border-radius: 4px; font-size: 14pt; color: #dcddde; }")
             body_layout.addWidget(self.reply_button, 0, Qt.AlignTop)
         main_vertical_layout.addWidget(body_container)
+
     def update_text(self, text):
         if hasattr(self, 'message_label'):
             self.message_label.setText(text)
     def enterEvent(self, event):
-        if hasattr(self, 'reply_button'):
-            self.reply_button.setVisible(True)
+        if hasattr(self, 'reply_button'): self.reply_button.setVisible(True)
         super().enterEvent(event)
     def leaveEvent(self, event):
-        if hasattr(self, 'reply_button'):
-            self.reply_button.setVisible(False)
+        if hasattr(self, 'reply_button'): self.reply_button.setVisible(False)
         super().leaveEvent(event)
 class ServerButton(QPushButton):
     def __init__(self, server_data, parent=None):
@@ -383,3 +399,32 @@ class UIMixin:
     def load_stylesheet(self):
         c_dark_heavy="#202225";c_dark_medium="#2f3136";c_dark_light="#36393f";c_dark_lighter="#40444b";c_text_header="#72767d";c_text_normal="#dcddde";c_text_active="#ffffff";c_brand="#5865f2"
         return f""" QMainWindow{{background-color:{c_dark_heavy};}} QFrame#server_list{{background-color:{c_dark_heavy};}} QPushButton#server_button{{background-color:{c_dark_light};color:{c_text_normal};font-size:16pt;font-weight:bold;border:none;border-radius:25px;padding:0;}} QPushButton#server_button:hover{{border-radius:15px;}} QPushButton#server_button:checked{{background-color:{c_brand};border-radius:15px;}} QPushButton#server_action_button{{background-color:{c_dark_light};color:#23a55a;font-size:20pt;border:none;border-radius:25px;height:50px;width:50px; padding-bottom: 4px;}} QPushButton#server_action_button:hover{{background-color:#23a55a;color:{c_text_active};border-radius:15px;}} QSplitter::handle{{background-color:#282a2e;}} QFrame#channel_panel{{background-color:{c_dark_medium};}} QLabel#server_name_label{{color:{c_text_active};font-weight:bold;padding:20px 15px;border-bottom:1px solid {c_dark_heavy};}} QLabel#server_name_label:hover{{background-color:{c_dark_lighter};}} QScrollArea{{border:none;}} QLabel#channel_header{{color:{c_text_header};font-size:9pt;font-weight:bold;}} QLabel#no_channels_label{{color:{c_text_header};font-style:italic;padding:8px;}} QLabel#welcome_label {{ color:{c_text_active}; font-size: 16pt; font-weight: bold; text-align: center; }} QPushButton#add_channel_button{{color:{c_text_header};font-size:14pt;font-weight:bold;border:none;border-radius:10px;text-align:center;}} QPushButton#add_channel_button:hover{{color:{c_text_active};}} QPushButton#channel_button,QPushButton#channel_button_active{{color:{c_text_header};text-align:left;padding:8px;border-radius:4px;font-size:11pt;border:none;}} QPushButton#channel_button:hover{{background-color:{c_dark_lighter};color:{c_text_normal};}} QPushButton#channel_button:checked,QPushButton#channel_button_active{{background-color:{c_dark_lighter};color:{c_text_active};}} QFrame#user_panel{{background-color:#232428;padding:5px;}} QLabel#user_name_label{{color:{c_text_active};font-weight:bold;font-size:10pt;}} QLabel#user_id_label{{color:{c_text_header};font-size:8pt;}} QPushButton#user_settings_button {{ color:{c_text_header};border:none;font-size:11pt;border-radius:4px;width:24px;height:24px;}} QPushButton#user_settings_button:hover {{ color:{c_text_active};background-color:{c_dark_lighter};}} QFrame#chat_panel{{background-color:{c_dark_light};}} QFrame#chat_top_bar{{border-bottom:1px solid {c_dark_heavy};padding:12px 15px;}} QLabel#chat_channel_name{{color:{c_text_active};font-weight:bold;font-size:12pt;}} QScrollArea#chat_scroll_area{{border:none;}} QFrame#chat_input_frame{{padding:0; border-radius: 8px; background-color: {c_dark_lighter};}} ChatInput{{background-color:transparent;border:none;border-radius:8px;font-size:11pt;padding:10px 15px;color:{c_text_normal};}} QLabel#chat_message_label {{ color: {c_text_normal}; font-size: 11pt; }} QFrame#message_widget {{ min-height: 20px; }} QScrollBar:vertical{{border:none;background:{c_dark_medium};width:8px;margin:0;}} QScrollBar::handle:vertical{{background:{c_dark_heavy};min-height:20px;border-radius:4px;}} QMenu {{ background-color: {c_dark_heavy}; color: {c_text_normal}; border: 1px solid #1a1b1e; }} QMenu::item:selected {{ background-color: {c_brand}; }} QMenu::item#deleteAction {{ color: #d83c3e; }} """
+    
+    # Em LouFE.py, adicione esta nova classe
+
+class DateSeparatorWidget(QFrame):
+    """Um widget para exibir uma linha separadora de data no chat."""
+    def __init__(self, date_str, parent=None):
+        super().__init__(parent)
+        self.setFixedHeight(30)
+        
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(15, 5, 15, 5)
+        layout.setAlignment(Qt.AlignCenter)
+
+        line1 = QFrame()
+        line1.setFrameShape(QFrame.HLine)
+        line1.setFrameShadow(QFrame.Sunken)
+        line1.setStyleSheet("border: 1px solid #40444b;")
+
+        self.label = QLabel(date_str)
+        self.label.setStyleSheet("color: #96989d; font-size: 9pt; font-weight: bold; padding: 0 10px;")
+
+        line2 = QFrame()
+        line2.setFrameShape(QFrame.HLine)
+        line2.setFrameShadow(QFrame.Sunken)
+        line2.setStyleSheet("border: 1px solid #40444b;")
+        
+        layout.addWidget(line1)
+        layout.addWidget(self.label)
+        layout.addWidget(line2)
