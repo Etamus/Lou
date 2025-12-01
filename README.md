@@ -1,90 +1,72 @@
-# Lou
+# ✨ Lou
 
-Lou é uma plataforma avançada para a criação e interação com personas digitais de alta fidelidade.  
-Projetada com uma arquitetura modular e um motor de IA de múltiplas camadas, ela transcende os chatbots tradicionais ao simular uma personalidade coesa, memória contínua e uma consciência situacional sofisticada.
-
----
-
-## Capacidades Chave da IA e Inovações
-
-### 1. Arquitetura de IA de Duas Etapas: O "Criador" e o "Editor"
-Para garantir respostas que são ao mesmo tempo criativas e perfeitamente formatadas, Lou utiliza uma pipeline de IA de duas etapas, separando o processo criativo do técnico:
-
-**IA Criativa (A "Atriz")**: A primeira camada, alimentada pela ficha de personagem completa, tem uma única tarefa: gerar o conteúdo da resposta de forma autêntica e alinhada à personalidade, sem se preocupar com as restrições de formato do chat.
-
-**IA de Formatação (O "Editor")**: Uma segunda IA especialista recebe o texto bruto da "Atriz". Sua única função é analisar a estrutura gramatical e o fluxo natural da resposta e dividi-la em múltiplos balões de chat curtos e cadenciados, garantindo uma experiência de diálogo perfeitamente natural e à prova de falhas.
-
-Esta arquitetura elimina a inconsistência dos modelos de linguagem, permitindo que a criatividade flua sem comprometer a robustez da formatação final.
+Inteligência artificial com personalidade customizável, projetada para diálogos naturais, interações contextuais profundas e memória a longo prazo.
 
 ---
 
-### 2. Motor de Personalidade Externalizado e "Hot-Swap"
-O "cérebro" da Lou não está fixo no código. Toda a sua identidade — desde traços psicológicos complexos, histórico de vida, medos e valores, até manias e estilo de comunicação — é definida em um único e detalhado arquivo `personality_prompt.json`.
+## Funcionalidades Principais
 
-**Customização Profunda**: Permite a criação de personas radicalmente diferentes e o ajuste fino de seu comportamento em tempo real.
+### Interface de Mensagens
+- **Gerenciamento Completo:** Crie, renomeie, exclua e personalize servidores (grupos) e canais de texto com ícones customizáveis.
+- **Diálogos Intuitivos:** Todas as janelas de gerenciamento possuem um design limpo, mantendo a consistência visual.
+- **Personalização de Perfil:** Altere seu nome de usuário e foto de perfil, com as mudanças sendo refletidas instantaneamente nas novas mensagens e na interface.
 
-**Recarregamento Dinâmico**: Uma interface de edição integrada permite modificar a personalidade e recarregar o modelo da IA em tempo real, sem a necessidade de reiniciar a aplicação, ideal para testes A/B e desenvolvimento iterativo de personagens.
-
----
-
-### 3. Consciência Contextual Avançada
-Lou demonstra uma compreensão do contexto que vai além do histórico de chat, simulando uma percepção do mundo real.
-
-**Consciência Temporal Contínua**: A IA sabe a data e a hora exatas a cada interação. Isso permite que ela comente sobre o período do dia ("boa noite"), reaja a inconsistências temporais ("Ué, 'boa noite' às duas da tarde?"), e entenda o contexto de feriados ou eventos sazonais.
-
-**Percepção de Latência**: O sistema mede o tempo entre a última mensagem dela e a resposta do usuário. Se um longo período se passa (ex: 3 horas), a IA é instruída a notar a ausência e comentar sobre a demora de forma natural.
+### Chat Moderno e Contextual
+- **Timestamp e Data:** Cada mensagem exibe a hora de envio, e o histórico é visualmente separado por dia com um marcador de data.
+- **Sistema de Resposta:** Responda a mensagens específicas da IA, com um indicador visual que mostra a qual mensagem você está respondendo.
+- **Suporte a GIFs:** A IA pode enviar GIFs animados (armazenados localmente em `assets/gifs`) quando achar apropriado para se expressar.
+- **Layout Inteligente:** A largura dos balões de chat se ajusta para otimizar a leitura, e o layout de mensagens com GIFs é tratado de forma especial para não quebrar a interface.
 
 ---
 
-### 4. Sistema de Memória de Dupla Camada
-Para garantir consistência e evolução, a memória da Lou é dividida em duas categorias distintas, que são amostradas e injetadas no contexto a cada interação:
+## Comportamento da Lou
 
-**Memória de Longo Prazo (Backstory)**: Um banco de memórias curado e editável manualmente que constitui a "história de vida" e os fatos imutáveis da personagem.
+### Personalidade Profunda e Customizável
+- **Ficha de Personagem Externa:** A personalidade completa da Lou (identidade, traços, psicologia, medos, hobbies, etc.) é carregada a partir de um único arquivo `personality_prompt.json`, permitindo total customização sem alterar o código.
+- **Noção de Tempo e Espaço:** A IA sabe a data e hora atuais, permitindo interações contextuais sobre o período do dia, datas especiais e feriados.
+- **Raciocínio Transparente (Debug):** O terminal exibe uma breve explicação do "raciocínio" da IA, mostrando quais traços de personalidade ela usou para formular sua resposta.
 
-**Memória de Curto Prazo (Diário de Bordo)**: Após cada conversa, um worker de análise assíncrono cria resumos inteligentes da interação, focando em eventos, decisões e emoções. Isso cria um diário dinâmico que informa a IA sobre o que aconteceu recentemente.
-
----
-
-### 5. Interação Natural e Proativa
-A Lou foi projetada para quebrar o ciclo passivo de "pergunta e resposta".
-
-**Motor de Turno de Conversa (Debouncing)**: A IA compreende o fluxo de uma rajada de mensagens. Ela aguarda inteligentemente o usuário concluir um pensamento antes de formular uma resposta única e coesa, criando um diálogo verdadeiramente natural.
-
-**Engajamento Proativo com Autocorreção**: Se o usuário fica inativo, a Lou tenta reengajar a conversa de forma contextual. O sistema possui um validador de código que inspeciona a tentativa proativa da IA. Se a IA gerar uma frase incompleta (um "mau hábito" comum), o sistema a instrui a se autocorrigir e tentar uma nova abordagem, garantindo que a iniciativa seja sempre de alta qualidade.
-
-**Adaptação de Estilo**: Um worker de análise extrai continuamente padrões de escrita e gírias do usuário, permitindo que a Lou sutilmente adapte seu próprio vocabulário para aumentar o rapport.
+### Memória e Aprendizado Contínuo
+- **Aprendizado Unificado:** Após cada conversa, um worker (`ContextUpdateWorker`) analisa a interação e extrai simultaneamente:
+  - **Memórias Factuais:** Fatos importantes para consistência a longo prazo (`memory_bank.json`).
+  - **Padrões de Estilo:** Gírias e formas de falar do usuário para adaptação (`style_bank.json`).
+- **Interação Natural:**
+  - **Debouncing de Mensagens:** A IA aguarda você terminar de digitar múltiplas mensagens em sequência para respondê-las como um único pensamento, evitando respostas apressadas e erros.
+  - **Fala Proativa com Limites:** Se o chat ficar inativo, a Lou tentará reengajar a conversa de forma contextual. Após um número limitado de tentativas sem resposta, ela perguntará pela sua presença e depois aguardará em silêncio.
 
 ---
 
-## Interface e Estrutura Técnica
+## Estrutura Técnica
 
-**Interface Moderna**: Construída com PySide6, a interface é inspirada em aplicativos de chat modernos, incluindo gerenciamento de servidores/canais, avatares customizáveis, sistema de resposta a mensagens e exibição de GIFs animados.
+### Arquitetura Modular em Python
+- **Código Organizado:** O projeto é dividido em módulos com responsabilidades claras (`LouFE.py` para front-end, `LouBE.py` para lógica, `LouIAFE.py` para integração da IA, etc.).
+- **Interface com PySide6:** A interface gráfica é construída utilizando o framework moderno Qt for Python.
+- **Comunicação Assíncrona com a IA:** Todas as chamadas para a API Gemini são feitas em `QThread`s separadas para garantir que a interface nunca congele, mesmo durante o processamento de respostas ou a análise de contexto.
 
-**Arquitetura Modular**: O projeto é segmentado em módulos com responsabilidades claras (`LouFE.py` para UI, `LouBE.py` para lógica, `LouIAFE.py` para integração da IA, etc.), facilitando a manutenção e a escalabilidade.
-
-**Processamento Assíncrono**: Todas as chamadas para a API Gemini são feitas em QThreads, garantindo que a interface permaneça 100% responsiva, mesmo durante o processamento de respostas ou a análise de contexto em segundo plano.
+### Robustez e Tratamento de Erros
+- **Parser de Respostas Inteligente:** O sistema é resiliente a variações no formato da resposta da IA. Ele é capaz de processar JSONs perfeitos, JSONs com erros de formatação (como aspas escapadas) e até mesmo texto plano com quebras de linha, sempre extraindo as mensagens corretamente.
+- **Gerenciamento de Recursos:** GIFs são carregados e exibidos de forma otimizada para não consumir memória excessiva, e os workers de IA são criados e destruídos de forma segura para evitar `race conditions`.
 
 ---
 
-## ⚙️ Como Executar
+## Como Executar
 
-### Pré-requisitos
-- Python **3.10+**  
-- Chave de API **Google Gemini**  
+1.  **Pré-requisitos:**
+    - Python 3.10+
+    - Uma chave de API da **Google Gemini**.
 
-### Instalação
-```bash
-# Instale as dependências
-pip install PySide6 google-generativeai
-```
+2.  **Instalação:**
+    ```bash
+    # Instale as dependências
+    pip install PySide6 google-generativeai
+    ```
 
-### Configuração
-```bash
-    - Acesse as pastas `assets/avatars` e `assets/gifs` e adicione seus avatares e GIFs.
+3.  **Configuração:**
+    - Crie as pastas `assets/avatars` e `assets/gifs` e adicione seus avatares e GIFs.
+    - Crie a pasta `data` e adicione o arquivo `personality_prompt.json` com a estrutura da personalidade da Lou.
     - Insira sua chave da API da Gemini no arquivo `LouIAFE.py` na variável `API_KEY`.
-```
 
-### Execução
-```bash
+4.  **Execução:**
+    ```bash
     python LouMain.py
-```
+    ```

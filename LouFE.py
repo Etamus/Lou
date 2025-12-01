@@ -352,7 +352,7 @@ class ReplyIndicatorWidget(QFrame):
 
 class ChatMessageWidget(QFrame):
     reply_clicked = Signal(dict)
-    def __init__(self, message_data, profiles, is_grouped=False, parent=None):
+    def __init__(self, message_data, profiles, is_grouped=False, parent=None, show_reply_button=True):
         from pathlib import Path
         super().__init__(parent)
         self.setObjectName("message_widget")
@@ -450,7 +450,7 @@ class ChatMessageWidget(QFrame):
             text_content_layout.addWidget(self.message_label)
         body_layout.addLayout(text_content_layout, 0 if is_gif else 100)
         body_layout.addStretch(1)
-        if self.role == "model":
+        if self.role == "model" and show_reply_button: # Adicione a condição aqui
             self.reply_button = QPushButton("↪")
             self.reply_button.setObjectName("replyButton")
             self.reply_button.setCursor(QCursor(Qt.PointingHandCursor))
@@ -507,6 +507,12 @@ class UIMixin:
         name_layout.addWidget(self.user_panel_name); name_layout.addWidget(self.user_panel_id)
         
         # --- NOVOS BOTÕES ---
+        # Botão para o player de filme
+        self.movie_player_button = QPushButton("🎬") # Ícone de claquete
+        self.movie_player_button.setObjectName("user_settings_button")
+        self.movie_player_button.setToolTip("Abrir Sessão de Filme (LouFlix)")
+        self.movie_player_button.clicked.connect(self._open_movie_player) # Conecta ao novo método
+
         # Botão para editar personalidade
         self.edit_personality_button = QPushButton("✏️") # Ícone de lápis
         self.edit_personality_button.setObjectName("user_settings_button")
@@ -516,9 +522,12 @@ class UIMixin:
         # Botão para configurações do usuário
         settings_button = QPushButton("⚙️"); settings_button.setObjectName("user_settings_button"); settings_button.clicked.connect(self.show_user_settings_dialog)
         
-        layout.addWidget(self.user_panel_avatar); layout.addLayout(name_layout); layout.addStretch()
-        layout.addWidget(self.edit_personality_button) # Adiciona o novo botão
-        layout.addWidget(settings_button); 
+        layout.addWidget(self.user_panel_avatar)
+        layout.addLayout(name_layout)
+        layout.addStretch()
+        layout.addWidget(self.movie_player_button) # Adiciona o botão novo
+        layout.addWidget(self.edit_personality_button)
+        layout.addWidget(settings_button)
         return panel
     def create_chat_panel(self):
         panel = QFrame(); panel.setObjectName("chat_panel"); layout = QVBoxLayout(panel); layout.setContentsMargins(0,0,0,0); layout.setSpacing(0); top_bar = QFrame(); top_bar.setObjectName("chat_top_bar"); top_bar_layout = QHBoxLayout(top_bar)

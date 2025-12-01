@@ -11,6 +11,7 @@ from LouFE import UIMixin, WelcomeWidget
 from LouBE import AppLogicMixin
 from LouIAFE import AIFeaturesMixin
 from LouEditor import PersonalityEditorWindow # <-- ALTERAÇÃO AQUI
+from LouFlix import MoviePlayerWindow
 
 class LouApp(QMainWindow, AppLogicMixin, UIMixin, AIFeaturesMixin):
     def __init__(self):
@@ -51,6 +52,12 @@ class LouApp(QMainWindow, AppLogicMixin, UIMixin, AIFeaturesMixin):
         editor = PersonalityEditorWindow(self.personality_file, self)
         editor.personality_saved.connect(self._reload_personality)
         editor.exec()
+
+    # Adicione este novo método
+    def _open_movie_player(self):
+        # Passamos 'self' para que a nova janela tenha acesso ao modelo, dados, etc.
+        player_window = MoviePlayerWindow(self, self) 
+        player_window.exec() # .exec() para abrir como um diálogo modal        
 
     def _reload_personality(self):
         print("--- Personalidade alterada. Recarregando modelo da IA... ---")
