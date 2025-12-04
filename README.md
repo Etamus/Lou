@@ -1,4 +1,4 @@
-# ✨ Lou
+# Lou
 
 Inteligência artificial com personalidade customizável, projetada para diálogos naturais, interações contextuais profundas e memória a longo prazo.
 
@@ -7,7 +7,7 @@ Inteligência artificial com personalidade customizável, projetada para diálog
 ## Funcionalidades Principais
 
 ### Interface de Mensagens
-- **Gerenciamento Completo:** Crie, renomeie, exclua e personalize servidores (grupos) e canais de texto com ícones customizáveis.
+- **Gerenciamento Completo:** Crie, renomeie, exclua e personalize servidores (grupos) e chats com ícones customizáveis.
 - **Diálogos Intuitivos:** Todas as janelas de gerenciamento possuem um design limpo, mantendo a consistência visual.
 - **Personalização de Perfil:** Altere seu nome de usuário e foto de perfil, com as mudanças sendo refletidas instantaneamente nas novas mensagens e na interface.
 
@@ -70,3 +70,18 @@ Inteligência artificial com personalidade customizável, projetada para diálog
     ```bash
     python LouMain.py
     ```
+
+---
+
+## Neve Frontend (Experimento Web)
+
+Agora o protótipo em `neve-frontend/` vem com um backend HTTP próprio (puro Python + stdlib) e um lançador desktop para evitar abrir o navegador manualmente.
+
+- **Dependências extras:** `pip install PySide6 PySide6-QtWebEngine` (a aplicação principal já usa PySide6, então basta garantir o módulo WebEngine).
+- **Como executar:**
+  1. No Windows, dê duplo clique em `start_neve_frontend.bat` **ou** rode `python run_neve_frontend.py` pela raiz do projeto.
+  2. O script sobe o servidor local em `http://127.0.0.1:8765` e abre uma janela Qt com o frontend carregado.
+- **Funcionalidades atuais:** lista de servidores/canais, histórico com separadores de dia, balões de conversa, auto-ajuste do campo de digitação e respostas reais da Lou usando Gemini (endpoint `/api/ai/reply`). Perfis e servidores conseguem enviar novos avatares (PNG/JPG/GIF/WebP até 2 MB) direto do navegador — o backend salva em `assets/avatars/` e já preenche o campo automaticamente. Todas as mensagens transitam pelo backend (`neve-frontend/backend/server.py`), que persiste os dados em `data/chat_data.json`.
+- **Isolamento:** o módulo é 100% desconectado do app PySide6 original; perfeito para evoluir o design ou testar fluxos de API sem tocar no restante do projeto.
+- **Configuração da IA no Neve:** defina a variável de ambiente `GEMINI_API_KEY` (ex.: `setx GEMINI_API_KEY "sua-chave"`) **ou** abra `neve-frontend/backend/settings.py` e preencha `GEMINI_API_KEY = "..."`. Sem essa chave o endpoint `/api/ai/reply` retorna 503 e o chat exibe uma mensagem de erro.
+- **Evoluções sugeridas:** expor endpoints reais do contexto/memória, implementar ações de resposta/edição e sincronizar os mesmos assets utilizados pela interface principal.

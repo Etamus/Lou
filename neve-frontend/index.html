@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Neve • Frontend Experimental</title>
+    <base href="/neve-frontend/" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <div class="glass-backdrop" aria-hidden="true"></div>
+      <div class="neve-app" role="application">
+      <nav class="server-rail" aria-label="Servidores" data-role="server-rail"></nav>
+      <aside class="channel-panel">
+        <header class="panel-header">
+          <div>
+            <p class="panel-label">Servidor</p>
+            <p class="panel-title" data-bind="server-name">—</p>
+          </div>
+          <button class="ghost-button" data-role="server-settings" title="Configurações do servidor" type="button">
+            <i class="fas fa-gear" aria-hidden="true"></i>
+          </button>
+        </header>
+        <div class="channel-section">
+          <div class="section-header">
+            <p class="section-label">Chats</p>
+            <button class="tiny-button" data-role="create-channel" title="Criar canal" type="button">
+              <i class="fas fa-plus" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="channel-list" data-role="channel-list"></div>
+        </div>
+        <footer class="user-card">
+          <div class="avatar" data-bind="user-avatar"></div>
+          <div>
+            <p class="user-name" data-bind="user-name">Você</p>
+            <p class="user-status">Disponível</p>
+          </div>
+          <div class="user-card-actions">
+            <button class="ghost-button" data-role="personality-editor" title="Editar personalidade" type="button">
+              <i class="fas fa-book" aria-hidden="true"></i>
+            </button>
+            <button class="ghost-button" data-role="profile-settings" title="Trocar perfil" type="button">
+              <i class="fas fa-retweet" aria-hidden="true"></i>
+            </button>
+          </div>
+        </footer>
+      </aside>
+      <main class="chat-pane">
+        <header class="chat-header">
+          <div>
+            <p class="chat-title" data-bind="channel-name">—</p>
+            <p class="chat-topic" data-bind="channel-topic"></p>
+          </div>
+          <div class="chat-actions">
+            <button class="ghost-button" type="button" title="Assistir com LouFlix" data-role="louflix-toggle">
+              <i class="fas fa-clapperboard" aria-hidden="true"></i>
+            </button>
+            <button class="ghost-button" type="button" title="Memórias e estilos" data-role="context-toggle">
+              <i class="fas fa-brain" aria-hidden="true"></i>
+            </button>
+          </div>
+        </header>
+        <div class="chat-body">
+          <div class="chat-scroll" data-role="message-list" aria-live="polite"></div>
+          <div class="empty-state" data-role="empty-state">
+            <div class="empty-icon">💬</div>
+            <p class="empty-title">Nenhum canal selecionado</p>
+            <p class="empty-text">Crie ou escolha um canal para começar. Todo o histórico fica salvo no backend local.</p>
+          </div>
+        </div>
+        <div class="reply-indicator is-hidden" data-role="reply-indicator">
+          <div>
+            <p class="reply-label">Respondendo a</p>
+            <p class="reply-author" data-role="reply-author">—</p>
+          </div>
+          <p class="reply-snippet" data-role="reply-snippet"></p>
+          <button class="reply-cancel" type="button" data-role="reply-cancel" title="Cancelar resposta">
+            <i class="fas fa-xmark" aria-hidden="true"></i>
+          </button>
+        </div>
+        <form class="composer" id="message-form">
+          <button class="round-button" title="Abrir GIFs" type="button" data-role="gif-button">
+            <i class="fas fa-photo-film" aria-hidden="true"></i>
+          </button>
+          <textarea
+            id="message-input"
+            name="message"
+            placeholder="Conversar em #geral"
+            rows="1"
+            autocomplete="off"
+          ></textarea>
+          <div class="composer-actions">
+            <button class="ghost-button" title="Anexar arquivo" type="button">
+              <i class="fas fa-paperclip" aria-hidden="true"></i>
+            </button>
+            <button class="primary-button" type="submit">
+              <i class="fas fa-paper-plane" aria-hidden="true"></i>
+              <span>Enviar</span>
+            </button>
+          </div>
+        </form>
+        <footer class="chat-footer" aria-live="polite">
+          <span class="status-dot"></span>
+          <p>Neve conectado ao backend local • Porta 8765</p>
+        </footer>
+      </main>
+      </div>
+    </div>
+    <div class="personality-overlay is-hidden" data-role="personality-overlay" aria-live="polite">
+      <section class="personality-panel" data-role="personality-panel" role="dialog" aria-modal="true" aria-labelledby="personality-title">
+        <header class="personality-header">
+          <div>
+            <p class="personality-label">Personalidade</p>
+            <h2 class="personality-title" id="personality-title">Ficha da Lou</h2>
+          </div>
+          <button class="ghost-button" type="button" data-role="personality-close" title="Fechar editor">
+            <i class="fas fa-xmark" aria-hidden="true"></i>
+          </button>
+        </header>
+        <div class="personality-body">
+          <nav class="personality-sidebar" data-role="personality-category-list" aria-label="Seções da personalidade"></nav>
+          <section class="personality-content">
+            <div class="personality-fields" data-role="personality-fields"></div>
+            <div class="personality-empty" data-role="personality-empty">Selecione uma seção para editar os detalhes.</div>
+          </section>
+        </div>
+        <footer class="personality-footer">
+          <p class="personality-status" data-role="personality-status"></p>
+          <div class="personality-footer-actions">
+            <button class="lou-button" type="button" data-role="personality-cancel">Fechar</button>
+            <button class="lou-button primary" type="button" data-role="personality-save">Salvar alterações</button>
+          </div>
+        </footer>
+      </section>
+    </div>
+    <div class="context-overlay is-hidden" data-role="context-overlay" aria-live="polite">
+      <section class="context-panel" role="dialog" aria-modal="true" aria-labelledby="context-title" data-role="context-panel">
+        <header class="context-header">
+          <div>
+            <p class="context-label">Contexto</p>
+            <h2 class="context-title" id="context-title">Memórias e Estilos</h2>
+          </div>
+          <div class="context-header-actions">
+            <button class="ghost-button" type="button" data-role="context-refresh" title="Atualizar dados">
+              <i class="fas fa-rotate" aria-hidden="true"></i>
+            </button>
+            <button class="ghost-button" type="button" data-role="context-close" title="Fechar painel">
+              <i class="fas fa-xmark" aria-hidden="true"></i>
+            </button>
+          </div>
+        </header>
+        <p class="context-status" data-role="context-status"></p>
+        <div class="context-body">
+          <p class="context-readonly-note">Painel somente leitura. As memórias e estilos são sincronizados automaticamente pela Lou.</p>
+          <section class="context-section">
+            <header>
+              <h3>Memórias recentes</h3>
+              <span>Compartilhadas com o worker proativo</span>
+            </header>
+            <ul class="context-list" data-role="context-list-short"></ul>
+          </section>
+          <section class="context-section">
+            <header>
+              <h3>Memórias longas</h3>
+              <span>Fica salvo na ficha</span>
+            </header>
+            <ul class="context-list" data-role="context-list-long"></ul>
+          </section>
+          <section class="context-section">
+            <header>
+              <h3>Estilos e gírias</h3>
+              <span>Define como ela fala</span>
+            </header>
+            <ul class="context-list" data-role="context-list-style"></ul>
+          </section>
+        </div>
+        <footer class="context-footer">
+          <button class="primary-button" type="button" data-role="proactive-trigger">
+            <i class="fas fa-bolt" aria-hidden="true"></i>
+            <span>Forçar mensagem proativa</span>
+          </button>
+        </footer>
+      </section>
+    </div>
+    <div class="gif-overlay is-hidden" data-role="gif-overlay" aria-live="polite">
+      <section class="gif-panel" role="dialog" aria-modal="true" aria-labelledby="gif-title" data-role="gif-panel">
+        <header class="gif-header">
+          <div>
+            <p class="gif-label">Reações</p>
+            <h2 class="gif-title" id="gif-title">GIFs da Lou</h2>
+            <p class="gif-description">Todos os arquivos dentro de assets/gifs aparecem aqui automaticamente.</p>
+          </div>
+          <div class="gif-header-actions">
+            <label class="gif-search-field">
+              <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+              <input type="search" placeholder="Buscar por nome" data-role="gif-search" />
+            </label>
+            <button class="ghost-button" type="button" data-role="gif-upload" title="Adicionar novo GIF">
+              <i class="fas fa-upload" aria-hidden="true"></i>
+            </button>
+            <button class="ghost-button" type="button" data-role="gif-refresh" title="Recarregar lista">
+              <i class="fas fa-rotate" aria-hidden="true"></i>
+            </button>
+            <button class="ghost-button" type="button" data-role="gif-close" title="Fechar seletor">
+              <i class="fas fa-xmark" aria-hidden="true"></i>
+            </button>
+            <input class="visually-hidden" type="file" accept="image/gif" data-role="gif-file-input" />
+          </div>
+        </header>
+        <p class="gif-status" data-role="gif-status"></p>
+        <div class="gif-body">
+          <div class="gif-grid" data-role="gif-list"></div>
+        </div>
+        <footer class="gif-footer">
+        </footer>
+      </section>
+    </div>
+    <div class="louflix-overlay is-hidden" data-role="louflix-overlay" aria-live="polite">
+      <section class="louflix-panel" data-role="louflix-panel" role="dialog" aria-modal="true" aria-labelledby="louflix-title">
+        <header class="louflix-header">
+          <div class="louflix-session-info">
+            <div class="louflix-poster" data-role="louflix-poster" aria-hidden="true"></div>
+            <div>
+              <p class="louflix-label">LouFlix</p>
+              <h2 class="louflix-title" id="louflix-title" data-role="louflix-title">Sessão</h2>
+              <p class="louflix-description" data-role="louflix-description"></p>
+            </div>
+          </div>
+          <div class="louflix-header-actions">
+            <button class="ghost-button" type="button" data-role="louflix-refresh" title="Recarregar sessão">
+              <i class="fas fa-rotate" aria-hidden="true"></i>
+            </button>
+            <button class="ghost-button" type="button" data-role="louflix-close" title="Fechar LouFlix">
+              <i class="fas fa-xmark" aria-hidden="true"></i>
+            </button>
+          </div>
+        </header>
+        <p class="louflix-status" data-role="louflix-status"></p>
+        <div class="louflix-body">
+          <div class="louflix-main">
+            <div class="louflix-player-card">
+              <video class="louflix-video" data-role="louflix-video" controls playsinline preload="metadata"></video>
+              <div class="louflix-player-toolbar">
+                <div class="louflix-playback-indicator" data-role="louflix-playback-indicator">00:00:00</div>
+                <button class="lou-button" type="button" data-role="louflix-capture-time">
+                  <i class="fas fa-clock" aria-hidden="true"></i>
+                  <span>Usar tempo atual</span>
+                </button>
+              </div>
+            </div>
+            <section class="louflix-timeline">
+              <header class="louflix-section-header">
+                <div>
+                  <p class="louflix-section-label">Timeline</p>
+                  <h3>Triggers temporizados</h3>
+                </div>
+                <span class="louflix-trigger-count" data-role="louflix-trigger-count"></span>
+              </header>
+              <div class="louflix-trigger-list" data-role="louflix-trigger-list"></div>
+            </section>
+          </div>
+          <aside class="louflix-sidebar">
+            <section class="louflix-comment-editor">
+              <header class="louflix-section-header">
+                <div>
+                  <p class="louflix-section-label">Comentário</p>
+                  <h3>Registrar insight</h3>
+                </div>
+              </header>
+              <form class="louflix-comment-form" data-role="louflix-comment-form">
+                <label class="louflix-field">
+                  <span>Timestamp</span>
+                  <div class="louflix-timestamp-row">
+                    <input type="text" placeholder="00:00:00" data-role="louflix-timestamp-input" />
+                    <input type="hidden" data-role="louflix-seconds-input" />
+                    <button class="louflix-mini-button" type="button" title="Sincronizar com o player" data-role="louflix-capture-time">
+                      <i class="fas fa-bullseye" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                </label>
+                <p class="louflix-prompt-preview" data-role="louflix-prompt-preview">Selecione um trigger para preencher automaticamente.</p>
+                <label class="louflix-field">
+                  <span>Comentário</span>
+                  <textarea rows="4" placeholder="Escreva algo sobre a cena" data-role="louflix-comment-input"></textarea>
+                </label>
+                <button class="lou-button primary" type="submit" data-role="louflix-comment-submit">
+                  <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                  <span>Enviar para o backend</span>
+                </button>
+              </form>
+            </section>
+            <section class="louflix-comment-feed">
+              <header class="louflix-section-header">
+                <div>
+                  <p class="louflix-section-label">Comentários enviados</p>
+                  <h3>Histórico</h3>
+                </div>
+              </header>
+              <div class="louflix-comments-list" data-role="louflix-comments-list"></div>
+            </section>
+          </aside>
+        </div>
+      </section>
+    </div>
+    <div class="modal-root" data-role="modal-root" aria-live="polite"></div>
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>

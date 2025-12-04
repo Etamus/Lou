@@ -1,0 +1,84 @@
+{
+  "profiles": {
+    "user": {
+      "id": "user",
+      "name": "Voce",
+      "initials": "VC",
+      "avatar": "assets/avatars/user.png"
+    },
+    "model": {
+      "id": "model",
+      "name": "Lou",
+      "initials": "LO",
+      "avatar": "assets/avatars/default.png"
+    }
+  },
+  "servers": [
+    {
+      "id": "lou-studio",
+      "name": "Lou Studio",
+      "shortName": "LS",
+      "channels": [
+        {
+          "id": "geral",
+          "name": "geral",
+          "topic": "Discussao geral e status do worker",
+          "messages": [
+            {
+              "id": "m-1",
+              "authorId": "model",
+              "content": "Bem-vindo ao frontend Neve. Aqui mantemos o visual inspirado no Discord.",
+              "timestamp": "2025-12-02T13:17:00-03:00"
+            },
+            {
+              "id": "m-2",
+              "authorId": "user",
+              "content": "Interface muito limpa. Vou testar o campo de mensagens.",
+              "timestamp": "2025-12-02T13:18:11-03:00"
+            },
+            {
+              "id": "m-3",
+              "authorId": "model",
+              "content": "Pode testar a vontade. Eu registro tudo aqui na memoria local.",
+              "timestamp": "2025-12-02T13:19:42-03:00",
+              "replyTo": "m-2"
+            }
+          ]
+        },
+        {
+          "id": "louflix",
+          "name": "louflix",
+          "topic": "GIFs e playlists favoritas",
+          "messages": [
+            {
+              "id": "m-4",
+              "authorId": "model",
+              "content": "Subi novos GIFs em assets/gifs. Depois testa com o worker.",
+              "timestamp": "2025-12-01T21:15:00-03:00"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "labs",
+      "name": "Laboratorio",
+      "shortName": "LB",
+      "channels": [
+        {
+          "id": "proativas",
+          "name": "proativas",
+          "topic": "Logs do modulo proativo",
+          "messages": [
+            {
+              "id": "m-5",
+              "authorId": "model",
+              "content": "Sem permissao para falar sozinha ainda. Obrigada por me vigiar.",
+              "timestamp": "2025-11-25T18:40:00-03:00"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

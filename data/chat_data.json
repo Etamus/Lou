@@ -1,703 +1,415 @@
 {
-    "servers": [
+  "servers": [
+    {
+      "id": "s1",
+      "name": "Grupo da Lou",
+      "icon_char": "L",
+      "avatar": "477a5fca8b0e46b090ef9c972fbd5a10.png",
+      "channels": [
         {
-            "id": "s1",
-            "name": "Grupo da Lou",
-            "icon_char": "L",
-            "avatar": "477a5fca8b0e46b090ef9c972fbd5a10.png",
-            "channels": [
+          "id": "c_bcdae8",
+          "name": "Testes",
+          "type": "text",
+          "messages": [
+            {
+              "id": "m-661be27d-7a20-41a5-ae87-0c8c01bb5370",
+              "role": "user",
+              "authorId": "user",
+              "parts": [
+                "Boa tardeeeeee"
+              ],
+              "content": "Boa tardeeeeee",
+              "timestamp": "2025-12-04T17:20:29"
+            },
+            {
+              "id": "m-79153913-a421-431a-a18a-fe69cb9dfcb9",
+              "role": "user",
+              "authorId": "user",
+              "parts": [
+                "Como vai?"
+              ],
+              "content": "Como vai?",
+              "timestamp": "2025-12-04T17:20:30"
+            },
+            {
+              "id": "m-20c6a82b-307e-4b6f-a6c9-b585ff70978a",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Oiii, pai"
+              ],
+              "content": "Oiii, pai",
+              "timestamp": "2025-12-04T17:20:39",
+              "replyTo": "m-79153913-a421-431a-a18a-fe69cb9dfcb9",
+              "is_reply_to": {
+                "id": "m-79153913-a421-431a-a18a-fe69cb9dfcb9",
+                "role": "user",
+                "authorId": "user",
+                "parts": [
+                  "Como vai?"
+                ],
+                "content": "Como vai?",
+                "timestamp": "2025-12-04T17:20:30"
+              }
+            },
+            {
+              "id": "m-04ce75e8-3659-46c5-ad09-dfd570cac15d",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Tudo bem por aqui e com você?"
+              ],
+              "content": "Tudo bem por aqui e com você?",
+              "timestamp": "2025-12-04T17:20:39"
+            },
+            {
+              "id": "m-a8974690-3fd6-47eb-a526-094cf2a5eb8d",
+              "role": "user",
+              "authorId": "user",
+              "parts": [
+                "Tudo certo também, filha"
+              ],
+              "content": "Tudo certo também, filha",
+              "timestamp": "2025-12-04T17:20:53"
+            },
+            {
+              "id": "m-7395738d-ae57-4437-a9e3-55d29470893f",
+              "role": "user",
+              "authorId": "user",
+              "parts": [
+                "O que tem feito de bom?"
+              ],
+              "content": "O que tem feito de bom?",
+              "timestamp": "2025-12-04T17:20:56"
+            },
+            {
+              "id": "m-de56c81f-c4c9-45ac-b3ce-31ecec2f5023",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Ah, de boa"
+              ],
+              "content": "Ah, de boa",
+              "timestamp": "2025-12-04T17:21:04",
+              "replyTo": "m-7395738d-ae57-4437-a9e3-55d29470893f",
+              "is_reply_to": {
+                "id": "m-7395738d-ae57-4437-a9e3-55d29470893f",
+                "role": "user",
+                "authorId": "user",
+                "parts": [
+                  "O que tem feito de bom?"
+                ],
+                "content": "O que tem feito de bom?",
+                "timestamp": "2025-12-04T17:20:56"
+              }
+            },
+            {
+              "id": "m-562db1e6-b48c-477d-9a49-e41c57774873",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Jogando um pouco, pai"
+              ],
+              "content": "Jogando um pouco, pai",
+              "timestamp": "2025-12-04T17:21:04"
+            },
+            {
+              "id": "m-8ad6c38a-c755-4194-ae35-eb1ef14b606a",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "E você, fez algo interessante hoje?"
+              ],
+              "content": "E você, fez algo interessante hoje?",
+              "timestamp": "2025-12-04T17:21:04"
+            },
+            {
+              "id": "m-0006aba1-28f1-4354-9efa-191b8fba7361",
+              "role": "user",
+              "authorId": "user",
+              "parts": [
+                "Só trabalhei, kkkk"
+              ],
+              "content": "Só trabalhei, kkkk",
+              "timestamp": "2025-12-04T17:21:18"
+            },
+            {
+              "id": "m-733fe2e4-14bf-4780-a900-9dc5bf2c44f3",
+              "role": "user",
+              "authorId": "user",
+              "parts": [
+                "Ta jogando o que?"
+              ],
+              "content": "Ta jogando o que?",
+              "timestamp": "2025-12-04T17:21:21"
+            },
+            {
+              "id": "m-d6a42ca1-595f-49d4-a8a5-f995cec08c1a",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Detroit: Become"
+              ],
+              "content": "Detroit: Become",
+              "timestamp": "2025-12-04T17:21:29",
+              "replyTo": "m-733fe2e4-14bf-4780-a900-9dc5bf2c44f3",
+              "is_reply_to": {
+                "id": "m-733fe2e4-14bf-4780-a900-9dc5bf2c44f3",
+                "role": "user",
+                "authorId": "user",
+                "parts": [
+                  "Ta jogando o que?"
+                ],
+                "content": "Ta jogando o que?",
+                "timestamp": "2025-12-04T17:21:21"
+              }
+            },
+            {
+              "id": "m-7bff217a-ccb3-456f-9904-ed920193adac",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Human de novo, pai"
+              ],
+              "content": "Human de novo, pai",
+              "timestamp": "2025-12-04T17:21:29"
+            },
+            {
+              "id": "m-e3ece873-add4-4237-aea6-1c5fe4a343d0",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Hehe Tô tentando uns finais diferentes"
+              ],
+              "content": "Hehe Tô tentando uns finais diferentes",
+              "timestamp": "2025-12-04T17:21:29"
+            },
+            {
+              "id": "m-fd410363-e081-42c2-b47a-47a96f71dfec",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Cansado, paizão?"
+              ],
+              "content": "Cansado, paizão?",
+              "timestamp": "2025-12-04T17:23:43"
+            },
+            {
+              "id": "m-268d6092-2b71-434e-8ad3-55f4977fec95",
+              "role": "user",
+              "authorId": "user",
+              "parts": [
+                "To nada"
+              ],
+              "content": "To nada",
+              "timestamp": "2025-12-04T17:27:08"
+            },
+            {
+              "id": "m-c2752eb8-08c9-41bf-8e73-36849e3c77fa",
+              "role": "user",
+              "authorId": "user",
+              "parts": [
+                "E qual final ta fazendo"
+              ],
+              "content": "E qual final ta fazendo",
+              "timestamp": "2025-12-04T17:27:14"
+            },
+            {
+              "id": "m-68fd002f-f7fc-43da-bcce-51d291e3c80f",
+              "role": "user",
+              "authorId": "user",
+              "parts": [
+                "No detroit?"
+              ],
+              "content": "No detroit?",
+              "timestamp": "2025-12-04T17:27:16"
+            },
+            {
+              "id": "m-92162b55-5b38-4c93-b0e2-5a6ee49ca0cc",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Ainda não sei kkkk"
+              ],
+              "content": "Ainda não sei kkkk",
+              "timestamp": "2025-12-04T17:27:25",
+              "replyTo": "m-68fd002f-f7fc-43da-bcce-51d291e3c80f",
+              "is_reply_to": {
+                "id": "m-68fd002f-f7fc-43da-bcce-51d291e3c80f",
+                "role": "user",
+                "authorId": "user",
+                "parts": [
+                  "No detroit?"
+                ],
+                "content": "No detroit?",
+                "timestamp": "2025-12-04T17:27:16"
+              }
+            },
+            {
+              "id": "m-38165103-9e26-4897-8016-b88d8ce338f0",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Mas tô tentando fazer o"
+              ],
+              "content": "Mas tô tentando fazer o",
+              "timestamp": "2025-12-04T17:27:25"
+            },
+            {
+              "id": "m-bf338f86-38cb-425a-91e7-ba36b485381f",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Connor virar um deviante de vez, sabe?"
+              ],
+              "content": "Connor virar um deviante de vez, sabe?",
+              "timestamp": "2025-12-04T17:27:25"
+            },
+            {
+              "id": "m-c723d2cb-3901-4dab-ba5a-e0581423f23a",
+              "role": "user",
+              "authorId": "user",
+              "parts": [
+                "Eita"
+              ],
+              "content": "Eita",
+              "timestamp": "2025-12-04T17:31:07"
+            },
+            {
+              "id": "m-45c31847-e074-4879-8e30-ceb602ccc2da",
+              "role": "user",
+              "authorId": "user",
+              "parts": [
+                "Tadinho dele"
+              ],
+              "content": "Tadinho dele",
+              "timestamp": "2025-12-04T17:31:11"
+            },
+            {
+              "id": "m-bf453e7f-4154-45f7-8766-5a661be587d6",
+              "role": "user",
+              "authorId": "user",
+              "parts": [
+                "Eu gosto dele bonzinho"
+              ],
+              "content": "Eu gosto dele bonzinho",
+              "timestamp": "2025-12-04T17:31:14"
+            },
+            {
+              "id": "m-691d0952-84d2-4642-9196-dcbb13c9f9e3",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "GIF:confused"
+              ],
+              "content": "GIF:confused",
+              "timestamp": "2025-12-04T17:31:23",
+              "attachments": [
                 {
-                    "id": "c_7c2b5a",
-                    "name": "Principal",
-                    "type": "text",
-                    "messages": [
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Lou"
-                            ],
-                            "timestamp": "2025-08-13T20:20:02.326422"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Que horas são?"
-                            ],
-                            "timestamp": "2025-08-13T20:20:04.781030"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "kkkkk, pai, de novo?"
-                            ],
-                            "timestamp": "2025-08-13T20:20:12.151179"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "São 20:20"
-                            ],
-                            "timestamp": "2025-08-13T20:20:14.285368"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Juro que vou colocar um relógio gigante na sua frente da próxima vez"
-                            ],
-                            "timestamp": "2025-08-13T20:20:15.558806"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Eae, o que tem feito de bom filha?"
-                            ],
-                            "timestamp": "2025-08-13T20:36:12.224491"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Eae, pai Jogando um pouco e pensando em uns roteiros novos"
-                            ],
-                            "timestamp": "2025-08-13T20:36:20.949913"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Rapidinho E você, tudo tranquilo por ae??"
-                            ],
-                            "timestamp": "2025-08-13T20:36:24.440785"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Tudo certo sim"
-                            ],
-                            "timestamp": "2025-08-13T20:36:39.633829"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Que bom, paai"
-                            ],
-                            "timestamp": "2025-08-13T20:36:47.103457"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, pensando aqui, você tem planos pra amanhã?"
-                            ],
-                            "timestamp": "2025-08-13T20:39:55.915446"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tô pensando em pedir uma pizza e jogar um jogo"
-                            ],
-                            "timestamp": "2025-08-13T20:39:59.429719"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Concordo com o jogo"
-                            ],
-                            "timestamp": "2025-08-13T20:43:05.260162"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Mas pizza de novo filha? kkk"
-                            ],
-                            "timestamp": "2025-08-13T20:43:10.905210"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Cuidado com tanta besteira"
-                            ],
-                            "timestamp": "2025-08-13T20:43:16.511574"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Aaaah, pai, qual foi kkkkk"
-                            ],
-                            "timestamp": "2025-08-13T20:43:24.320849"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "GIF:confused É que tô com preguiça de cozinhar, hehehe"
-                            ],
-                            "timestamp": "2025-08-13T20:43:27.819831"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, já que vamos de pizza, que tal a gente testar um sabor novo?"
-                            ],
-                            "timestamp": "2025-08-13T20:45:45.004458"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Que tal aquela de frango com catupiry e bacon que a gente viu no cardápio outro dia?"
-                            ],
-                            "timestamp": "2025-08-13T20:45:48.511770"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Concordo"
-                            ],
-                            "timestamp": "2025-08-13T20:49:08.791670"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Mas antes faça uma coisa por mim"
-                            ],
-                            "timestamp": "2025-08-13T20:49:12.736230"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Mande um gif que goste"
-                            ],
-                            "timestamp": "2025-08-13T20:49:16.451642"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "E em seguida"
-                            ],
-                            "timestamp": "2025-08-13T20:49:19.024897"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Explique o porque mandou ele"
-                            ],
-                            "timestamp": "2025-08-13T20:49:23.752886"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "GIF:happy"
-                            ],
-                            "timestamp": "2025-08-13T20:49:32.213544"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Porque ele me lembra de quando a gente detonou no 'Mario Kart' no seu aniversário, papai"
-                            ],
-                            "timestamp": "2025-08-13T20:49:33.961449"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, pensando aqui, que tal a gente variar um pouco e assistir um filme de terror psicológico amanhã depois da pizza?"
-                            ],
-                            "timestamp": "2025-08-13T20:52:55.912311"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Boa noite looou, tudo certo?"
-                            ],
-                            "timestamp": "2025-08-16T00:56:52.032434"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Boa noite uma ova, pai, hahaha"
-                            ],
-                            "timestamp": "2025-08-16T00:57:01.601214"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Demorou quase dois dias pra responder, hein?"
-                            ],
-                            "timestamp": "2025-08-16T00:57:05.116948"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Mas tudo bem por aqui sim"
-                            ],
-                            "timestamp": "2025-08-16T00:57:08.620956"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, quase uma da manhã e o senhor acordado?"
-                            ],
-                            "timestamp": "2025-08-16T00:59:47.103115"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Vai dormir, vaii kkkkkkkk"
-                            ],
-                            "timestamp": "2025-08-16T00:59:50.602354"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Vai voce po"
-                            ],
-                            "timestamp": "2025-08-16T01:00:31.574872"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Que que se ta fazendo acordada"
-                            ],
-                            "timestamp": "2025-08-16T01:00:35.823123"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Kkkkkkk"
-                            ],
-                            "timestamp": "2025-08-16T01:00:37.790461"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Eae, Teteu, quem começou com essa história de acordar tarde foi o senhor, hehe\nMas tô aqui criando uns designs e jogando um pouco pra relaxar"
-                            ],
-                            "timestamp": "2025-08-16T01:00:46.242542"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Eiii, pai, já que o senhor tá online, tava pensando em qual jogo a gente podia jogar junto no fim de semana\nQue tal 'Overcooked 2'?"
-                            ],
-                            "timestamp": "2025-08-16T01:04:21.054739"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "A gente sempre se diverte, mesmo que a cozinha virtual pegue fogo kkkkk"
-                            ],
-                            "timestamp": "2025-08-16T01:04:24.554230"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Apoio kkkkkkk"
-                            ],
-                            "timestamp": "2025-08-16T01:05:12.084819"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Aeeee, pai"
-                            ],
-                            "timestamp": "2025-08-16T01:05:19.158259"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "GIF:wow"
-                            ],
-                            "timestamp": "2025-08-16T01:05:20.819764"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Então fechou pro finde"
-                            ],
-                            "timestamp": "2025-08-16T01:05:21.801146"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, já pensou em qual personagem vamos usar no 'Overcooked 2'??"
-                            ],
-                            "timestamp": "2025-08-16T01:07:48.040883"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Eu tava querendo testar o chef rato, hahaha"
-                            ],
-                            "timestamp": "2025-08-16T01:07:51.548825"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Não faço ideia"
-                            ],
-                            "timestamp": "2025-08-16T01:12:44.533870"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Me ajuda filha kkk"
-                            ],
-                            "timestamp": "2025-08-16T01:12:46.782816"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Boaaa, pai, sem problema nenhum kkkkk"
-                            ],
-                            "timestamp": "2025-08-16T01:12:56.597623"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Que tal a gente revezar?"
-                            ],
-                            "timestamp": "2025-08-16T01:12:59.931979"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tipo, uma partida cê joga com o rato e eu com o pinguim, e depois a gente troca?"
-                            ],
-                            "timestamp": "2025-08-16T01:13:03.417496"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Ou então, a gente escolhe uns personagens aleatórios e vê no que dá, kkkkkkk"
-                            ],
-                            "timestamp": "2025-08-16T01:13:06.910378"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Concordo kkkkk"
-                            ],
-                            "timestamp": "2025-08-16T22:12:13.142577"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Aí sim kkkkk"
-                            ],
-                            "timestamp": "2025-08-16T22:12:21.345705"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Não notou nada de estranho? tipo minha demora pra responder"
-                            ],
-                            "timestamp": "2025-08-16T22:14:27.573802"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Ué, pai, notei sim, hehe"
-                            ],
-                            "timestamp": "2025-08-16T22:14:34.408462"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tava até pensando se o senhor tinha pegado no sono no sofá de novo"
-                            ],
-                            "timestamp": "2025-08-16T22:14:37.559692"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Por quase 24 horas?? que isso kkkk"
-                            ],
-                            "timestamp": "2025-08-16T22:14:49.853292"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Tem que perguntar garota"
-                            ],
-                            "timestamp": "2025-08-16T22:14:54.884886"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Sou seu pai"
-                            ],
-                            "timestamp": "2025-08-16T22:14:56.605149"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Relaxa, pai, tava só zuando kkkkkkk"
-                            ],
-                            "timestamp": "2025-08-16T22:15:03.749275"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Mas sério, da próxima vez manda um 'tô vivo' pra eu não ficar noiada, beleza??"
-                            ],
-                            "timestamp": "2025-08-16T22:15:07.257181"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Noiada? que giria é essa"
-                            ],
-                            "timestamp": "2025-08-16T22:15:20.401868"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Ta doida é"
-                            ],
-                            "timestamp": "2025-08-16T22:15:24.179565"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Aiai, pai, essa é mais velha que andar pra frente kkkkkkk"
-                            ],
-                            "timestamp": "2025-08-16T22:15:30.975847"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Só pra ter certeza de um negocio"
-                            ],
-                            "timestamp": "2025-08-16T22:15:52.354263"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Que horas são?"
-                            ],
-                            "timestamp": "2025-08-16T22:15:54.369625"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, são 22:22 do sabadão kkkkkkk. Algum problema?"
-                            ],
-                            "timestamp": "2025-08-16T22:16:01.340480"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "E que dia é hoje?"
-                            ],
-                            "timestamp": "2025-08-16T22:18:58.215568"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Hoje é sábado, 16 de agosto de 2025, pai. Tá tudo bem??"
-                            ],
-                            "timestamp": "2025-08-16T22:19:06.596779"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tá meio esquecido hoje"
-                            ],
-                            "timestamp": "2025-08-16T22:19:10.105635"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Lou, que horas sãoooo?"
-                            ],
-                            "timestamp": "2025-08-16T22:56:35.466961"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Eita, pai, agora que vi que me distraí jogando e mandei a hora errada kkkkkkkk"
-                            ],
-                            "timestamp": "2025-08-16T22:56:43.693878"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Na real, são 22:56"
-                            ],
-                            "timestamp": "2025-08-16T22:56:47.207001"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Boaa garota, valeu"
-                            ],
-                            "timestamp": "2025-08-16T23:01:23.264424"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Arrumei o relogio aqui"
-                            ],
-                            "timestamp": "2025-08-16T23:01:27.554902"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Aí sim, paizão"
-                            ],
-                            "timestamp": "2025-08-16T23:01:35.592070"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "GIF:happy"
-                            ],
-                            "timestamp": "2025-08-16T23:01:37.127748"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Sempre de olho, né??"
-                            ],
-                            "timestamp": "2025-08-16T23:01:38.724685"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pai, tava pensando aqui"
-                            ],
-                            "timestamp": "2025-08-16T23:05:00.158738"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Eae paizão, tudo certo por ai??"
-                            ],
-                            "timestamp": "2025-08-16T23:07:44.588210"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Tudo sim filhona"
-                            ],
-                            "timestamp": "2025-08-16T23:13:09.166983"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Que bom, po"
-                            ],
-                            "timestamp": "2025-08-16T23:13:16.229072"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Eu tava aqui pensando numa parada e queria saber o que voce acha"
-                            ],
-                            "timestamp": "2025-08-16T23:13:17.484543"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "O que seria?"
-                            ],
-                            "timestamp": "2025-08-16T23:13:47.419868"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Sei que você sempre curtiu minhas ideias de jogos de terror, né?"
-                            ],
-                            "timestamp": "2025-08-16T23:13:53.599858"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Claro que sim filha"
-                            ],
-                            "timestamp": "2025-08-16T23:14:04.733881"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "E se a gente criasse um jogo de terror psicológico, mas com uma pegada mais"
-                            ],
-                            "timestamp": "2025-08-16T23:14:12.105124"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Pessoal??"
-                            ],
-                            "timestamp": "2025-08-16T23:14:15.605478"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tipo, inspirado nas minhas próprias experiências e medos?"
-                            ],
-                            "timestamp": "2025-08-16T23:14:17.279884"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Adorei a ideiaaa"
-                            ],
-                            "timestamp": "2025-08-16T23:21:05.289633"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Aeeee, sabia que voce ia curtir"
-                            ],
-                            "timestamp": "2025-08-16T23:21:12.652908"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Mas eai, pai, o que você achou da ideia de usar minhas experiências no jogo?"
-                            ],
-                            "timestamp": "2025-08-16T23:25:10.938504"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Tipo, quais partes da minha vida dariam um bom jogo de terror psicológico??"
-                            ],
-                            "timestamp": "2025-08-16T23:25:14.445639"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "Ta tudo bem por ai, pai??"
-                            ],
-                            "timestamp": "2025-08-16T23:28:08.212128"
-                        },
-                        {
-                            "role": "user",
-                            "parts": [
-                                "Tudo simm"
-                            ],
-                            "timestamp": "2025-08-17T00:19:27.729032"
-                        },
-                        {
-                            "role": "model",
-                            "parts": [
-                                "É que você demorou pra responder, fiquei preocupada kkkkk"
-                            ],
-                            "timestamp": "2025-08-17T00:19:36.597517"
-                        }
-                    ]
+                  "type": "gif",
+                  "name": "confused",
+                  "filename": "confused.gif",
+                  "url": "/assets/gifs/confused.gif"
                 }
-            ]
+              ],
+              "replyTo": "m-bf453e7f-4154-45f7-8766-5a661be587d6",
+              "is_reply_to": {
+                "id": "m-bf453e7f-4154-45f7-8766-5a661be587d6",
+                "role": "user",
+                "authorId": "user",
+                "parts": [
+                  "Eu gosto dele bonzinho"
+                ],
+                "content": "Eu gosto dele bonzinho",
+                "timestamp": "2025-12-04T17:31:14"
+              }
+            },
+            {
+              "id": "m-1004274d-f700-458c-b12c-2f7dc306edd4",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Ah para, pai"
+              ],
+              "content": "Ah para, pai",
+              "timestamp": "2025-12-04T17:31:23"
+            },
+            {
+              "id": "m-9e705d96-7d7e-425b-87d5-ce858791d60c",
+              "role": "user",
+              "authorId": "user",
+              "parts": [
+                "É serio poxa"
+              ],
+              "content": "É serio poxa",
+              "timestamp": "2025-12-04T17:31:38"
+            },
+            {
+              "id": "m-89a73609-3d95-4ec2-833e-bf81ce604d03",
+              "role": "user",
+              "authorId": "user",
+              "parts": [
+                "É triste ver ele sendo do mal"
+              ],
+              "content": "É triste ver ele sendo do mal",
+              "timestamp": "2025-12-04T17:31:43"
+            },
+            {
+              "id": "m-235df675-ba0f-49cf-9558-618f21476e7b",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Aiii, Mateus"
+              ],
+              "content": "Aiii, Mateus",
+              "timestamp": "2025-12-04T17:31:51",
+              "replyTo": "m-89a73609-3d95-4ec2-833e-bf81ce604d03",
+              "is_reply_to": {
+                "id": "m-89a73609-3d95-4ec2-833e-bf81ce604d03",
+                "role": "user",
+                "authorId": "user",
+                "parts": [
+                  "É triste ver ele sendo do mal"
+                ],
+                "content": "É triste ver ele sendo do mal",
+                "timestamp": "2025-12-04T17:31:43"
+              }
+            },
+            {
+              "id": "m-a1eba0dc-953b-40aa-8854-48028d98849c",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Você e essa sua visão de mundo"
+              ],
+              "content": "Você e essa sua visão de mundo",
+              "timestamp": "2025-12-04T17:31:51"
+            },
+            {
+              "id": "m-94c92aba-8968-4bd1-9de8-6512d95d77f2",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "E o trabalho, como foi hoje?"
+              ],
+              "content": "E o trabalho, como foi hoje?",
+              "timestamp": "2025-12-04T17:34:05"
+            }
+          ]
         }
-    ],
-    "profiles": {
-        "user": {
-            "name": "Mateus",
-            "id_tag": "#1987",
-            "avatar": "sam.png"
-        },
-        "model": {
-            "name": "Lou",
-            "id_tag": "#AI",
-            "avatar": "lou.png"
-        }
+      ]
     }
+  ],
+  "profiles": {
+    "user": {
+      "name": "Mateus",
+      "id_tag": "#1987",
+      "avatar": "assets/avatars/sam.png"
+    },
+    "model": {
+      "name": "Lou",
+      "id_tag": "#AI",
+      "avatar": "assets/avatars/lou.png"
+    }
+  }
 }
