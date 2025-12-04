@@ -39,7 +39,6 @@ const elements = {
   contextOverlay: document.querySelector("[data-role=context-overlay]"),
   contextPanel: document.querySelector("[data-role=context-panel]"),
   contextClose: document.querySelector("[data-role=context-close]"),
-  contextRefresh: document.querySelector("[data-role=context-refresh]"),
   contextStatus: document.querySelector("[data-role=context-status]"),
   contextListShort: document.querySelector("[data-role=context-list-short]"),
   contextListLong: document.querySelector("[data-role=context-list-long]"),
@@ -49,7 +48,6 @@ const elements = {
   gifOverlay: document.querySelector("[data-role=gif-overlay]"),
   gifPanel: document.querySelector("[data-role=gif-panel]"),
   gifClose: document.querySelector("[data-role=gif-close]"),
-  gifRefresh: document.querySelector("[data-role=gif-refresh]"),
   gifUpload: document.querySelector("[data-role=gif-upload]"),
   gifStatus: document.querySelector("[data-role=gif-status]"),
   gifList: document.querySelector("[data-role=gif-list]"),
@@ -152,6 +150,20 @@ const louReplyState = {
 const LOU_TYPING_INITIAL_DELAY = { min: 900, max: 2000 };
 const LOU_TYPING_BURST_DELAY = { min: 1100, max: 2200 };
 const LOU_TYPING_BETWEEN_DELAY = { min: 350, max: 900 };
+
+function syncOverlayPresence() {
+  const overlays = [
+    elements.contextOverlay,
+    elements.gifOverlay,
+    elements.louflixOverlay,
+    elements.personalityOverlay,
+  ];
+  const hasVisibleOverlay =
+    overlays.some((node) => node && !node.classList.contains("is-hidden")) || Boolean(modalState.node);
+  if (document.body) {
+    document.body.classList.toggle("has-overlay", hasVisibleOverlay);
+  }
+}
 
 function setBinding(bindingNodes, value) {
   bindingNodes.forEach((node) => {
@@ -746,12 +758,18 @@ function autoResizeTextarea() {
   const textarea = elements.messageInput;
   if (!textarea) return;
   if (!textarea.dataset.baseHeight) {
-    textarea.dataset.baseHeight = String(textarea.clientHeight || 32);
+    textarea.dataset.baseHeight = String(textarea.clientHeight || 46);
   }
-  const baseHeight = Number(textarea.dataset.baseHeight) || 32;
+  const baseHeight = Number(textarea.dataset.baseHeight) || 46;
+  const maxHeight = 120;
   textarea.style.height = "auto";
-  const nextHeight = Math.min(Math.max(textarea.scrollHeight, baseHeight), 96);
+  const nextHeight = Math.min(Math.max(textarea.scrollHeight, baseHeight), maxHeight);
   textarea.style.height = `${nextHeight}px`;
+  if (textarea.scrollHeight > maxHeight || nextHeight >= maxHeight) {
+    textarea.classList.add("is-scrollable");
+  } else {
+    textarea.classList.remove("is-scrollable");
+  }
 }
 
 function bindEvents() {
@@ -792,7 +810,6 @@ function bindEvents() {
     }
   });
   elements.contextPanel?.addEventListener("click", (event) => event.stopPropagation());
-  elements.contextRefresh?.addEventListener("click", () => loadContextSnapshot(true));
   elements.proactiveTrigger?.addEventListener("click", () => triggerProactiveMessage({ manual: true }));
   elements.louflixToggle?.addEventListener("click", openLouflixPanel);
   elements.louflixClose?.addEventListener("click", closeLouflixPanel);
@@ -812,7 +829,6 @@ function bindEvents() {
   document.addEventListener("keydown", handleLouflixEscapeKey);
   elements.gifButton?.addEventListener("click", openGifPicker);
   elements.gifClose?.addEventListener("click", closeGifPicker);
-  elements.gifRefresh?.addEventListener("click", () => loadGifCatalog(true));
   elements.gifUpload?.addEventListener("click", handleGifUploadClick);
   elements.gifFileInput?.addEventListener("change", handleGifFileChange);
   elements.gifOverlay?.addEventListener("click", (event) => {
@@ -1368,6 +1384,7 @@ function openProfileSettingsDialog() {
 async function openPersonalityEditor() {
   if (!elements.personalityOverlay) return;
   elements.personalityOverlay.classList.remove("is-hidden");
+  syncOverlayPresence();
   if (!personalityState.data) {
     await loadPersonalityData();
     return;
@@ -1378,6 +1395,7 @@ async function openPersonalityEditor() {
 
 function closePersonalityEditor() {
   elements.personalityOverlay?.classList.add("is-hidden");
+  syncOverlayPresence();
 }
 
 async function loadPersonalityData(force = false) {
@@ -1663,6 +1681,7 @@ function openGifPicker() {
   if (!elements.gifOverlay) return;
   elements.gifOverlay.classList.remove("is-hidden");
   gifState.isOpen = true;
+  syncOverlayPresence();
   if (elements.gifSearch) {
     elements.gifSearch.value = gifState.filter;
     elements.gifSearch.focus();
@@ -1678,6 +1697,7 @@ function openGifPicker() {
 function closeGifPicker() {
   elements.gifOverlay?.classList.add("is-hidden");
   gifState.isOpen = false;
+  syncOverlayPresence();
 }
 
 async function loadGifCatalog(force = false) {
@@ -2012,6 +2032,7 @@ function openLouflixPanel() {
   if (!elements.louflixOverlay) return;
   elements.louflixOverlay.classList.remove("is-hidden");
   louflixState.isOpen = true;
+  syncOverlayPresence();
   setLouflixStatus(louflixState.session ? "Sessão carregada" : "Carregando sessão…");
   if (!louflixState.session || louflixState.session.triggers === undefined) {
     loadLouflixSession();
@@ -2023,6 +2044,7 @@ function openLouflixPanel() {
 function closeLouflixPanel() {
   elements.louflixOverlay?.classList.add("is-hidden");
   louflixState.isOpen = false;
+  syncOverlayPresence();
   if (elements.louflixVideo && typeof elements.louflixVideo.pause === "function") {
     elements.louflixVideo.pause();
   }
@@ -2311,11 +2333,13 @@ function openContextPanel() {
   } else {
     renderContextLists();
   }
+  syncOverlayPresence();
 }
 
 function closeContextPanel() {
   elements.contextOverlay?.classList.add("is-hidden");
   contextState.isOpen = false;
+  syncOverlayPresence();
 }
 
 async function loadContextSnapshot(force = false) {
@@ -2522,6 +2546,7 @@ function openDialog(template) {
     if (event.key === "Escape") closeDialog();
   };
   document.addEventListener("keydown", modalState.escHandler);
+  syncOverlayPresence();
   return backdrop;
 }
 
@@ -2534,6 +2559,7 @@ function closeDialog() {
     document.removeEventListener("keydown", modalState.escHandler);
     modalState.escHandler = null;
   }
+  syncOverlayPresence();
 }
 
 async function postJSON(url, payload, options) {

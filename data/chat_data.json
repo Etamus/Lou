@@ -394,6 +394,56 @@
               ],
               "content": "E o trabalho, como foi hoje?",
               "timestamp": "2025-12-04T17:34:05"
+            },
+            {
+              "id": "m-4187af56-6927-4ed8-970e-71ed12d5c528",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Pai, tá tudo bem por aí?"
+              ],
+              "content": "Pai, tá tudo bem por aí?",
+              "timestamp": "2025-12-04T17:40:16"
+            },
+            {
+              "id": "m-524aa0b7-3c7f-4a8f-9f23-73596df72809",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Pai, você sumiu kkkkk"
+              ],
+              "content": "Pai, você sumiu kkkkk",
+              "timestamp": "2025-12-04T17:42:20"
+            },
+            {
+              "id": "m-15077118-38cc-44f8-ace5-8ddf6e7daa6f",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Pai, você tá bem mesmo?"
+              ],
+              "content": "Pai, você tá bem mesmo?",
+              "timestamp": "2025-12-04T18:02:04"
+            },
+            {
+              "id": "m-47e8a45d-a1fc-46e3-9db3-aad9750a8a24",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Já sei, você deve estar pensando em qual final do Detroit vai fazer, né?"
+              ],
+              "content": "Já sei, você deve estar pensando em qual final do Detroit vai fazer, né?",
+              "timestamp": "2025-12-04T18:17:41"
+            },
+            {
+              "id": "m-65e99491-9551-4974-a7bc-6ff2fef4b873",
+              "role": "model",
+              "authorId": "model",
+              "parts": [
+                "Pai, se você não quiser falar do jogo, tudo bem também"
+              ],
+              "content": "Pai, se você não quiser falar do jogo, tudo bem também",
+              "timestamp": "2025-12-04T18:25:13"
             }
           ]
         }
