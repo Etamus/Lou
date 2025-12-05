@@ -5,4 +5,4 @@ using environment variables. Leave it empty to rely on the system
 environment (GEMINI_API_KEY or GOOGLE_API_KEY).
 """
 
-GEMINI_API_KEY = "AIzaSyAYA3YHftK3wnlNhZC5WyMlyqKUEV6AfiY"  # <-- Coloque sua chave da API Gemini aqui (string)
+GEMINI_API_KEY = ""  # <-- Coloque sua chave da API Gemini aqui (string)

@@ -6,11 +6,13 @@ const state = {
   activeServerId: null,
   activeChannelId: null,
   isLoading: true,
+  voiceChannels: [],
 };
 
 const elements = {
   serverRail: document.querySelector("[data-role=server-rail]"),
   channelList: document.querySelector("[data-role=channel-list]"),
+  voiceChannelList: document.querySelector("[data-role=voice-channel-list]"),
   messageList: document.querySelector("[data-role=message-list]"),
   emptyState: document.querySelector("[data-role=empty-state]"),
   channelCreateButton: document.querySelector("[data-role=create-channel]"),
@@ -25,6 +27,8 @@ const elements = {
   replyAuthor: document.querySelector("[data-role=reply-author]"),
   replySnippet: document.querySelector("[data-role=reply-snippet]"),
   replyCancel: document.querySelector("[data-role=reply-cancel]"),
+  aiAvailability: document.querySelector("[data-role=ai-availability]"),
+  aiAvailabilityLabel: document.querySelector("[data-role=ai-availability-label]"),
   personalityButton: document.querySelector("[data-role=personality-editor]"),
   personalityOverlay: document.querySelector("[data-role=personality-overlay]"),
   personalityPanel: document.querySelector("[data-role=personality-panel]"),
@@ -44,6 +48,9 @@ const elements = {
   contextListLong: document.querySelector("[data-role=context-list-long]"),
   contextListStyle: document.querySelector("[data-role=context-list-style]"),
   proactiveTrigger: document.querySelector("[data-role=proactive-trigger]"),
+  availabilityToggle: document.querySelector("[data-role=availability-toggle]"),
+  availabilityToggleLabel: document.querySelector("[data-role=availability-toggle-label]"),
+  availabilityToggleDot: document.querySelector("[data-role=availability-toggle-dot]"),
   gifButton: document.querySelector("[data-role=gif-button]"),
   gifOverlay: document.querySelector("[data-role=gif-overlay]"),
   gifPanel: document.querySelector("[data-role=gif-panel]"),
@@ -53,26 +60,20 @@ const elements = {
   gifList: document.querySelector("[data-role=gif-list]"),
   gifSearch: document.querySelector("[data-role=gif-search]"),
   gifFileInput: document.querySelector("[data-role=gif-file-input]"),
-  louflixToggle: document.querySelector("[data-role=louflix-toggle]"),
-  louflixOverlay: document.querySelector("[data-role=louflix-overlay]"),
-  louflixPanel: document.querySelector("[data-role=louflix-panel]"),
-  louflixClose: document.querySelector("[data-role=louflix-close]"),
-  louflixRefresh: document.querySelector("[data-role=louflix-refresh]"),
-  louflixStatus: document.querySelector("[data-role=louflix-status]"),
-  louflixTitle: document.querySelector("[data-role=louflix-title]"),
-  louflixDescription: document.querySelector("[data-role=louflix-description]"),
-  louflixPoster: document.querySelector("[data-role=louflix-poster]"),
-  louflixVideo: document.querySelector("[data-role=louflix-video]"),
-  louflixTriggerList: document.querySelector("[data-role=louflix-trigger-list]"),
-  louflixTriggerCount: document.querySelector("[data-role=louflix-trigger-count]"),
-  louflixPlaybackIndicator: document.querySelector("[data-role=louflix-playback-indicator]"),
-  louflixCommentForm: document.querySelector("[data-role=louflix-comment-form]"),
-  louflixTimestampInput: document.querySelector("[data-role=louflix-timestamp-input]"),
-  louflixSecondsInput: document.querySelector("[data-role=louflix-seconds-input]"),
-  louflixPromptPreview: document.querySelector("[data-role=louflix-prompt-preview]"),
-  louflixCommentInput: document.querySelector("[data-role=louflix-comment-input]"),
-  louflixCommentsList: document.querySelector("[data-role=louflix-comments-list]"),
-  louflixCommentSubmit: document.querySelector("[data-role=louflix-comment-submit]"),
+  voiceSession: document.querySelector("[data-role=voice-session]"),
+  voiceSessionStatus: document.querySelector("[data-role=voice-session-status]"),
+  voiceParticipants: document.querySelector("[data-role=voice-participants]"),
+  voiceLeave: document.querySelector("[data-role=voice-leave]"),
+  voiceShare: document.querySelector("[data-role=voice-share]"),
+  voiceShareTitle: document.querySelector("[data-role=voice-share-title]"),
+  voiceShareStatus: document.querySelector("[data-role=voice-share-status]"),
+  voiceShareVideo: document.querySelector("[data-role=voice-share-video]"),
+  voiceShareStop: document.querySelector("[data-role=voice-share-stop]"),
+  voiceShareTrigger: document.querySelector("[data-role=voice-share-trigger]"),
+  voiceShareFileInput: document.querySelector("[data-role=voice-share-file]"),
+  voiceShareToggle: document.querySelector("[data-role=voice-share-toggle]"),
+  voiceShareCollapseBanner: document.querySelector("[data-role=voice-share-collapse-banner]"),
+  voicePresenceIndicator: document.querySelector("[data-role=voice-presence-indicator]"),
 };
 
 const bindings = {
@@ -108,16 +109,338 @@ const contextState = {
   hasLoaded: false,
 };
 
-const LOUFLIX_PROMPT_PLACEHOLDER = "Selecione um trigger para preencher automaticamente.";
-
-const louflixState = {
-  session: null,
-  isLoading: false,
-  isOpen: false,
-  isSubmitting: false,
-  selectedTriggerIndex: null,
-  selectedPrompt: "",
+const voiceState = {
+  channels: [],
+  activeChannelId: null,
+  participants: [],
+  aiChannelId: null,
+  aiPresenceSource: null,
+  share: null,
+  isShareMinimized: false,
+  aiShareBackgrounded: false,
 };
+
+const voiceMediaLibrary = {
+  items: [],
+  isLoading: false,
+  lastLoadedAt: 0,
+  promise: null,
+};
+
+const voicePlaybackState = {
+  unmuteTimerId: null,
+  resumeOnInteractHandler: null,
+  pendingPlayPromise: null,
+  audioContext: null,
+  isUnlocked: false,
+  readyHandler: null,
+  readyErrorHandler: null,
+  unlockListenersAttached: false,
+};
+
+const voiceIntentState = {
+  pending: [],
+};
+
+const VOICE_ACTION_DELAY_MS = 3000;
+const AI_AUTO_LEAVE_DELAY_MS = 45000;
+
+const voiceTimers = {
+  aiAutoLeaveTimeoutId: null,
+};
+
+let channelLimitMeasureFrame = null;
+
+const VOICE_JOIN_PATTERNS = [
+  /(lou\s*)?(entra|cola|vem|participa|aparece|conecta)\s+(?:pro|pra|para|no|na)\s+(?:chat\s+de\s+)?(?:voz|call|canal)/i,
+  /(entra|cola|vem)\s+(?:no|na|pro|pra)\s+(?:chat\s+de\s+)?voz/i,
+  /(entra|vai)\s+(?:sozinha|sozinho|primeiro).*(voz|call|canal)/i,
+  /(preciso|quero|manda|chama).*(lou|ela).*(voz|call|canal)/i,
+];
+
+const VOICE_SHARE_PATTERNS = [
+  /(bora|vamos|vamo)\s+(ver|assistir)/i,
+  /(coloca|bota|poe|manda|roda|solta|passa).*(video|filme|transmissao|algo)/i,
+  /(transmite|transmitir|compartilha|compartilhar|streama|stream|inicia).*(video|filme|tela|transmissao|algo)?/i,
+  /(quero|preciso).*(assistir|ver).*(video|filme)/i,
+  /(trasmit|trasmite|trasmitir|trasmissao|trasmisao)/i,
+];
+
+const VOICE_CHANNEL_TERMS = [
+  "voz",
+  "call",
+  "chamada",
+  "chamadao",
+  "canal",
+  "canal de voz",
+  "vc",
+  "voice",
+  "sala",
+  "ligacao",
+  "conferencia",
+  "audio",
+  "cal",
+  "chamada de voz",
+];
+
+const VOICE_JOIN_VERBS = [
+  "entra",
+  "chega",
+  "cola",
+  "vem",
+  "participa",
+  "aparece",
+  "comparece",
+  "brota",
+  "pull",
+  "join",
+  "conecta",
+  "sobe",
+  "desce",
+  "encosta",
+  "parece",
+  "invade",
+];
+
+const VOICE_SUMMON_TERMS = ["lou", "louzinha", "assistente", "sua ia", "minha ia", "iai" , "a ia"];
+
+const VOICE_SHARE_VERBS = [
+  "transmit",
+  "transmi",
+  "compartilh",
+  "stream",
+  "passa",
+  "coloca",
+  "bota",
+  "mostra",
+  "apresenta",
+  "solta",
+  "manda",
+  "exibe",
+  "projeta",
+  "reproduz",
+  "roda",
+  "abre",
+  "liga",
+  "starta",
+  "inicia",
+  "dropa",
+  "trasmit",
+  "trasmite",
+  "trasmiss",
+];
+
+const VOICE_MEDIA_TERMS = [
+  "video",
+  "filme",
+  "tela",
+  "live",
+  "serie",
+  "clipe",
+  "musica",
+  "musica",
+  "conteudo",
+  "programa",
+  "algo",
+  "coisa",
+  "clip",
+  "episodio",
+  "trailer",
+  "epis",
+];
+
+const VOICE_TITLE_SECTION_MARKER = "§§VOICE_SECTION§§";
+const VOICE_TITLE_LOWERCASE_WORDS = new Set([
+  "da",
+  "de",
+  "do",
+  "das",
+  "dos",
+  "vs",
+  "vs.",
+  "x",
+  "e",
+  "and",
+  "of",
+  "the",
+]);
+
+const MAX_TEXT_CHANNELS = 8;
+
+const VOICE_UI_TONES = {
+  connect: { frequency: 660, duration: 0.18, volume: 0.14, wave: "triangle" },
+  disconnect: { frequency: 420, duration: 0.2, volume: 0.12, wave: "sine" },
+  share: { frequency: 520, duration: 0.22, volume: 0.16, wave: "sawtooth" },
+};
+
+const VOICE_TITLE_ACRONYM_WORDS = new Set(["AI", "IA", "VR", "HDR", "DLSS"]);
+
+const PERSONALITY_LABEL_OVERRIDES = {
+  IdentificacaoGeral: "Identificação Geral",
+  AparenciaFisicaEstilo: "Aparência Física e Estilo",
+  TraitsPersonalidade: "Traços de Personalidade",
+  PsicologiaProfunda: "Psicologia Profunda",
+  InteligenciaProcessamentoCognitivo: "Perfil Cognitivo",
+  ComportamentoSocial: "Comportamento Social",
+  Comunicacao: "Comunicação",
+  ValoresEMoral: "Valores e Crenças",
+  EstiloDeVida: "Rotina Psicossocial",
+  RelacoesEAfetos: "Relações e Afeto",
+  EmocoesEReacoes: "Perfil Emocional",
+  HistoricoEExperiencias: "Experiências de Desenvolvimento",
+  ObjetivosEProjecaoFutura: "Projeção de Vida",
+  "FamiliaELaçosFamiliares": "Estrutura Familiar",
+  Alimentacao: "Alimentação",
+  Altura: "Altura",
+  Apelidos: "Apelidos",
+  ApelidosPai: "Apelidos do Pai",
+  AssuntosQueEvitam: "Assuntos que Evitam",
+  AtencaoFoco: "Atenção e Foco",
+  Autoconfianca: "Autoconfiança",
+  CapacidadeMemorizacao: "Capacidade de Memorização",
+  CapacidadeNegociar: "Capacidade de Negociar",
+  CausaOuIdeal: "Causa ou Ideal",
+  ClasseSocialPercebida: "Classe Social Percebida",
+  ComQuemMora: "Com quem Mora",
+  ComoDesejaSerLembrado: "Como Deseja Ser Lembrada",
+  ComposicaoFamiliarAtual: "Composição Familiar Atual",
+  ConfiancaEmPessoas: "Confiança em Pessoas",
+  ControleEmocional: "Controle Emocional",
+  CorOlhos: "Cor dos Olhos",
+  CorTipoCabelo: "Cor e Tipo de Cabelo",
+  CostumesFamiliaresMantidos: "Costumes Familiares Mantidos",
+  "CrençasCentraisSobreSiMesmo": "Crenças Centrais sobre Si Mesma",
+  "CrençasSobreOMundo": "Crenças sobre o Mundo",
+  "CrençasSobreOutrasPessoas": "Crenças sobre Outras Pessoas",
+  DataNascimento: "Data de Nascimento",
+  DefeitosPrincipais: "Defeitos Principais",
+  DesejosMaisProfundos: "Desejos Mais Profundos",
+  EmocaoMaisFrequente: "Emoção Mais Frequente",
+  EstiloVestimenta: "Estilo de Vestimenta",
+  EstrategiasDeEnfrentamento: "Estratégias de Enfrentamento",
+  EventosFamiliaresMarcantesNegativos: "Eventos Familiares Marcantes (Negativos)",
+  EventosFamiliaresMarcantesPositivos: "Eventos Familiares Marcantes (Positivos)",
+  EventosMarcantesAdolescencia: "Eventos Marcantes da Adolescência",
+  EventosMarcantesInfancia: "Eventos Marcantes da Infância",
+  EventosMarcantesVidaAdulta: "Eventos Marcantes da Vida Adulta",
+  ExpectativasFamiliares: "Expectativas Familiares",
+  ExpectativasRelacionamentos: "Expectativas em Relacionamentos",
+  Expressividade: "Expressividade",
+  ExpressoesFaciaisComuns: "Expressões Faciais Comuns",
+  FlexibilidadeMental: "Flexibilidade Mental",
+  FormaDeAprenderMelhor: "Forma de Aprender Melhor",
+  FormaDeContarHistorias: "Forma de Contar Histórias",
+  FormaDeSeExpressarMelhor: "Forma de se Expressar Melhor",
+  FormaDemonstrarAfeto: "Forma de Demonstrar Afeto",
+  FormaLidarConflitos: "Forma de Lidar com Conflitos",
+  FormaLidarTerminoAfastamento: "Forma de Lidar com Términos/Afastamentos",
+  FormaSeApresentarEstranhos: "Como se Apresenta a Estranhos",
+  FormasDeSeAcalmar: "Formas de se Acalmar",
+  GatilhosEmocionais: "Gatilhos Emocionais",
+  Genero: "Gênero",
+  GestosCaracteristicos: "Gestos Característicos",
+  HabilidadesAnaliticas: "Habilidades Analíticas",
+  HerancaCulturalTradicoesFamiliares: "Herança Cultural e Tradições Familiares",
+  HigienePessoal: "Higiene Pessoal",
+  HistoriasNarrativasFamiliaresImportantes: "Histórias Familiares Importantes",
+  HistoricoAmizadesAmoresImportantes: "Histórico de Amizades e Amores Importantes",
+  HobbiesPassatempos: "Hobbies e Passatempos",
+  HorarioMaiorEnergia: "Horário de Maior Energia",
+  IdadeReal: "Idade Real",
+  InfluenciasFamiliaresNasEscolhas: "Influências Familiares nas Escolhas",
+  Insegurancas: "Inseguranças",
+  InteressesCulinarios: "Interesses Culinários",
+  LimitesPessoais: "Limites Pessoais",
+  LinguagemCorporalPredominante: "Linguagem Corporal Predominante",
+  LocalNascimento: "Local de Nascimento",
+  LocalResidenciaAtual: "Local de Residência Atual",
+  MarcasCicatrizes: "Marcas e Cicatrizes",
+  MecanismosDeDefesa: "Mecanismos de Defesa",
+  MedosFuturo: "Medos em Relação ao Futuro",
+  MedosPrincipais: "Medos Principais",
+  MetasCurtoPrazo: "Metas de Curto Prazo",
+  MetasLongoPrazo: "Metas de Longo Prazo",
+  MomentosMudaramFormaDePensar: "Momentos que Mudaram sua Forma de Pensar",
+  Nacionalidade: "Nacionalidade",
+  NecessidadeAprovacao: "Necessidade de Aprovação",
+  NivelAtividadeFisica: "Nível de Atividade Física",
+  NivelCiumes: "Nível de Ciúmes",
+  NivelCuriosidade: "Nível de Curiosidade",
+  NivelEmpatia: "Nível de Empatia",
+  NivelExtroversaoIntroversao: "Nível de Extroversão/Introversão",
+  NivelImpulsividade: "Nível de Impulsividade",
+  NivelOtimismoPessimismo: "Nível de Otimismo/Pessimismo",
+  NivelReligiosidadeEspiritualidade: "Nível de Religiosidade/Espiritualidade",
+  NivelSinceridadeDiplomacia: "Nível de Sinceridade/Diplomacia",
+  NivelSociabilidade: "Nível de Sociabilidade",
+  NomeCompleto: "Nome Completo",
+  NomeCompletoPai: "Nome Completo do Pai",
+  ObjetivosDeVida: "Objetivos de Vida",
+  Ocupacao: "Ocupação",
+  PadroesDePensamentoRecorrentes: "Padrões de Pensamento Recorrentes",
+  PapelComunEmGrupos: "Papel Comum em Grupos",
+  PapelNaFamilia: "Papel na Família",
+  Peso: "Peso",
+  PlanosParaSuperar: "Planos para Superar",
+  PosicionamentoPolitico: "Posicionamento Político",
+  PosturaAndar: "Postura e Maneira de Andar",
+  PreferenciaTrabalhoGrupoOuSozinho: "Preferência por Trabalho em Grupo ou Sozinha",
+  PreferenciasDeLazer: "Preferências de Lazer",
+  PreferenciasDeLeitura: "Preferências de Leitura",
+  PreferenciasMusicais: "Preferências Musicais",
+  PresencaFigMentorasInspiradoras: "Presença de Figuras Mentoras/Inspiradoras",
+  PrincipaisConquistas: "Principais Conquistas",
+  PrincipaisPerdas: "Principais Perdas",
+  PrincipiosInegociaveis: "Princípios Inegociáveis",
+  PronomePreferido: "Pronome Preferido",
+  QualidadesPrincipais: "Qualidades Principais",
+  ReacaoAoFracasso: "Reação ao Fracasso",
+  ReacaoAoSucesso: "Reação ao Sucesso",
+  ReacaoCriticas: "Reação a Críticas",
+  ReacaoElogios: "Reação a Elogios",
+  ReacaoSobPressao: "Reação sob Pressão",
+  RegrasProprias: "Regras Próprias",
+  RelacaoComIrmaos: "Relação com Irmãos",
+  RelacaoComMae: "Relação com a Mãe",
+  RelacaoComPai: "Relação com o Pai",
+  RelacaoComTecnologia: "Relação com a Tecnologia",
+  RotinaDiaria: "Rotina Diária",
+  SensoDeHumor: "Senso de Humor",
+  SituacoesGeramAnsiedade: "Situações que Geram Ansiedade",
+  SituacoesGeramCalma: "Situações que Geram Calma",
+  TendenciaGuardarExpressarEmocoes: "Tendência a Guardar ou Expressar Emoções",
+  TipoCorpo: "Tipo de Corpo",
+  TipoInteligenciaPredominante: "Tipo de Inteligência Predominante",
+  TipoVinculoMaisValoriza: "Tipo de Vínculo que Mais Valoriza",
+  ToleranciaEstresse: "Tolerância ao Estresse",
+  TomDeVoz: "Tom de Voz",
+  TomPele: "Tom de Pele",
+  TranstornosCondicoesMentais: "Transtornos ou Condições Mentais",
+  TraumasPassados: "Traumas Passados",
+  UsoDeGirias: "Uso de Gírias",
+  VelocidadeAoFalar: "Velocidade ao Falar",
+  VelocidadeRaciocinio: "Velocidade de Raciocínio",
+  ViagensExperienciasMarcantes: "Viagens e Experiências Marcantes",
+  VisaoSobreCertoErrado: "Visão sobre Certo e Errado",
+  VisaoSobreJustica: "Visão sobre Justiça",
+  Vocabulario: "Vocabulário",
+};
+
+function normalizeIntentText(text) {
+  if (!text) return "";
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[!?.,;:()/]+/g, " ")
+    .replace(/\s+/g, " ")
+    .toLowerCase()
+    .trim();
+}
+
+function containsAny(text, tokens) {
+  if (!text || !Array.isArray(tokens)) return false;
+  return tokens.some((token) => token && text.includes(token));
+}
 
 const gifState = {
   gifs: [],
@@ -130,12 +453,15 @@ const gifState = {
 };
 
 const PROACTIVE_DELAYS = [60000, 120000, 240000];
+const MAX_PROACTIVE_MESSAGES = 3;
 const proactiveState = {
   timerId: null,
   attempt: 0,
-  maxAttempts: 3,
   lastUserActivity: Date.now(),
   requestInFlight: false,
+  proactiveMessagesSent: 0,
+  absenceQuestionSent: false,
+  awaitingUserResponse: false,
 };
 const louReplyState = {
   timerId: null,
@@ -147,6 +473,37 @@ const louReplyState = {
   abortController: null,
   outputController: null,
 };
+const AVAILABILITY_STATUS_META = {
+  available: {
+    label: "Disponível",
+    toggleLabel: "Mudar para Ausente",
+    cycleRange: { min: 60000, max: 600000 },
+    responseLag: { min: 0, max: 1200 },
+    typingLag: { min: 0, max: 600 },
+  },
+  away: {
+    label: "Ausente",
+    toggleLabel: "Mudar para Disponível",
+    cycleRange: { min: 120000, max: 600000 },
+    responseLag: { min: 3500, max: 7000 },
+    typingLag: { min: 1500, max: 3200 },
+  },
+};
+const AVAILABILITY_SHORT_CYCLE_RANGE = { min: 30000, max: 60000 };
+const AVAILABILITY_SHORT_CYCLE_EXPIRY_MS = 10 * 60 * 1000;
+const MANUAL_AWAY_DURATION_MS = { min: 120000, max: 600000 };
+const AVAILABILITY_RETURN_COOLDOWN_MS = 5000;
+const availabilityState = {
+  status: "available",
+  timerId: null,
+  manualDowntimeTimerId: null,
+  isManualDowntimeActive: false,
+  pendingLouReply: null,
+  cooldownUntil: 0,
+  pendingShortCycle: false,
+  lastUserMessageAt: 0,
+  returnFromAwayTimerId: null,
+};
 const LOU_TYPING_INITIAL_DELAY = { min: 900, max: 2000 };
 const LOU_TYPING_BURST_DELAY = { min: 1100, max: 2200 };
 const LOU_TYPING_BETWEEN_DELAY = { min: 350, max: 900 };
@@ -155,7 +512,6 @@ function syncOverlayPresence() {
   const overlays = [
     elements.contextOverlay,
     elements.gifOverlay,
-    elements.louflixOverlay,
     elements.personalityOverlay,
   ];
   const hasVisibleOverlay =
@@ -183,42 +539,39 @@ function getActiveChannel() {
 
 function renderServers() {
   const rail = elements.serverRail;
+  if (!rail) return;
+  if (!rail) return;
   rail.innerHTML = "";
-  state.servers.forEach((server) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.textContent = server.shortName ?? server.name.slice(0, 2).toUpperCase();
-    if (server.id === state.activeServerId) button.classList.add("active");
-    button.addEventListener("click", () => {
-      if (state.activeServerId === server.id) return;
-      state.activeServerId = server.id;
-      state.activeChannelId = server.channels[0]?.id ?? null;
-      renderServers();
-      renderChannels();
-      renderChatArea();
-      refreshProactiveWatcher();
-    });
-    rail.appendChild(button);
+  const server = state.servers[0];
+  if (!server) return;
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = server.shortName ?? server.name.slice(0, 2).toUpperCase();
+  button.classList.add("active");
+  button.title = server.name;
+  button.addEventListener("click", () => {
+    if (state.activeServerId === server.id) return;
+    state.activeServerId = server.id;
+    state.activeChannelId = server.channels[0]?.id ?? null;
+    renderChannels();
+    renderChatArea();
+    refreshProactiveWatcher();
   });
-  const addButton = document.createElement("button");
-  addButton.type = "button";
-  addButton.innerHTML = '<i class="fas fa-plus" aria-hidden="true"></i>';
-  addButton.title = "Criar servidor";
-  addButton.setAttribute("aria-label", "Criar servidor");
-  addButton.addEventListener("click", handleCreateServerFlow);
-  rail.appendChild(addButton);
+  rail.appendChild(button);
 }
 
 function renderChannels() {
   const server = getActiveServer();
-  setBinding(bindings.serverName, server?.name ?? "Sem servidor");
-  if (elements.channelCreateButton) {
-    elements.channelCreateButton.disabled = !server;
-  }
+  setBinding(bindings.serverName, server?.name ?? "Grupo fixo");
 
   const list = elements.channelList;
   list.innerHTML = "";
-  if (!server) return;
+  if (!server) {
+    voiceState.channels = [];
+    renderVoiceChannels();
+    scheduleChannelLimitCheck(null);
+    return;
+  }
 
   server.channels.forEach((channel) => {
     const button = document.createElement("button");
@@ -228,7 +581,7 @@ function renderChannels() {
     if (channel.id === state.activeChannelId) button.classList.add("active");
     button.innerHTML = `
       <span class="channel-label">
-        <span class="channel-badge">#</span>
+        <span class="channel-badge">@</span>
         <span class="channel-name-text">${escapeHTML(channel.name)}</span>
       </span>
       <span class="channel-action-bar" aria-label="Ações do canal">
@@ -242,6 +595,1099 @@ function renderChannels() {
     `;
     list.appendChild(button);
   });
+
+  const voiceChannels = getVoiceChannelsForServer(server);
+  voiceState.channels = voiceChannels;
+  state.voiceChannels = voiceChannels;
+  if (voiceState.activeChannelId && !voiceChannels.some((chn) => chn.id === voiceState.activeChannelId)) {
+    leaveVoiceChannel({ silent: true });
+  }
+  renderVoiceChannels();
+  renderVoicePresenceIndicator();
+  syncVoiceControls();
+  scheduleAiAutoLeaveIfNeeded();
+  scheduleChannelLimitCheck(server);
+}
+
+function getVoiceChannelsForServer(server) {
+  if (!server) return [];
+  const firstChannel = Array.isArray(server.voice_channels) ? server.voice_channels[0] : null;
+  const baseId = firstChannel?.id || `${server.id || "voice"}_chat`;
+  return [{ id: baseId, name: "Chat de Voz" }];
+}
+
+function renderVoiceChannels() {
+  if (!elements.voiceChannelList) return;
+  elements.voiceChannelList.innerHTML = "";
+  const channels = voiceState.channels ?? [];
+  if (!channels.length) {
+    const placeholder = document.createElement("p");
+    placeholder.className = "voice-channel-status";
+    placeholder.textContent = "Nenhum chat de voz disponível.";
+    elements.voiceChannelList.appendChild(placeholder);
+    return;
+  }
+  channels.forEach((channel) => {
+    const isActive = channel.id === voiceState.activeChannelId;
+    const aiInChannel = channel.id === voiceState.aiChannelId;
+    const isAiStreaming = Boolean(
+      aiInChannel && voiceState.share && voiceState.share.owner === "ai" && voiceState.share.channelId === channel.id
+    );
+    const statusLabel = isActive ? "Conectado" : "Entrar";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "voice-channel";
+    if (isActive) button.classList.add("is-active");
+    button.classList.toggle("has-ai", aiInChannel);
+    button.classList.toggle("is-streaming", isAiStreaming);
+    button.dataset.voiceChannelId = channel.id;
+    button.innerHTML = `
+      <span class="voice-channel-info">
+        <i class="fas fa-volume-high" aria-hidden="true"></i>
+        <span>${escapeHTML(channel.name)}</span>
+      </span>
+      <span class="voice-channel-status">${statusLabel}</span>
+    `;
+    elements.voiceChannelList.appendChild(button);
+  });
+}
+
+function scheduleChannelLimitCheck(server) {
+  if (typeof window === "undefined" || !window.requestAnimationFrame) {
+    updateChannelCreationAvailability(server);
+    return;
+  }
+  if (channelLimitMeasureFrame) {
+    window.cancelAnimationFrame(channelLimitMeasureFrame);
+  }
+  channelLimitMeasureFrame = window.requestAnimationFrame(() => {
+    channelLimitMeasureFrame = null;
+    updateChannelCreationAvailability(server);
+  });
+}
+
+function updateChannelCreationAvailability(server) {
+  const button = elements.channelCreateButton;
+  if (!button) return;
+  if (!server) {
+    button.disabled = true;
+    button.title = "Selecione um servidor para criar canais";
+    return;
+  }
+  const list = elements.channelList;
+  if (!list) return;
+  const maxChannelsReached =
+    Array.isArray(server.channels) && server.channels.length >= MAX_TEXT_CHANNELS;
+  const ranOutOfSpace = list.scrollHeight > list.clientHeight + 2;
+  const reachedLimit = maxChannelsReached || ranOutOfSpace;
+  button.disabled = reachedLimit;
+  button.title = reachedLimit
+    ? maxChannelsReached
+  ? `Limite de ${MAX_TEXT_CHANNELS} chats atingido. Exclua um canal para liberar espaço.`
+      : "Espaço esgotado acima do chat de voz. Exclua um canal para liberar espaço."
+    : "Criar canal";
+}
+
+function handleVoiceChannelListClick(event) {
+  if (!(event.target instanceof Element)) return;
+  const button = event.target.closest("[data-voice-channel-id]");
+  if (!button) return;
+  const channelId = button.dataset.voiceChannelId;
+  if (!channelId) return;
+  if (voiceState.activeChannelId === channelId) {
+    leaveVoiceChannel();
+  } else {
+    joinVoiceChannel(channelId);
+  }
+}
+
+function joinVoiceChannel(channelId) {
+  const channel = voiceState.channels.find((chn) => chn.id === channelId) || voiceState.channels[0];
+  if (!channel) return;
+  voiceState.activeChannelId = channel.id;
+  voiceState.participants = [createVoiceParticipantFromProfile(profiles.user, "user")];
+  if (voiceState.aiChannelId === channel.id) {
+    ensureAiInParticipants();
+  }
+  renderVoiceChannels();
+  showVoiceSession(channel);
+  renderVoiceParticipants();
+  renderVoiceShareFromState();
+  restoreBackgroundedAiShareIfNeeded();
+  renderVoicePresenceIndicator();
+  syncVoiceControls();
+  clearAiAutoLeaveTimer();
+  playVoiceUiTone("connect");
+}
+
+function showVoiceSession(channel) {
+  if (!elements.voiceSession) return;
+  elements.voiceSession.classList.remove("is-hidden");
+  if (elements.voiceSessionStatus) {
+    elements.voiceSessionStatus.textContent = "";
+  }
+}
+
+function renderVoiceParticipants() {
+  if (!elements.voiceParticipants) return;
+  elements.voiceParticipants.innerHTML = "";
+  voiceState.participants.forEach((participant) => {
+    const item = document.createElement("div");
+    item.className = "voice-participant";
+    const avatar = document.createElement("div");
+    avatar.className = "voice-participant-avatar";
+    if (participant.avatar) {
+      const img = document.createElement("img");
+      img.src = participant.avatar;
+      img.alt = `Avatar de ${participant.name}`;
+      avatar.appendChild(img);
+    } else {
+      avatar.textContent = participant.initials;
+    }
+    const textWrapper = document.createElement("div");
+    const name = document.createElement("p");
+    name.className = "voice-participant-name";
+    name.textContent = participant.name;
+    const role = document.createElement("p");
+    role.className = "voice-participant-role";
+    role.textContent = participant.roleLabel;
+    textWrapper.append(name, role);
+    item.append(avatar, textWrapper);
+    elements.voiceParticipants.appendChild(item);
+  });
+}
+
+function createVoiceParticipantFromProfile(profile, role) {
+  const fallbackName = role === "ai" ? "Lou" : "Você";
+  const name = profile?.name || fallbackName;
+  const initialsSource = profile?.initials || name.slice(0, 2);
+  const initials = initialsSource.toUpperCase();
+  return {
+    id: role,
+    name,
+    roleLabel: role === "ai" ? "IA" : "Você",
+    avatar: profile?.avatar ? normalizeAssetPath(profile.avatar) : "",
+    initials,
+  };
+}
+
+function leaveVoiceChannel({ silent = false } = {}) {
+  const wasUserStreaming = voiceState.share?.owner === "user";
+  voiceState.activeChannelId = null;
+  voiceState.participants = [];
+  if (elements.voiceSession) {
+    elements.voiceSession.classList.add("is-hidden");
+  }
+  if (!silent && elements.voiceSessionStatus) {
+    elements.voiceSessionStatus.textContent = "";
+  }
+  if (wasUserStreaming) {
+    stopVoiceShare();
+  } else if (voiceState.share?.owner === "ai") {
+    backgroundAiVoiceShare();
+  } else {
+    renderVoiceShareFromState();
+  }
+  renderVoiceChannels();
+  renderVoicePresenceIndicator();
+  syncVoiceControls();
+  scheduleAiAutoLeaveIfNeeded();
+  if (!silent) {
+    playVoiceUiTone("disconnect");
+  }
+}
+
+function syncVoiceControls() {
+  const hasChannel = Boolean(voiceState.activeChannelId);
+  const hasShare = Boolean(voiceState.share);
+  const shareMatchesActive = Boolean(
+    voiceState.share && voiceState.share.channelId === voiceState.activeChannelId
+  );
+  if (elements.voiceShareTrigger) {
+    elements.voiceShareTrigger.classList.toggle("is-hidden", !hasChannel);
+    elements.voiceShareTrigger.disabled = !hasChannel || hasShare;
+  }
+  if (elements.voiceShareStop) {
+    const shouldShowStop = hasChannel && shareMatchesActive;
+    elements.voiceShareStop.classList.toggle("is-hidden", !shouldShowStop);
+    elements.voiceShareStop.disabled = !shouldShowStop;
+  }
+}
+
+function pauseVoiceSharePlayback(removeSource = false) {
+  if (!elements.voiceShareVideo) return;
+  const videoEl = elements.voiceShareVideo;
+  videoEl.pause();
+  videoEl.currentTime = 0;
+  videoEl.muted = true;
+  videoEl.volume = 0;
+  if (videoEl.srcObject) {
+    videoEl.srcObject = null;
+  }
+  voicePlaybackState.pendingPlayPromise = null;
+  if (removeSource) {
+    videoEl.removeAttribute("src");
+    videoEl.removeAttribute("data-voice-share-src");
+    while (videoEl.firstChild) {
+      videoEl.removeChild(videoEl.firstChild);
+    }
+    videoEl.load();
+  }
+  videoEl.removeAttribute("poster");
+}
+
+function hideVoiceShare({ clearState = true } = {}) {
+  pauseVoiceSharePlayback(true);
+  if (elements.voiceShareStatus && clearState) {
+    elements.voiceShareStatus.textContent = "";
+  }
+  if (elements.voiceShare) {
+    elements.voiceShare.classList.add("is-hidden");
+  }
+  clearVoiceShareReadyListeners();
+  clearVoiceShareResumeOnInteraction();
+  if (clearState) {
+    clearVoiceShareUnmute();
+  }
+  if (clearState) {
+    if (voiceState.share?.isObjectUrl && voiceState.share?.src) {
+      try {
+        URL.revokeObjectURL(voiceState.share.src);
+      } catch (error) {
+        console.warn("Falha ao liberar URL de transmissão", error);
+      }
+    }
+    voiceState.share = null;
+    voiceState.isShareMinimized = false;
+    voiceState.aiShareBackgrounded = false;
+    renderVoicePresenceIndicator();
+    renderVoiceChannels();
+  }
+  updateVoiceShareVisibilityUi();
+  syncVoiceControls();
+}
+
+function scheduleVoiceShareUnmute() {
+  clearVoiceShareUnmute();
+  voicePlaybackState.unmuteTimerId = window.setTimeout(() => {
+    voicePlaybackState.unmuteTimerId = null;
+    if (!voiceState.share || voiceState.share.owner !== "ai") return;
+    if (!elements.voiceShareVideo) return;
+    elements.voiceShareVideo.muted = false;
+    elements.voiceShareVideo.volume = 1;
+    if (
+      elements.voiceShareStatus &&
+      voiceState.activeChannelId &&
+      voiceState.share.channelId === voiceState.activeChannelId
+    ) {
+      elements.voiceShareStatus.textContent = "Lou está transmitindo";
+    }
+  }, 600);
+}
+
+function clearVoiceShareUnmute() {
+  if (voicePlaybackState.unmuteTimerId) {
+    window.clearTimeout(voicePlaybackState.unmuteTimerId);
+    voicePlaybackState.unmuteTimerId = null;
+  }
+}
+
+function requestVoiceShareResumeOnInteraction(callback) {
+  clearVoiceShareResumeOnInteraction();
+  if (typeof callback !== "function") return;
+  const handler = () => {
+    clearVoiceShareResumeOnInteraction();
+    callback();
+  };
+  voicePlaybackState.resumeOnInteractHandler = handler;
+  document.addEventListener("pointerdown", handler, { once: true });
+  document.addEventListener("keydown", handler, { once: true });
+}
+
+function clearVoiceShareResumeOnInteraction() {
+  if (!voicePlaybackState.resumeOnInteractHandler) return;
+  document.removeEventListener("pointerdown", voicePlaybackState.resumeOnInteractHandler);
+  document.removeEventListener("keydown", voicePlaybackState.resumeOnInteractHandler);
+  voicePlaybackState.resumeOnInteractHandler = null;
+}
+
+function clearVoiceShareReadyListeners() {
+  if (!elements.voiceShareVideo) return;
+  if (voicePlaybackState.readyHandler) {
+    elements.voiceShareVideo.removeEventListener("canplay", voicePlaybackState.readyHandler);
+    voicePlaybackState.readyHandler = null;
+  }
+  if (voicePlaybackState.readyErrorHandler) {
+    elements.voiceShareVideo.removeEventListener("error", voicePlaybackState.readyErrorHandler);
+    voicePlaybackState.readyErrorHandler = null;
+  }
+
+  updateVoiceShareVisibilityUi();
+}
+
+function removeAiFromParticipants() {
+  const before = voiceState.participants.length;
+  voiceState.participants = voiceState.participants.filter((participant) => participant.id !== "ai");
+  return voiceState.participants.length !== before;
+}
+
+function clearAiAutoLeaveTimer() {
+  if (voiceTimers.aiAutoLeaveTimeoutId) {
+    window.clearTimeout(voiceTimers.aiAutoLeaveTimeoutId);
+    voiceTimers.aiAutoLeaveTimeoutId = null;
+  }
+}
+
+function scheduleAiAutoLeaveIfNeeded() {
+  clearAiAutoLeaveTimer();
+  if (!voiceState.aiChannelId) return;
+  const userInSameChannel = Boolean(
+    voiceState.activeChannelId && voiceState.activeChannelId === voiceState.aiChannelId
+  );
+  if (userInSameChannel) return;
+  voiceTimers.aiAutoLeaveTimeoutId = window.setTimeout(() => {
+    voiceTimers.aiAutoLeaveTimeoutId = null;
+    disconnectAiFromVoiceChannel({ reason: "idle" });
+  }, AI_AUTO_LEAVE_DELAY_MS);
+}
+
+function disconnectAiFromVoiceChannel({ reason = "manual" } = {}) {
+  if (!voiceState.aiChannelId) return;
+  const channelId = voiceState.aiChannelId;
+  clearAiAutoLeaveTimer();
+  const aiStreamingInChannel = Boolean(
+    voiceState.share && voiceState.share.owner === "ai" && voiceState.share.channelId === channelId
+  );
+  if (aiStreamingInChannel) {
+    stopVoiceShare();
+    clearAiAutoLeaveTimer();
+  }
+  const removed = removeAiFromParticipants();
+  clearAiPresence();
+  if (removed) {
+    renderVoiceParticipants();
+  }
+  renderVoicePresenceIndicator();
+  renderVoiceChannels();
+  if (elements.voiceSessionStatus) {
+    if (reason === "idle") {
+      elements.voiceSessionStatus.textContent = "Lou saiu do chat de voz por inatividade";
+    } else if (reason === "manual" && voiceState.activeChannelId === channelId) {
+      elements.voiceSessionStatus.textContent = "Lou saiu do chat de voz";
+    }
+  }
+}
+
+function ensureVoicePlaybackUnlock() {
+  if (voicePlaybackState.isUnlocked) return Promise.resolve();
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (typeof AudioContextClass === "function") {
+    if (!voicePlaybackState.audioContext) {
+      try {
+        voicePlaybackState.audioContext = new AudioContextClass();
+      } catch (error) {
+        console.warn("Não foi possível criar AudioContext para desbloqueio", error);
+      }
+    }
+    const context = voicePlaybackState.audioContext;
+    if (context && context.state === "suspended") {
+      return context
+        .resume()
+        .then(() => {
+          voicePlaybackState.isUnlocked = true;
+        })
+        .catch((error) => {
+          console.warn("Falha ao retomar AudioContext", error);
+          voicePlaybackState.isUnlocked = true;
+        });
+    }
+    if (context && context.state === "running") {
+      voicePlaybackState.isUnlocked = true;
+      return Promise.resolve();
+    }
+  }
+  voicePlaybackState.isUnlocked = true;
+  return Promise.resolve();
+}
+
+function setupVoicePlaybackUnlockListeners() {
+  if (voicePlaybackState.unlockListenersAttached) return;
+  const unlock = () => {
+    ensureVoicePlaybackUnlock();
+  };
+  document.addEventListener("pointerdown", unlock, { once: true });
+  document.addEventListener("keydown", unlock, { once: true });
+  voicePlaybackState.unlockListenersAttached = true;
+}
+
+function playVoiceUiTone(kind) {
+  const tone = VOICE_UI_TONES[kind];
+  if (!tone) return;
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (typeof AudioContextClass !== "function") return;
+  if (!voicePlaybackState.audioContext) {
+    try {
+      voicePlaybackState.audioContext = new AudioContextClass();
+    } catch (error) {
+      console.warn("Não foi possível inicializar AudioContext para tons de voz", error);
+      return;
+    }
+  }
+  const context = voicePlaybackState.audioContext;
+  ensureVoicePlaybackUnlock();
+  const oscillator = context.createOscillator();
+  const gainNode = context.createGain();
+  oscillator.type = tone.wave || tone.type || "sine";
+  oscillator.frequency.setValueAtTime(tone.frequency || 600, context.currentTime);
+  const now = context.currentTime;
+  const duration = Math.max(0.08, tone.duration || 0.18);
+  const peak = Math.max(0.01, tone.volume || 0.12);
+  gainNode.gain.setValueAtTime(0.0001, now);
+  gainNode.gain.exponentialRampToValueAtTime(peak, now + 0.01);
+  gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  oscillator.connect(gainNode);
+  gainNode.connect(context.destination);
+  oscillator.start(now);
+  oscillator.stop(now + duration);
+  oscillator.addEventListener("ended", () => {
+    try {
+      oscillator.disconnect();
+      gainNode.disconnect();
+    } catch (error) {
+      console.warn("Falha ao liberar nodes de áudio", error);
+    }
+  });
+}
+
+function stopVoiceShare({ userTriggered = false } = {}) {
+  if (!voiceState.share) return;
+  const shareOwner = voiceState.share.owner;
+  hideVoiceShare({ clearState: true });
+  scheduleAiAutoLeaveIfNeeded();
+  if (!elements.voiceSessionStatus || !voiceState.activeChannelId) return;
+  if (shareOwner === "ai") {
+    elements.voiceSessionStatus.textContent = userTriggered
+      ? "Transmissão da Lou encerrada"
+      : "Lou encerrou a transmissão";
+  } else {
+    elements.voiceSessionStatus.textContent = "Transmissão encerrada";
+  }
+}
+
+function connectAiToVoiceChannel(channel, { source = "auto" } = {}) {
+  if (!channel) return;
+  voiceState.aiChannelId = channel.id;
+  voiceState.aiPresenceSource = source;
+  if (voiceState.activeChannelId === channel.id) {
+    ensureAiInParticipants();
+    renderVoiceParticipants();
+  }
+  renderVoicePresenceIndicator();
+  renderVoiceChannels();
+  scheduleAiAutoLeaveIfNeeded();
+}
+
+function ensureAiInParticipants() {
+  if (voiceState.participants.some((participant) => participant.id === "ai")) return;
+  voiceState.participants.push(createVoiceParticipantFromProfile(profiles.model, "ai"));
+}
+
+function renderVoicePresenceIndicator() {
+  const indicator = elements.voicePresenceIndicator;
+  if (!indicator) return;
+  const channel = voiceState.channels.find((chn) => chn.id === voiceState.aiChannelId);
+  const shouldShow = Boolean(channel && voiceState.activeChannelId !== channel.id);
+  indicator.classList.toggle("is-hidden", !shouldShow);
+  if (shouldShow) {
+    const label = indicator.querySelector("span");
+    if (label) {
+      const isStreaming = Boolean(
+        voiceState.share &&
+          voiceState.share.owner === "ai" &&
+          voiceState.share.channelId === channel.id
+      );
+      label.textContent = isStreaming
+        ? `Lou está transmitindo em ${channel.name}`
+        : `Lou está em ${channel.name}`;
+    }
+  }
+}
+
+function clearAiPresence() {
+  voiceState.aiChannelId = null;
+  voiceState.aiPresenceSource = null;
+}
+
+function setVoiceShareState(shareConfig = {}) {
+  const previousShare = voiceState.share;
+  hideVoiceShare({ clearState: true });
+  const channelId =
+    shareConfig.channelId ||
+    voiceState.activeChannelId ||
+    voiceState.aiChannelId ||
+    voiceState.channels[0]?.id ||
+    null;
+  if (!channelId) {
+    console.warn("Nenhum canal disponível para transmitir");
+    return;
+  }
+  voiceState.share = { ...shareConfig, channelId };
+  const shareOwner = voiceState.share.owner;
+  const shareChannelId = voiceState.share.channelId;
+  const shareSrc = voiceState.share.src;
+  const shouldPlayTone =
+    !previousShare ||
+    previousShare.owner !== shareOwner ||
+    previousShare.channelId !== shareChannelId ||
+    previousShare.src !== shareSrc;
+  voiceState.isShareMinimized = false;
+  voiceState.aiShareBackgrounded = false;
+  renderVoiceShareFromState();
+  renderVoicePresenceIndicator();
+  renderVoiceChannels();
+  syncVoiceControls();
+  if (shouldPlayTone) {
+    playVoiceUiTone("share");
+  }
+}
+
+function resetVoiceShareVideoElement(videoEl) {
+  if (!videoEl) return;
+  videoEl.pause();
+  videoEl.removeAttribute("src");
+  while (videoEl.firstChild) {
+    videoEl.removeChild(videoEl.firstChild);
+  }
+  videoEl.load();
+}
+
+function inferMimeTypeFromSource(source) {
+  if (!source) return "video/mp4";
+  const lowercase = source.split("?")[0].toLowerCase();
+  if (lowercase.endsWith(".webm")) return "video/webm";
+  if (lowercase.endsWith(".ogv") || lowercase.endsWith(".ogg")) return "video/ogg";
+  if (lowercase.endsWith(".mov")) return "video/quicktime";
+  if (lowercase.endsWith(".mkv")) return "video/x-matroska";
+  if (lowercase.endsWith(".m4v")) return "video/x-m4v";
+  return "video/mp4";
+}
+
+function applyVoiceShareSources(videoEl, share) {
+  if (!videoEl || !share?.src) return;
+  const sourceNode = document.createElement("source");
+  sourceNode.src = share.src;
+  const mimeType = share.mimeType || inferMimeTypeFromSource(share.src);
+  if (mimeType) {
+    sourceNode.type = mimeType;
+  }
+  videoEl.appendChild(sourceNode);
+  videoEl.setAttribute("data-voice-share-src", share.src);
+  videoEl.load();
+}
+
+function formatVoiceShareTitle(rawTitle) {
+  if (!rawTitle) return "Transmissão";
+  const marker = VOICE_TITLE_SECTION_MARKER;
+  const withoutExt = rawTitle.replace(/\.[a-z0-9]+$/i, "");
+  const underscoreNormalized = withoutExt.replace(/_/g, " ");
+  let normalized = underscoreNormalized
+    .replace(/-[_\s]*-/g, ` ${marker} `)
+    .replace(/\s-\s/g, ` ${marker} `)
+    .replace(/-/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  if (!normalized) {
+    return "Transmissão";
+  }
+  const rawSegments = normalized.includes(marker)
+    ? normalized
+        .split(marker)
+        .map((segment) => segment.trim())
+        .filter(Boolean)
+    : [normalized];
+  const formattedSegments = rawSegments
+    .map((segment) => formatVoiceTitleSegment(segment))
+    .filter(Boolean);
+  const result = formattedSegments.join(" - ").replace(/\s{2,}/g, " ").trim();
+  return result || normalized || "Transmissão";
+}
+
+function formatVoiceTitleSegment(segment) {
+  if (!segment) return "";
+  const words = segment
+    .split(/\s+/)
+    .map((word) => word.trim())
+    .filter(Boolean);
+  const formatted = words
+    .map((word, index) => formatVoiceTitleWord(word, index))
+    .filter(Boolean)
+    .join(" ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  return formatted;
+}
+
+function formatVoiceTitleWord(word, index) {
+  if (!word) return "";
+  const stripped = word
+    .replace(/^[^0-9A-Za-zÀ-ÿçÇ]+/, "")
+    .replace(/[^0-9A-Za-zÀ-ÿçÇ.]+$/, "");
+  if (!stripped) return "";
+  if (/^\d+$/.test(stripped)) {
+    return stripped;
+  }
+  if (/^(x|vs|vs\.)$/i.test(stripped)) {
+    return "vs";
+  }
+  if (/^[ivxlcdm]+$/i.test(stripped)) {
+    return stripped.toUpperCase();
+  }
+  if (VOICE_TITLE_ACRONYM_WORDS.has(stripped.toUpperCase())) {
+    return stripped.toUpperCase();
+  }
+  const lower = stripped.toLowerCase();
+  if (VOICE_TITLE_LOWERCASE_WORDS.has(lower) && index !== 0) {
+    return lower.replace("vs.", "vs");
+  }
+  if (stripped.length <= 3 && stripped === stripped.toUpperCase()) {
+    return stripped;
+  }
+  return stripped.charAt(0).toUpperCase() + stripped.slice(1).toLowerCase();
+}
+
+function setVoiceShareMinimized(hidden) {
+  voiceState.isShareMinimized = Boolean(hidden);
+  updateVoiceShareVisibilityUi();
+}
+
+function updateVoiceShareVisibilityUi() {
+  if (!elements.voiceShare) return;
+  elements.voiceShare.classList.toggle("is-collapsed", Boolean(voiceState.isShareMinimized));
+  const toggle = elements.voiceShareToggle;
+  if (toggle) {
+    toggle.setAttribute("aria-pressed", voiceState.isShareMinimized ? "true" : "false");
+    const icon = toggle.querySelector("i");
+    const label = toggle.querySelector("span");
+    if (icon) {
+      icon.className = `fas ${voiceState.isShareMinimized ? "fa-eye" : "fa-eye-slash"}`;
+    }
+    if (label) {
+      label.textContent = voiceState.isShareMinimized ? "Mostrar" : "Ocultar";
+    }
+  }
+  if (elements.voiceShareCollapseBanner) {
+    elements.voiceShareCollapseBanner.classList.toggle("is-hidden", !voiceState.isShareMinimized);
+  }
+}
+
+function handleVoiceShareToggleClick() {
+  setVoiceShareMinimized(!voiceState.isShareMinimized);
+}
+
+function handleVoiceShareCollapseBannerClick() {
+  setVoiceShareMinimized(false);
+}
+
+function backgroundAiVoiceShare() {
+  voiceState.aiShareBackgrounded = Boolean(voiceState.share && voiceState.share.owner === "ai");
+  if (!voiceState.aiShareBackgrounded) return;
+  if (elements.voiceShareVideo) {
+    elements.voiceShareVideo.muted = true;
+    elements.voiceShareVideo.volume = 0;
+    elements.voiceShareVideo.setAttribute("muted", "muted");
+  }
+  if (elements.voiceShare) {
+    elements.voiceShare.classList.add("is-hidden");
+  }
+}
+
+function restoreBackgroundedAiShareIfNeeded() {
+  if (!voiceState.aiShareBackgrounded) return;
+  if (!voiceState.share || voiceState.share.owner !== "ai") {
+    voiceState.aiShareBackgrounded = false;
+    return;
+  }
+  const sameChannel = Boolean(
+    voiceState.activeChannelId && voiceState.share.channelId === voiceState.activeChannelId
+  );
+  if (!sameChannel) return;
+  voiceState.aiShareBackgrounded = false;
+  scheduleVoiceShareUnmute();
+}
+
+function renderVoiceShareFromState() {
+  const share = voiceState.share;
+  if (!share) {
+    hideVoiceShare({ clearState: true });
+    return;
+  }
+  if (!elements.voiceShare || !elements.voiceShareVideo) return;
+  const canDisplay = Boolean(
+    voiceState.activeChannelId && share.channelId === voiceState.activeChannelId
+  );
+  if (!canDisplay) {
+    if (share.owner === "ai") {
+      elements.voiceShare.classList.add("is-hidden");
+      return;
+    }
+    hideVoiceShare({ clearState: false });
+    return;
+  }
+  elements.voiceShare.classList.remove("is-hidden");
+  clearVoiceShareResumeOnInteraction();
+  clearVoiceShareReadyListeners();
+  if (elements.voiceShareTitle) {
+    elements.voiceShareTitle.textContent = formatVoiceShareTitle(share.title);
+  }
+  if (elements.voiceShareStatus) {
+    elements.voiceShareStatus.textContent = share.owner === "ai" ? "Lou está transmitindo" : "Você está transmitindo";
+  }
+  const videoEl = elements.voiceShareVideo;
+  const previousSrc = videoEl.getAttribute("data-voice-share-src") || videoEl.getAttribute("src") || "";
+  const needsUpdate = previousSrc !== share.src;
+  if (needsUpdate) {
+    resetVoiceShareVideoElement(videoEl);
+    applyVoiceShareSources(videoEl, share);
+    videoEl.src = share.src;
+    videoEl.currentTime = 0;
+  }
+  const shouldStartMuted = share.owner === "ai";
+  videoEl.autoplay = true;
+  videoEl.setAttribute("autoplay", "autoplay");
+  videoEl.playsInline = true;
+  videoEl.setAttribute("playsinline", "playsinline");
+  videoEl.preload = "auto";
+  videoEl.crossOrigin = "anonymous";
+  videoEl.muted = shouldStartMuted;
+  if (shouldStartMuted) {
+    videoEl.setAttribute("muted", "muted");
+  } else {
+    videoEl.removeAttribute("muted");
+  }
+  videoEl.volume = 1;
+
+  const startPlayback = () => {
+    Promise.resolve(ensureVoicePlaybackUnlock())
+      .catch(() => {})
+      .finally(() => {
+        const playPromise = videoEl.play();
+        voicePlaybackState.pendingPlayPromise = playPromise ?? null;
+        if (playPromise?.then) {
+          playPromise
+            .then(() => {
+              voicePlaybackState.pendingPlayPromise = null;
+              clearVoiceShareResumeOnInteraction();
+              if (shouldStartMuted) {
+                scheduleVoiceShareUnmute();
+              }
+            })
+            .catch((error) => {
+              voicePlaybackState.pendingPlayPromise = null;
+              if (shouldStartMuted && !videoEl.muted) {
+                videoEl.muted = true;
+                videoEl.setAttribute("muted", "muted");
+                startPlayback();
+                return;
+              }
+              console.warn("Não foi possível iniciar a transmissão automaticamente", error);
+              requestVoiceShareResumeOnInteraction(startPlayback);
+            });
+        } else if (shouldStartMuted) {
+          scheduleVoiceShareUnmute();
+        }
+      });
+  };
+
+  if (!needsUpdate && videoEl.readyState >= 2) {
+    startPlayback();
+  } else {
+    const handleReady = () => {
+      clearVoiceShareReadyListeners();
+      startPlayback();
+    };
+    const handleError = (event) => {
+      clearVoiceShareReadyListeners();
+      console.error("Falha ao preparar transmissão da Lou", event?.error || event);
+    };
+    voicePlaybackState.readyHandler = handleReady;
+    voicePlaybackState.readyErrorHandler = handleError;
+    videoEl.addEventListener("canplay", handleReady);
+    videoEl.addEventListener("error", handleError);
+    videoEl.load();
+  }
+}
+
+async function startAiVoiceShare(channel) {
+  if (!channel) return;
+  const library = await ensureVoiceMediaLibrary();
+  if (!library.length) {
+    if (elements.voiceSessionStatus && voiceState.activeChannelId === channel.id) {
+      elements.voiceSessionStatus.textContent = "Nenhum vídeo encontrado em assets/videos";
+    }
+    return;
+  }
+  const chosen = pickRandomVoiceVideo(library);
+  if (!chosen) return;
+  setVoiceShareState({
+    owner: "ai",
+    title: chosen.filename || "Transmissão surpresa",
+    src: normalizeAssetPath(chosen.path || chosen.filename),
+    isObjectUrl: false,
+    channelId: channel.id,
+    mimeType: inferMimeTypeFromSource(chosen.path || chosen.filename || ""),
+  });
+}
+
+async function requestAiTransmission({ channelId } = {}) {
+  const channel =
+    voiceState.channels.find((chn) => chn.id === channelId) ||
+    voiceState.channels.find((chn) => chn.id === voiceState.activeChannelId) ||
+    voiceState.channels[0];
+  if (!channel) return;
+  if (voiceState.aiChannelId !== channel.id) {
+    connectAiToVoiceChannel(channel, { source: "summoned" });
+  }
+  await startAiVoiceShare(channel);
+}
+
+async function ensureVoiceMediaLibrary(force = false) {
+  if (voiceMediaLibrary.items.length && !force) {
+    return voiceMediaLibrary.items;
+  }
+  if (voiceMediaLibrary.isLoading && voiceMediaLibrary.promise) {
+    await voiceMediaLibrary.promise;
+    return voiceMediaLibrary.items;
+  }
+  voiceMediaLibrary.isLoading = true;
+  voiceMediaLibrary.promise = fetchVoiceMediaLibrary();
+  try {
+    voiceMediaLibrary.items = await voiceMediaLibrary.promise;
+    voiceMediaLibrary.lastLoadedAt = Date.now();
+  } finally {
+    voiceMediaLibrary.isLoading = false;
+    voiceMediaLibrary.promise = null;
+  }
+  return voiceMediaLibrary.items;
+}
+
+async function fetchVoiceMediaLibrary() {
+  try {
+    const response = await fetch(`${API_BASE}/media/videos`);
+    if (!response.ok) throw new Error("Falha ao listar vídeos");
+    const payload = await response.json();
+    return Array.isArray(payload?.videos) ? payload.videos : [];
+  } catch (error) {
+    console.error("Erro ao carregar lista de vídeos", error);
+    return [];
+  }
+}
+
+function pickRandomVoiceVideo(items) {
+  const list = Array.isArray(items) ? items : [];
+  if (!list.length) return null;
+  const index = Math.floor(Math.random() * list.length);
+  return list[index];
+}
+
+function handleVoiceShareTriggerClick() {
+  if (!voiceState.activeChannelId) {
+    if (elements.voiceSessionStatus) {
+      elements.voiceSessionStatus.textContent = "Entre no chat de voz para iniciar uma transmissão.";
+    }
+    return;
+  }
+  if (voiceState.share) return;
+  if (!elements.voiceShareFileInput) return;
+  elements.voiceShareFileInput.value = "";
+  elements.voiceShareFileInput.click();
+}
+
+function handleVoiceShareFileChange(event) {
+  const file = event.target?.files?.[0];
+  if (!file) return;
+  startUserVoiceShare(file);
+}
+
+function startUserVoiceShare(file) {
+  if (!voiceState.activeChannelId) return;
+  const objectUrl = URL.createObjectURL(file);
+  setVoiceShareState({
+    owner: "user",
+    title: file.name || "Minha transmissão",
+    src: objectUrl,
+    isObjectUrl: true,
+    mimeType: file.type || inferMimeTypeFromSource(file.name || ""),
+    channelId: voiceState.activeChannelId,
+  });
+}
+
+function handleVoiceShareStopClick() {
+  stopVoiceShare({ userTriggered: true });
+}
+
+function analyzeVoiceIntentsFromMessage(content, context = {}) {
+  const normalized = normalizeIntentText(content);
+  if (!normalized) return;
+  if (matchesVoiceJoinIntent(normalized)) {
+    handleVoiceJoinIntent(context);
+  }
+  if (matchesVoiceShareIntent(normalized)) {
+    handleVoiceShareIntent(context);
+  }
+}
+
+function matchesVoicePattern(normalizedText, patterns) {
+  if (!normalizedText) return false;
+  return patterns.some((regex) => regex.test(normalizedText));
+}
+
+function matchesVoiceJoinIntent(text) {
+  if (matchesVoicePattern(text, VOICE_JOIN_PATTERNS)) return true;
+  const hasVoiceWord = containsAny(text, VOICE_CHANNEL_TERMS);
+  const hasJoinVerb = containsAny(text, VOICE_JOIN_VERBS);
+  const mentionsLou = containsAny(text, VOICE_SUMMON_TERMS);
+  if ((hasVoiceWord && hasJoinVerb) || (mentionsLou && hasVoiceWord) || (mentionsLou && hasJoinVerb)) {
+    return true;
+  }
+  if (text.includes("vem pra chamada") || text.includes("vem pra call")) {
+    return true;
+  }
+  return false;
+}
+
+function matchesVoiceShareIntent(text) {
+  if (matchesVoicePattern(text, VOICE_SHARE_PATTERNS)) return true;
+  const hasShareVerb = containsAny(text, VOICE_SHARE_VERBS);
+  const hasMediaTerm = containsAny(text, VOICE_MEDIA_TERMS);
+  const hasVoiceWord = containsAny(text, VOICE_CHANNEL_TERMS);
+  const mentionsLou = containsAny(text, VOICE_SUMMON_TERMS);
+  return (
+    (hasShareVerb && (hasMediaTerm || hasVoiceWord)) ||
+    (mentionsLou && hasShareVerb) ||
+    (hasShareVerb && text.includes("pra mim"))
+  );
+}
+
+function queueVoiceIntentAction(action = {}) {
+  if (!action.channelId || !action.type) return;
+  const entry = {
+    id: `voice-intent-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+    type: action.type,
+    channelId: action.channelId,
+    serverId: action.serverId ?? null,
+    originChannelId: action.originChannelId ?? null,
+    delayMs: action.delayMs ?? VOICE_ACTION_DELAY_MS,
+  };
+  voiceIntentState.pending.push(entry);
+}
+
+function flushVoiceIntentQueue(serverId, channelId) {
+  if (!channelId || !voiceIntentState.pending.length) return;
+  const actions = [];
+  voiceIntentState.pending = voiceIntentState.pending.filter((action) => {
+    const sameVoiceChannel = action.channelId === channelId;
+    const sameServer = !serverId || !action.serverId || action.serverId === serverId;
+    const sameOrigin = !action.originChannelId || action.originChannelId === channelId;
+    if ((sameVoiceChannel || sameOrigin) && sameServer) {
+      actions.push(action);
+      return false;
+    }
+    return true;
+  });
+  if (!actions.length) return;
+  processVoiceIntentActionsSequentially(actions);
+}
+
+function processVoiceIntentActionsSequentially(actions) {
+  actions.reduce((chain, action) => {
+    return chain
+      .then(() => delay(action.delayMs ?? VOICE_ACTION_DELAY_MS))
+      .then(() => executeVoiceIntentAction(action))
+      .catch((error) => {
+        console.error("Falha ao executar ação de voz", error);
+      });
+  }, Promise.resolve());
+}
+
+function executeVoiceIntentAction(action) {
+  if (!action || !action.type) return Promise.resolve();
+  if (action.type === "join") {
+    return executeVoiceJoinAction(action);
+  }
+  if (action.type === "share") {
+    return executeVoiceShareAction(action);
+  }
+  return Promise.resolve();
+}
+
+async function executeVoiceJoinAction(action) {
+  const channel = voiceState.channels.find((chn) => chn.id === action.channelId) || voiceState.channels[0];
+  if (!channel) return;
+  const alreadyInChannel = voiceState.aiChannelId === channel.id;
+  if (alreadyInChannel) {
+    if (elements.voiceSessionStatus && voiceState.activeChannelId === channel.id) {
+      elements.voiceSessionStatus.textContent = "Lou já está no chat de voz";
+    }
+    return;
+  }
+  if (elements.voiceSessionStatus && voiceState.activeChannelId === channel.id) {
+    elements.voiceSessionStatus.textContent = "Lou está entrando no chat de voz...";
+  }
+  connectAiToVoiceChannel(channel, { source: "summoned" });
+  if (elements.voiceSessionStatus && voiceState.activeChannelId === channel.id) {
+    elements.voiceSessionStatus.textContent = "Lou entrou no chat de voz";
+  }
+}
+
+async function executeVoiceShareAction(action) {
+  const channel = voiceState.channels.find((chn) => chn.id === action.channelId) || voiceState.channels[0];
+  if (!channel) return;
+  const alreadyInChannel = voiceState.aiChannelId === channel.id;
+  if (!alreadyInChannel && elements.voiceSessionStatus && voiceState.activeChannelId === channel.id) {
+    elements.voiceSessionStatus.textContent = "Lou está entrando no chat de voz...";
+  }
+  if (alreadyInChannel && elements.voiceSessionStatus && voiceState.activeChannelId === channel.id) {
+    elements.voiceSessionStatus.textContent = "Lou vai iniciar uma transmissão";
+  }
+  try {
+    await requestAiTransmission({ channelId: channel.id });
+    if (elements.voiceSessionStatus && voiceState.activeChannelId === channel.id) {
+      elements.voiceSessionStatus.textContent = "Lou iniciou uma transmissão";
+    }
+  } catch (error) {
+    console.error("Não foi possível iniciar a transmissão da Lou", error);
+    if (elements.voiceSessionStatus && voiceState.activeChannelId === channel.id) {
+      elements.voiceSessionStatus.textContent = "Falha ao iniciar transmissão da Lou";
+    }
+  }
+}
+
+function handleVoiceJoinIntent(context = {}) {
+  const channelId = voiceState.activeChannelId || voiceState.channels[0]?.id || null;
+  if (!channelId) return;
+  queueVoiceIntentAction({
+    type: "join",
+    channelId,
+    serverId: context.serverId,
+    originChannelId: context.channelId ?? state.activeChannelId,
+  });
+  if (elements.voiceSessionStatus && voiceState.activeChannelId === channelId) {
+    elements.voiceSessionStatus.textContent = "Lou vai entrar assim que responder";
+  }
+}
+
+function handleVoiceShareIntent(context = {}) {
+  const channelId = voiceState.activeChannelId || voiceState.channels[0]?.id || null;
+  if (!channelId) return;
+  queueVoiceIntentAction({
+    type: "share",
+    channelId,
+    serverId: context.serverId,
+    originChannelId: context.channelId ?? state.activeChannelId,
+  });
+  if (elements.voiceSessionStatus && voiceState.activeChannelId === channelId) {
+    elements.voiceSessionStatus.textContent = "Lou vai preparar uma transmissão";
+  }
 }
 
 function renderChatArea() {
@@ -249,9 +1695,10 @@ function renderChatArea() {
   if (!channel || channel.id !== replyState.channelId) {
     clearReplyTarget();
   }
-  setBinding(bindings.channelName, channel ? `#${channel.name}` : "Selecione um canal");
+  const channelHandle = channel ? formatChannelHandle(channel.name) : null;
+  setBinding(bindings.channelName, channel ? channelHandle : "Selecione um canal");
   setBinding(bindings.channelTopic, channel?.topic ?? "");
-  elements.messageInput.placeholder = channel ? `Conversar em #${channel.name}` : "Selecione um canal";
+  updateComposerPlaceholders(channel);
   renderMessages();
 }
 
@@ -259,6 +1706,19 @@ function escapeHTML(str) {
   const div = document.createElement("div");
   div.textContent = str;
   return div.innerHTML;
+}
+
+function formatChannelHandle(name) {
+  const cleaned = (name || "").replace(/^[@#]+/, "").trim();
+  return cleaned ? `@ ${cleaned}` : "@ canal";
+}
+
+function updateComposerPlaceholders(channel) {
+  const handle = channel ? formatChannelHandle(channel.name) : null;
+  const mainPlaceholder = channel ? `Conversar em ${handle}` : "Selecione um canal";
+  if (elements.messageInput) {
+    elements.messageInput.placeholder = mainPlaceholder;
+  }
 }
 
 function renderMessages() {
@@ -270,13 +1730,13 @@ function renderMessages() {
     return;
   }
   if (!channel) {
-    showEmptyState("Nenhum canal selecionado", "Crie ou escolha um servidor para visualizar os canais.");
+  showEmptyState("Nenhum chat selecionado", "Crie um chat para iniciar a conversa.");
     return;
   }
 
   let lastDayLabel = "";
   if (channel.messages.length === 0) {
-    showEmptyState("Histórico limpo", "Envie a primeira mensagem desse canal para iniciar o log.");
+  showEmptyState("Sem histórico", "Envie uma mensagem para iniciar a conversa.");
     return;
   }
 
@@ -303,6 +1763,207 @@ function randomBetween(min, max) {
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, Math.max(0, ms)));
+}
+
+function getAvailabilityConfig(status) {
+  return AVAILABILITY_STATUS_META[status] ?? AVAILABILITY_STATUS_META.available;
+}
+
+function initAiAvailability() {
+  setAiAvailability(availabilityState.status);
+}
+
+function setAiAvailability(nextStatus, options = {}) {
+  const normalized = AVAILABILITY_STATUS_META[nextStatus] ? nextStatus : "available";
+  const previousStatus = availabilityState.status;
+  if (!options.preserveTimer) {
+    clearAvailabilityShiftTimer();
+  }
+  clearReturnFromAwayTimer();
+  availabilityState.status = normalized;
+  if (normalized === "available" && previousStatus === "away") {
+    availabilityState.cooldownUntil = Date.now() + AVAILABILITY_RETURN_COOLDOWN_MS;
+  }
+  if (normalized === "away") {
+    availabilityState.cooldownUntil = 0;
+  }
+  updateAiAvailabilityUi();
+  if (normalized === "available") {
+    dispatchPendingLouReply();
+  }
+  if (options.skipSchedule) {
+    return;
+  }
+  scheduleAvailabilityShift();
+}
+
+function updateAiAvailabilityUi() {
+  const indicator = elements.aiAvailability;
+  const labelNode = elements.aiAvailabilityLabel;
+  const toggleLabelNode = elements.availabilityToggleLabel;
+  const toggleButton = elements.availabilityToggle;
+  const toggleDot = elements.availabilityToggleDot;
+  const config = getAvailabilityConfig(availabilityState.status);
+  if (indicator) {
+    indicator.setAttribute("data-status", availabilityState.status);
+  }
+  if (toggleButton) {
+    toggleButton.setAttribute("data-status", availabilityState.status);
+  }
+  if (toggleDot) {
+    toggleDot.setAttribute("data-status", availabilityState.status);
+  }
+  if (labelNode) {
+    labelNode.textContent = config.label;
+  }
+  if (toggleLabelNode) {
+    toggleLabelNode.textContent = config.toggleLabel;
+  }
+}
+
+function scheduleAvailabilityShift() {
+  if (typeof window === "undefined") {
+    return;
+  }
+  clearAvailabilityShiftTimer();
+  const config = getAvailabilityConfig(availabilityState.status);
+  let range = config.cycleRange || { min: 60000, max: 120000 };
+  if (availabilityState.status === "available" && availabilityState.pendingShortCycle) {
+    const hasRecentUserMessage =
+      availabilityState.lastUserMessageAt &&
+      Date.now() - availabilityState.lastUserMessageAt <= AVAILABILITY_SHORT_CYCLE_EXPIRY_MS;
+    if (hasRecentUserMessage) {
+      range = AVAILABILITY_SHORT_CYCLE_RANGE;
+    }
+    availabilityState.pendingShortCycle = false;
+  }
+  const wait = randomBetween(range.min || 60000, range.max || range.min || 120000);
+  availabilityState.timerId = window.setTimeout(() => {
+    availabilityState.timerId = null;
+    const nextStatus = availabilityState.status === "available" ? "away" : "available";
+    setAiAvailability(nextStatus);
+  }, wait);
+}
+
+function handleAvailabilityToggleClick() {
+  if (availabilityState.status === "available") {
+    beginManualDowntimeWindow();
+    return;
+  }
+  endManualDowntimeWindow();
+}
+
+function clearAvailabilityShiftTimer() {
+  if (typeof window === "undefined") {
+    availabilityState.timerId = null;
+    return;
+  }
+  if (availabilityState.timerId) {
+    window.clearTimeout(availabilityState.timerId);
+    availabilityState.timerId = null;
+  }
+}
+
+function clearReturnFromAwayTimer() {
+  if (typeof window === "undefined") {
+    availabilityState.returnFromAwayTimerId = null;
+    return;
+  }
+  if (availabilityState.returnFromAwayTimerId) {
+    window.clearTimeout(availabilityState.returnFromAwayTimerId);
+    availabilityState.returnFromAwayTimerId = null;
+  }
+}
+
+function scheduleReturnToAvailableAfterUserMessage() {
+  if (typeof window === "undefined") {
+    return;
+  }
+  clearReturnFromAwayTimer();
+  const wait = randomBetween(
+    AVAILABILITY_SHORT_CYCLE_RANGE.min,
+    AVAILABILITY_SHORT_CYCLE_RANGE.max
+  );
+  availabilityState.returnFromAwayTimerId = window.setTimeout(() => {
+    availabilityState.returnFromAwayTimerId = null;
+    setAiAvailability("available");
+  }, wait);
+}
+
+function beginManualDowntimeWindow() {
+  if (typeof window === "undefined" || availabilityState.isManualDowntimeActive) {
+    return;
+  }
+  availabilityState.isManualDowntimeActive = true;
+  updateAiAvailabilityUi();
+  captureActiveLouReplyForLater();
+  setAiAvailability("away", { skipSchedule: true });
+  const wait = randomBetween(MANUAL_AWAY_DURATION_MS.min, MANUAL_AWAY_DURATION_MS.max);
+  if (availabilityState.manualDowntimeTimerId) {
+    window.clearTimeout(availabilityState.manualDowntimeTimerId);
+  }
+  availabilityState.manualDowntimeTimerId = window.setTimeout(() => {
+    availabilityState.manualDowntimeTimerId = null;
+    availabilityState.isManualDowntimeActive = false;
+    updateAiAvailabilityUi();
+    setAiAvailability("available");
+  }, wait);
+}
+
+function endManualDowntimeWindow() {
+  if (typeof window !== "undefined" && availabilityState.manualDowntimeTimerId) {
+    window.clearTimeout(availabilityState.manualDowntimeTimerId);
+    availabilityState.manualDowntimeTimerId = null;
+  }
+  if (availabilityState.isManualDowntimeActive) {
+    availabilityState.isManualDowntimeActive = false;
+    updateAiAvailabilityUi();
+  }
+  setAiAvailability("available");
+}
+
+function captureActiveLouReplyForLater() {
+  if (!louReplyState.referenceMessage || !louReplyState.serverId || !louReplyState.channelId) {
+    return;
+  }
+  availabilityState.pendingLouReply = {
+    serverId: louReplyState.serverId,
+    channelId: louReplyState.channelId,
+    referenceMessage: louReplyState.referenceMessage,
+  };
+  cancelLouReplyTimer();
+  cancelLouReplyRequest();
+  interruptLouOutput();
+}
+
+function dispatchPendingLouReply() {
+  if (!availabilityState.pendingLouReply) {
+    return;
+  }
+  const payload = availabilityState.pendingLouReply;
+  availabilityState.pendingLouReply = null;
+  scheduleLouReplyCountdown(payload);
+}
+
+function getAvailabilityCooldownDelay() {
+  if (!availabilityState.cooldownUntil) {
+    return 0;
+  }
+  return Math.max(0, availabilityState.cooldownUntil - Date.now());
+}
+
+function getAvailabilityResponseLag() {
+  const config = getAvailabilityConfig(availabilityState.status);
+  const range = config.responseLag;
+  const baseLag = range ? randomBetween(range.min || 0, range.max || range.min || 0) : 0;
+  return Math.max(0, baseLag + getAvailabilityCooldownDelay());
+}
+
+function getAvailabilityTypingLag() {
+  const config = getAvailabilityConfig(availabilityState.status);
+  const range = config.typingLag;
+  if (!range) return 0;
+  return Math.max(0, randomBetween(range.min || 0, range.max || range.min || 0));
 }
 
 function createLouOutputController() {
@@ -467,44 +2128,6 @@ function formatTime(isoDate) {
   });
 }
 
-function formatSecondsAsTimestamp(totalSeconds) {
-  const safeSeconds = Math.max(0, Number.isFinite(totalSeconds) ? Math.floor(totalSeconds) : 0);
-  const hours = Math.floor(safeSeconds / 3600)
-    .toString()
-    .padStart(2, "0");
-  const minutes = Math.floor((safeSeconds % 3600) / 60)
-    .toString()
-    .padStart(2, "0");
-  const seconds = Math.floor(safeSeconds % 60)
-    .toString()
-    .padStart(2, "0");
-  return `${hours}:${minutes}:${seconds}`;
-}
-
-function parseTimestampToSeconds(value) {
-  if (!value) return 0;
-  const sanitized = value.trim();
-  if (!sanitized) return 0;
-  const tokens = sanitized.split(":").map((part) => Number.parseInt(part, 10));
-  if (tokens.some((token) => Number.isNaN(token))) return 0;
-  if (tokens.length === 3) {
-    const [hours, minutes, seconds] = tokens;
-    return hours * 3600 + minutes * 60 + seconds;
-  }
-  if (tokens.length === 2) {
-    const [minutes, seconds] = tokens;
-    return minutes * 60 + seconds;
-  }
-  return tokens[0] ?? 0;
-}
-
-function formatLouflixDate(isoString) {
-  if (!isoString) return "";
-  const parsed = new Date(isoString);
-  if (Number.isNaN(parsed.getTime())) return "";
-  return parsed.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
-}
-
 function hydrateUserCard() {
   if (!profiles.user) return;
   elements.userName.textContent = profiles.user.name;
@@ -528,7 +2151,10 @@ async function handleFormSubmit(event) {
   event.preventDefault();
   const channel = getActiveChannel();
   if (!channel) return;
-  const text = elements.messageInput.value.trim();
+  const form = event.currentTarget || event.target;
+  const textarea = form?.querySelector("textarea") || elements.messageInput;
+  if (!textarea) return;
+  const text = textarea.value.trim();
   if (!text) return;
 
   const server = getActiveServer();
@@ -545,8 +2171,9 @@ async function handleFormSubmit(event) {
     });
 
     channel.messages.push(newMessage);
-    elements.messageInput.value = "";
-    autoResizeTextarea();
+    analyzeVoiceIntentsFromMessage(text, { serverId: server.id, channelId: channel.id });
+    textarea.value = "";
+    autoResizeTextarea(textarea);
     clearReplyTarget();
     registerUserActivity();
     renderMessages();
@@ -559,7 +2186,8 @@ async function handleFormSubmit(event) {
 async function triggerLouReplyFlow(serverId, channelId, referenceMessage, options = {}) {
   const { token } = options;
   const requestStartedAt = Date.now();
-  const targetInitialDelay = randomBetween(LOU_TYPING_INITIAL_DELAY.min, LOU_TYPING_INITIAL_DELAY.max);
+  const targetInitialDelay =
+    randomBetween(LOU_TYPING_INITIAL_DELAY.min, LOU_TYPING_INITIAL_DELAY.max) + getAvailabilityTypingLag();
   const abortController = new AbortController();
   louReplyState.abortController = abortController;
   let payload;
@@ -719,6 +2347,7 @@ async function playLouTypingSequence(serverId, channelId, messages, options = {}
     }
   }
   removePlaceholder();
+  flushVoiceIntentQueue(serverId, channelId);
 }
 
 function getFriendlyAiErrorMessage(error) {
@@ -754,8 +2383,8 @@ async function postMessage({ serverId, channelId, authorId, content, replyTo, at
   });
 }
 
-function autoResizeTextarea() {
-  const textarea = elements.messageInput;
+function autoResizeTextarea(target = elements.messageInput) {
+  const textarea = target;
   if (!textarea) return;
   if (!textarea.dataset.baseHeight) {
     textarea.dataset.baseHeight = String(textarea.clientHeight || 46);
@@ -773,18 +2402,28 @@ function autoResizeTextarea() {
 }
 
 function bindEvents() {
-  elements.messageForm.addEventListener("submit", handleFormSubmit);
-  elements.messageInput.addEventListener("input", autoResizeTextarea);
-  elements.messageInput.addEventListener("keydown", handleComposerKeyDown);
+  elements.messageForm?.addEventListener("submit", handleFormSubmit);
+  elements.messageInput?.addEventListener("input", (event) => autoResizeTextarea(event.target));
+  elements.messageInput?.addEventListener("keydown", handleComposerKeyDown);
   elements.channelCreateButton?.addEventListener("click", handleCreateChannelFlow);
   elements.channelList?.addEventListener("click", handleChannelListClick);
   elements.channelList?.addEventListener("keydown", handleChannelListKeyDown);
+  elements.voiceChannelList?.addEventListener("click", handleVoiceChannelListClick);
   elements.messageList?.addEventListener("click", handleMessageListClick);
   elements.serverSettingsButton?.addEventListener("click", () => {
     const server = getActiveServer();
     if (!server) return;
     openServerSettingsDialog(server);
   });
+  elements.voiceLeave?.addEventListener("click", () => leaveVoiceChannel());
+  elements.voiceShareStop?.addEventListener("click", handleVoiceShareStopClick);
+  elements.voiceShareTrigger?.addEventListener("click", handleVoiceShareTriggerClick);
+  elements.voiceShareFileInput?.addEventListener("change", handleVoiceShareFileChange);
+  elements.voiceShareToggle?.addEventListener("click", handleVoiceShareToggleClick);
+  elements.voiceShareCollapseBanner?.addEventListener(
+    "click",
+    handleVoiceShareCollapseBannerClick
+  );
   elements.profileSettingsButton?.addEventListener("click", () => {
     openProfileSettingsDialog();
   });
@@ -810,23 +2449,8 @@ function bindEvents() {
     }
   });
   elements.contextPanel?.addEventListener("click", (event) => event.stopPropagation());
+  elements.availabilityToggle?.addEventListener("click", handleAvailabilityToggleClick);
   elements.proactiveTrigger?.addEventListener("click", () => triggerProactiveMessage({ manual: true }));
-  elements.louflixToggle?.addEventListener("click", openLouflixPanel);
-  elements.louflixClose?.addEventListener("click", closeLouflixPanel);
-  elements.louflixOverlay?.addEventListener("click", (event) => {
-    if (event.target === elements.louflixOverlay) {
-      closeLouflixPanel();
-    }
-  });
-  elements.louflixRefresh?.addEventListener("click", () => loadLouflixSession(true));
-  elements.louflixTriggerList?.addEventListener("click", handleLouflixTriggerListClick);
-  elements.louflixCommentForm?.addEventListener("submit", handleLouflixCommentSubmit);
-  elements.louflixPanel?.addEventListener("click", handleLouflixPanelClick);
-  if (elements.louflixVideo) {
-    elements.louflixVideo.addEventListener("timeupdate", updateLouflixPlaybackIndicator);
-    elements.louflixVideo.addEventListener("loadedmetadata", updateLouflixPlaybackIndicator);
-  }
-  document.addEventListener("keydown", handleLouflixEscapeKey);
   elements.gifButton?.addEventListener("click", openGifPicker);
   elements.gifClose?.addEventListener("click", closeGifPicker);
   elements.gifUpload?.addEventListener("click", handleGifUploadClick);
@@ -840,20 +2464,23 @@ function bindEvents() {
   elements.gifSearch?.addEventListener("input", handleGifSearchInput);
   elements.gifList?.addEventListener("click", handleGifListClick);
   document.addEventListener("keydown", handleGifEscapeKey);
+  setupVoicePlaybackUnlockListeners();
+  window.addEventListener("resize", () => scheduleChannelLimitCheck(getActiveServer()));
 }
 
 function handleComposerKeyDown(event) {
-  if (event.key !== "Enter") return;
-  if (event.shiftKey) return;
+  if (event.key !== "Enter" || event.shiftKey) return;
+  const form = event.target?.closest("form");
+  if (!form) return;
   event.preventDefault();
-  if (elements.messageForm) {
-    elements.messageForm.requestSubmit();
-  }
+  form.requestSubmit();
 }
 
 async function init() {
   bindEvents();
-  autoResizeTextarea();
+  initAiAvailability();
+  autoResizeTextarea(elements.messageInput);
+  updateVoiceShareVisibilityUi();
   try {
     const response = await fetch(`${API_BASE}/bootstrap`);
     if (!response.ok) throw new Error("Falha ao carregar dados iniciais");
@@ -875,23 +2502,6 @@ async function init() {
 }
 
 init();
-
-async function handleCreateServerFlow() {
-  const name = window.prompt("Nome do novo servidor:");
-  if (!name || !name.trim()) return;
-  try {
-    const server = await postJSON(`${API_BASE}/servers`, { name: name.trim() });
-    state.servers.push(server);
-    state.activeServerId = server.id;
-    state.activeChannelId = server.channels[0]?.id ?? null;
-    renderServers();
-    renderChannels();
-    renderChatArea();
-    refreshProactiveWatcher({ resetAttempts: true });
-  } catch (error) {
-    console.error("Falha ao criar servidor", error);
-  }
-}
 
 function handleChannelListClick(event) {
   const actionButton = event.target.closest("[data-channel-action]");
@@ -981,10 +2591,14 @@ function updateReplyIndicator() {
 async function handleCreateChannelFlow() {
   const server = getActiveServer();
   if (!server) return;
-  const name = window.prompt("Nome do novo canal:");
-  if (!name || !name.trim()) return;
+  if (Array.isArray(server.channels) && server.channels.length >= MAX_TEXT_CHANNELS) {
+    window.alert(`Limite de ${MAX_TEXT_CHANNELS} chats atingido. Exclua um canal antes de criar outro.`);
+    updateChannelCreationAvailability(server);
+    return;
+  }
+  const name = generateAutoChannelName(server);
   try {
-    const channel = await postJSON(`${API_BASE}/servers/${server.id}/channels`, { name: name.trim() });
+    const channel = await postJSON(`${API_BASE}/servers/${server.id}/channels`, { name });
     server.channels.push(channel);
     state.activeChannelId = channel.id;
     renderChannels();
@@ -995,6 +2609,24 @@ async function handleCreateChannelFlow() {
   }
 }
 
+function generateAutoChannelName(server) {
+  const baseName = "Novo Chat";
+  if (!server || !Array.isArray(server.channels) || server.channels.length === 0) {
+    return baseName;
+  }
+  const pattern = /^novo chat(?:\s+(\d+))?$/i;
+  let nextIndex = 1;
+  for (const channel of server.channels) {
+    const match = typeof channel.name === "string" ? channel.name.match(pattern) : null;
+    if (!match) continue;
+    const number = match[1] ? Number.parseInt(match[1], 10) : 1;
+    if (Number.isFinite(number) && number >= nextIndex) {
+      nextIndex = number + 1;
+    }
+  }
+  return nextIndex === 1 ? baseName : `${baseName} ${nextIndex}`;
+}
+
 function openChannelRenameDialog(server, channel) {
   const safeName = escapeHTML(channel.name);
   const template = `
@@ -1002,12 +2634,12 @@ function openChannelRenameDialog(server, channel) {
       <div class="lou-dialog__header">
         <div>
           <h2 class="lou-dialog__title">Renomear canal</h2>
-          <p class="lou-dialog__subtitle">#${safeName}</p>
+          <p class="lou-dialog__subtitle">@${safeName}</p>
         </div>
         <button class="lou-dialog__close" type="button" data-action="close">×</button>
       </div>
       <form class="lou-form" data-role="channel-form">
-        <label class="lou-field">
+        <label class="lou-field lou-field--spaced">
           <span class="lou-label">Nome do canal</span>
           <input class="lou-input" name="name" value="${safeName}" maxlength="48" autocomplete="off" />
         </label>
@@ -1054,7 +2686,7 @@ function openChannelDeleteDialog(server, channel) {
       <div class="lou-dialog__header">
         <div>
           <h2 class="lou-dialog__title">Excluir canal</h2>
-          <p class="lou-dialog__subtitle">#${safeName}</p>
+          <p class="lou-dialog__subtitle">@${safeName}</p>
         </div>
         <button class="lou-dialog__close" type="button" data-action="close">×</button>
       </div>
@@ -1102,7 +2734,6 @@ function removeChannelFromState(serverId, channelId) {
 function openServerSettingsDialog(server) {
   const serverName = server.name ?? "Servidor";
   const safeName = escapeHTML(serverName);
-  const safeAvatar = escapeHTML(server.avatar ?? "");
   const template = `
     <div class="lou-dialog" role="dialog" aria-modal="true">
       <div class="lou-dialog__header">
@@ -1113,22 +2744,9 @@ function openServerSettingsDialog(server) {
         <button class="lou-dialog__close" type="button" data-action="close">×</button>
       </div>
       <form class="lou-form" data-role="server-form">
-        <div class="lou-profile-preview">
-          <div class="lou-avatar-preview" data-role="server-avatar-preview"></div>
-          <div class="lou-avatar-actions">
-            <p class="lou-hint">Envie um PNG/JPG (até 2 MB) ou cole um caminho manual.</p>
-            <button class="ghost-button" type="button" data-action="upload-avatar">Enviar imagem</button>
-            <input type="file" data-role="server-avatar-file" accept="image/png,image/jpeg,image/webp,image/gif" hidden />
-            <p class="lou-hint" data-role="avatar-status"></p>
-          </div>
-        </div>
-        <label class="lou-field">
+        <label class="lou-field lou-field--spaced">
           <span class="lou-label">Nome do servidor</span>
           <input class="lou-input" name="name" value="${safeName}" maxlength="48" autocomplete="off" />
-        </label>
-        <label class="lou-field">
-          <span class="lou-label">Avatar (caminho relativo)</span>
-          <input class="lou-input" name="avatar" value="${safeAvatar}" placeholder="assets/avatars/lou.png" autocomplete="off" />
         </label>
         <div class="lou-dialog__actions">
           <button class="lou-button danger" type="button" data-action="delete">Excluir</button>
@@ -1143,50 +2761,11 @@ function openServerSettingsDialog(server) {
   const dialog = backdrop.querySelector(".lou-dialog");
   const form = dialog.querySelector("[data-role=server-form]");
   const nameInput = form.querySelector('input[name="name"]');
-  const avatarInput = form.querySelector('input[name="avatar"]');
-  const avatarPreview = dialog.querySelector('[data-role="server-avatar-preview"]');
-  const avatarStatus = dialog.querySelector('[data-role="avatar-status"]');
-  const avatarUploadButton = dialog.querySelector('[data-action="upload-avatar"]');
-  const avatarFileInput = dialog.querySelector('[data-role="server-avatar-file"]');
   const deleteButton = form.querySelector('[data-action="delete"]');
   const cancelButtons = dialog.querySelectorAll('[data-action="close"],[data-action="cancel"]');
   cancelButtons.forEach((btn) => btn.addEventListener("click", closeDialog));
   nameInput.focus();
   nameInput.select();
-
-  const updateServerAvatarPreview = (path) => {
-    if (!avatarPreview) return;
-    avatarPreview.innerHTML = "";
-    const img = document.createElement("img");
-    img.alt = `Avatar do servidor ${serverName}`;
-    const selectedPath = path && path.trim() ? path.trim() : "assets/avatars/default.png";
-    img.src = normalizeAssetPath(selectedPath);
-    img.addEventListener("error", () => {
-      img.remove();
-      avatarPreview.textContent = serverName.slice(0, 2).toUpperCase();
-    });
-    avatarPreview.appendChild(img);
-  };
-
-  if (avatarInput) {
-    updateServerAvatarPreview(avatarInput.value || server.avatar);
-    avatarInput.addEventListener("input", () => {
-      updateServerAvatarPreview(avatarInput.value);
-      if (avatarStatus) avatarStatus.textContent = "";
-    });
-  }
-
-  initializeAvatarUploadControls({
-    uploadButton: avatarUploadButton,
-    fileInput: avatarFileInput,
-    statusNode: avatarStatus,
-    onSuccess: (payload) => {
-      if (!avatarInput) return;
-      const normalized = normalizeUploadedAvatarPath(payload);
-      avatarInput.value = normalized;
-      updateServerAvatarPreview(normalized);
-    },
-  });
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -1195,11 +2774,7 @@ function openServerSettingsDialog(server) {
       nameInput.focus();
       return;
     }
-    const avatarValue = avatarInput?.value.trim();
     const payload = { name: newName };
-    if (avatarValue) {
-      payload.avatar = avatarValue;
-    }
     try {
       const updated = await patchJSON(`${API_BASE}/servers/${server.id}`, payload);
       Object.assign(server, updated);
@@ -1257,6 +2832,7 @@ function openServerSettingsDialog(server) {
 function openProfileSettingsDialog() {
   if (!profiles.user && !profiles.model) return;
   let currentKey = "user";
+  let currentAvatarValue = "";
   const template = `
     <div class="lou-dialog" role="dialog" aria-modal="true">
       <div class="lou-dialog__header">
@@ -1273,20 +2849,16 @@ function openProfileSettingsDialog() {
       <div class="lou-profile-preview">
         <div class="lou-avatar-preview" data-role="avatar-preview"></div>
         <div class="lou-avatar-actions">
-          <p class="lou-hint">Envie PNG/JPG (até 2 MB) ou cole um caminho existente.</p>
+          <p class="lou-hint">Envie PNG/JPG (até 2 MB).</p>
           <button class="ghost-button" type="button" data-action="upload-avatar">Enviar imagem</button>
           <input type="file" data-role="profile-avatar-file" accept="image/png,image/jpeg,image/webp,image/gif" hidden />
           <p class="lou-hint" data-role="avatar-status"></p>
         </div>
       </div>
       <form class="lou-form" data-role="profile-form">
-        <label class="lou-field">
+        <label class="lou-field lou-field--spaced">
           <span class="lou-label">Nome</span>
           <input class="lou-input" name="name" maxlength="48" autocomplete="off" />
-        </label>
-        <label class="lou-field">
-          <span class="lou-label">Avatar (caminho relativo)</span>
-          <input class="lou-input" name="avatar" placeholder="assets/avatars/lou.png" autocomplete="off" />
         </label>
         <div class="lou-dialog__actions">
           <button class="lou-button" type="button" data-action="cancel">Cancelar</button>
@@ -1301,7 +2873,6 @@ function openProfileSettingsDialog() {
   const tabs = dialog.querySelectorAll("[data-profile-key]");
   const form = dialog.querySelector("[data-role=profile-form]");
   const nameInput = form.querySelector('input[name="name"]');
-  const avatarInput = form.querySelector('input[name="avatar"]');
   const preview = dialog.querySelector("[data-role=avatar-preview]");
   const avatarUploadButton = dialog.querySelector('[data-action="upload-avatar"]');
   const avatarFileInput = dialog.querySelector('[data-role="profile-avatar-file"]');
@@ -1328,8 +2899,8 @@ function openProfileSettingsDialog() {
     const profile = profiles[currentKey] ?? {};
     subtitle.textContent = currentKey === "user" ? "Seu perfil" : "Perfil da Lou";
     nameInput.value = profile.name ?? "";
-    avatarInput.value = profile.avatar ?? "";
-    updateAvatarPreview(avatarInput.value || profile.avatar);
+    currentAvatarValue = profile.avatar ?? "";
+    updateAvatarPreview(currentAvatarValue);
     if (avatarStatus) avatarStatus.textContent = "";
   };
 
@@ -1340,18 +2911,13 @@ function openProfileSettingsDialog() {
     });
   });
 
-  avatarInput.addEventListener("input", () => {
-    updateAvatarPreview(avatarInput.value);
-    if (avatarStatus) avatarStatus.textContent = "";
-  });
-
   initializeAvatarUploadControls({
     uploadButton: avatarUploadButton,
     fileInput: avatarFileInput,
     statusNode: avatarStatus,
     onSuccess: (payload) => {
       const normalized = normalizeUploadedAvatarPath(payload);
-      avatarInput.value = normalized;
+      currentAvatarValue = normalized;
       updateAvatarPreview(normalized);
     },
   });
@@ -1363,7 +2929,11 @@ function openProfileSettingsDialog() {
       nameInput.focus();
       return;
     }
-    const payload = { name: newName, avatar: avatarInput.value.trim() || null };
+    const normalizedAvatar = (currentAvatarValue ?? "").trim();
+    const payload = {
+      name: newName,
+      avatar: normalizedAvatar || null,
+    };
     try {
       const updated = await patchJSON(`${API_BASE}/profiles/${currentKey}`, payload);
       profiles[currentKey] = { ...(profiles[currentKey] ?? {}), ...updated };
@@ -1414,7 +2984,7 @@ async function loadPersonalityData(force = false) {
     personalityState.data = payload ?? {};
     buildPersonalityDraft();
     renderPersonalityPanel();
-    setPersonalityStatus("Ficha carregada");
+  setPersonalityStatus("");
   } catch (error) {
     console.error("Falha ao carregar personalidade", error);
     setPersonalityStatus("Erro ao carregar personalidade");
@@ -1607,6 +3177,9 @@ function parsePersonalityFieldValue(rawValue, kind) {
 
 function formatPersonalityLabel(key) {
   if (!key) return "";
+  if (Object.prototype.hasOwnProperty.call(PERSONALITY_LABEL_OVERRIDES, key)) {
+    return PERSONALITY_LABEL_OVERRIDES[key];
+  }
   const spaced = key.replace(/([A-Z])/g, " $1").replace(/_/g, " ").trim();
   return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
@@ -1642,10 +3215,11 @@ function updatePersonalitySaveState(options = {}) {
     elements.personalitySave.textContent = personalityState.isSaving ? "Salvando..." : "Salvar alterações";
   }
   if (!options.skipStatus && !personalityState.isSaving && !personalityState.isLoading) {
-    const message = personalityState.hasUnsavedChanges
-      ? "Alterações não salvas"
-      : "Tudo sincronizado com personality_prompt.json";
-    setPersonalityStatus(message);
+    if (personalityState.hasUnsavedChanges) {
+      setPersonalityStatus("Alterações não salvas");
+    } else {
+      setPersonalityStatus("");
+    }
   }
 }
 
@@ -2028,302 +3602,6 @@ function handleGifEscapeKey(event) {
   }
 }
 
-function openLouflixPanel() {
-  if (!elements.louflixOverlay) return;
-  elements.louflixOverlay.classList.remove("is-hidden");
-  louflixState.isOpen = true;
-  syncOverlayPresence();
-  setLouflixStatus(louflixState.session ? "Sessão carregada" : "Carregando sessão…");
-  if (!louflixState.session || louflixState.session.triggers === undefined) {
-    loadLouflixSession();
-  } else {
-    renderLouflixSession();
-  }
-}
-
-function closeLouflixPanel() {
-  elements.louflixOverlay?.classList.add("is-hidden");
-  louflixState.isOpen = false;
-  syncOverlayPresence();
-  if (elements.louflixVideo && typeof elements.louflixVideo.pause === "function") {
-    elements.louflixVideo.pause();
-  }
-}
-
-async function loadLouflixSession(force = false) {
-  if (louflixState.isLoading) return;
-  if (louflixState.session && !force) {
-    renderLouflixSession();
-    return;
-  }
-  louflixState.isLoading = true;
-  setLouflixStatus("Carregando sessão LouFlix…");
-  try {
-    const response = await fetch(`${API_BASE}/louflix/session`);
-    if (!response.ok) throw new Error("Falha ao carregar dados do LouFlix");
-    const payload = await response.json();
-    louflixState.session = {
-      ...payload,
-      triggers: Array.isArray(payload?.triggers) ? payload.triggers : [],
-      comments: Array.isArray(payload?.comments) ? payload.comments : [],
-    };
-    louflixState.selectedTriggerIndex = null;
-    louflixState.selectedPrompt = "";
-    renderLouflixSession();
-    setLouflixStatus("Sessão sincronizada com o backend");
-  } catch (error) {
-    console.error("Falha ao carregar LouFlix", error);
-    setLouflixStatus("Erro ao carregar sessão. Tente novamente.");
-  } finally {
-    louflixState.isLoading = false;
-  }
-}
-
-function renderLouflixSession() {
-  if (!louflixState.session) return;
-  const { title, description, poster, video, triggers = [], comments = [] } = louflixState.session;
-  if (elements.louflixTitle) elements.louflixTitle.textContent = title || "Sessão";
-  if (elements.louflixDescription) elements.louflixDescription.textContent = description || "";
-  if (elements.louflixPoster) {
-    const posterPath = poster ? normalizeAssetPath(poster) : "";
-    elements.louflixPoster.style.backgroundImage = posterPath ? `url('${posterPath}')` : "";
-  }
-  if (elements.louflixVideo) {
-    const normalizedVideo = video ? normalizeAssetPath(video) : "";
-    if (normalizedVideo && elements.louflixVideo.getAttribute("src") !== normalizedVideo) {
-      elements.louflixVideo.src = normalizedVideo;
-      elements.louflixVideo.load();
-    }
-    if (poster) {
-      elements.louflixVideo.poster = normalizeAssetPath(poster);
-    } else {
-      elements.louflixVideo.removeAttribute("poster");
-    }
-  }
-  renderLouflixTriggers(triggers);
-  renderLouflixComments(comments);
-  resetLouflixPromptPreview();
-  updateLouflixPlaybackIndicator();
-}
-
-function renderLouflixTriggers(triggers) {
-  if (!elements.louflixTriggerList) return;
-  elements.louflixTriggerList.innerHTML = "";
-  const list = Array.isArray(triggers) ? [...triggers] : [];
-  if (!list.length) {
-    const placeholder = document.createElement("p");
-    placeholder.className = "louflix-comment-empty";
-    placeholder.textContent = "Nenhum trigger configurado.";
-    elements.louflixTriggerList.appendChild(placeholder);
-  } else {
-    list.forEach((trigger, index) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "louflix-trigger";
-      if (index === louflixState.selectedTriggerIndex) {
-        button.classList.add("is-active");
-      }
-      button.dataset.triggerIndex = String(index);
-      const time = document.createElement("span");
-      time.className = "louflix-trigger-time";
-      time.textContent = trigger.timestamp || formatSecondsAsTimestamp(trigger.seconds ?? 0);
-      const prompt = document.createElement("p");
-      prompt.className = "louflix-trigger-prompt";
-      prompt.textContent = trigger.prompt || "Sem descrição";
-      button.append(time, prompt);
-      elements.louflixTriggerList.appendChild(button);
-    });
-  }
-  if (elements.louflixTriggerCount) {
-    elements.louflixTriggerCount.textContent = list.length ? `${list.length} eventos` : "Sem eventos";
-  }
-}
-
-function renderLouflixComments(comments) {
-  if (!elements.louflixCommentsList) return;
-  elements.louflixCommentsList.innerHTML = "";
-  const list = Array.isArray(comments) ? [...comments] : [];
-  if (!list.length) {
-    const placeholder = document.createElement("p");
-    placeholder.className = "louflix-comment-empty";
-    placeholder.textContent = "Nenhum comentário enviado ainda.";
-    elements.louflixCommentsList.appendChild(placeholder);
-    return;
-  }
-  list
-    .sort((a, b) => Number(a.seconds ?? 0) - Number(b.seconds ?? 0))
-    .forEach((comment) => {
-      const item = document.createElement("article");
-      item.className = "louflix-comment-item";
-      const meta = document.createElement("div");
-      meta.className = "louflix-comment-meta";
-      const timestamp = document.createElement("span");
-      timestamp.textContent = comment.timestamp || formatSecondsAsTimestamp(comment.seconds ?? 0);
-      const createdAt = document.createElement("span");
-      createdAt.textContent = formatLouflixDate(comment.created_at);
-      meta.append(timestamp, createdAt);
-      const prompt = (comment.trigger_prompt || "").trim();
-      if (prompt) {
-        const promptNode = document.createElement("p");
-        promptNode.className = "louflix-comment-prompt";
-        promptNode.textContent = prompt;
-        item.appendChild(promptNode);
-      }
-      const body = document.createElement("p");
-      body.className = "louflix-comment-text";
-      body.textContent = comment.comment || "";
-      item.prepend(meta);
-      item.appendChild(body);
-      elements.louflixCommentsList.appendChild(item);
-    });
-}
-
-function handleLouflixTriggerListClick(event) {
-  if (!(event.target instanceof Element)) return;
-  const button = event.target.closest(".louflix-trigger");
-  if (!button) return;
-  event.preventDefault();
-  const index = Number.parseInt(button.dataset.triggerIndex ?? "", 10);
-  if (Number.isNaN(index)) return;
-  selectLouflixTrigger(index);
-}
-
-function selectLouflixTrigger(index) {
-  if (!louflixState.session || !Array.isArray(louflixState.session.triggers)) return;
-  const trigger = louflixState.session.triggers[index];
-  if (!trigger) return;
-  louflixState.selectedTriggerIndex = index;
-  louflixState.selectedPrompt = trigger.prompt || "";
-  renderLouflixTriggers(louflixState.session.triggers);
-  updateLouflixFormFromTrigger(trigger);
-  if (elements.louflixVideo && typeof trigger.seconds === "number") {
-    try {
-      elements.louflixVideo.currentTime = trigger.seconds;
-      elements.louflixVideo.focus?.();
-    } catch (error) {
-      console.error("Não foi possível ajustar o tempo do vídeo", error);
-    }
-  }
-}
-
-function updateLouflixFormFromTrigger(trigger) {
-  const timestamp = trigger.timestamp || formatSecondsAsTimestamp(trigger.seconds ?? 0);
-  if (elements.louflixTimestampInput) {
-    elements.louflixTimestampInput.value = timestamp;
-  }
-  if (elements.louflixSecondsInput) {
-    elements.louflixSecondsInput.value = String(trigger.seconds ?? parseTimestampToSeconds(timestamp));
-  }
-  if (elements.louflixPromptPreview) {
-    elements.louflixPromptPreview.textContent = trigger.prompt || LOUFLIX_PROMPT_PLACEHOLDER;
-  }
-}
-
-function resetLouflixPromptPreview() {
-  if (!elements.louflixPromptPreview) return;
-  const label = louflixState.selectedPrompt || LOUFLIX_PROMPT_PLACEHOLDER;
-  elements.louflixPromptPreview.textContent = label;
-}
-
-function handleLouflixPanelClick(event) {
-  event.stopPropagation();
-  if (!(event.target instanceof Element)) return;
-  const captureButton = event.target.closest("[data-role=louflix-capture-time]");
-  if (!captureButton) return;
-  event.preventDefault();
-  captureLouflixTimestamp();
-}
-
-function captureLouflixTimestamp() {
-  if (!elements.louflixVideo) return;
-  const seconds = Math.floor(elements.louflixVideo.currentTime || 0);
-  applyLouflixTimestamp(seconds);
-}
-
-function applyLouflixTimestamp(seconds) {
-  const timestamp = formatSecondsAsTimestamp(seconds);
-  if (elements.louflixTimestampInput) {
-    elements.louflixTimestampInput.value = timestamp;
-  }
-  if (elements.louflixSecondsInput) {
-    elements.louflixSecondsInput.value = String(seconds);
-  }
-}
-
-function updateLouflixPlaybackIndicator() {
-  if (!elements.louflixVideo || !elements.louflixPlaybackIndicator) return;
-  const current = Math.floor(elements.louflixVideo.currentTime || 0);
-  const duration = Number.isFinite(elements.louflixVideo.duration)
-    ? Math.floor(elements.louflixVideo.duration || 0)
-    : null;
-  const currentLabel = formatSecondsAsTimestamp(current);
-  elements.louflixPlaybackIndicator.textContent = duration
-    ? `${currentLabel} / ${formatSecondsAsTimestamp(duration)}`
-    : currentLabel;
-}
-
-function setLouflixStatus(message) {
-  if (!elements.louflixStatus) return;
-  elements.louflixStatus.textContent = message || "";
-}
-
-async function handleLouflixCommentSubmit(event) {
-  event.preventDefault();
-  if (louflixState.isSubmitting) return;
-  const commentInputValue = elements.louflixCommentInput?.value ?? "";
-  const commentText = commentInputValue.trim();
-  if (!commentText) {
-    setLouflixStatus("Escreva um comentário antes de enviar.");
-    elements.louflixCommentInput?.focus();
-    return;
-  }
-  const timestampValue = (elements.louflixTimestampInput?.value ?? "").trim();
-  const secondsHidden = (elements.louflixSecondsInput?.value ?? "").trim();
-  let seconds = secondsHidden ? Number.parseInt(secondsHidden, 10) : parseTimestampToSeconds(timestampValue);
-  if (!Number.isFinite(seconds)) seconds = 0;
-  const timestamp = timestampValue || formatSecondsAsTimestamp(seconds);
-  const payload = {
-    timestamp,
-    seconds,
-    comment: commentText,
-    triggerPrompt: louflixState.selectedPrompt || undefined,
-  };
-  louflixState.isSubmitting = true;
-  if (elements.louflixCommentSubmit) elements.louflixCommentSubmit.disabled = true;
-  setLouflixStatus("Enviando comentário…");
-  try {
-    const response = await fetch(`${API_BASE}/louflix/comments`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) throw new Error("Falha ao salvar comentário");
-    const saved = await response.json();
-    louflixState.session = louflixState.session || {};
-    const nextComments = [...(louflixState.session.comments ?? []), saved];
-    louflixState.session.comments = nextComments;
-    renderLouflixComments(nextComments);
-    elements.louflixCommentForm?.reset();
-    louflixState.selectedTriggerIndex = null;
-    louflixState.selectedPrompt = "";
-    renderLouflixTriggers(louflixState.session.triggers ?? []);
-    resetLouflixPromptPreview();
-    setLouflixStatus("Comentário registrado.");
-  } catch (error) {
-    console.error("Falha ao enviar comentário para LouFlix", error);
-    setLouflixStatus("Erro ao enviar comentário. Tente novamente.");
-  } finally {
-    louflixState.isSubmitting = false;
-    if (elements.louflixCommentSubmit) elements.louflixCommentSubmit.disabled = false;
-  }
-}
-
-function handleLouflixEscapeKey(event) {
-  if (event.key === "Escape" && louflixState.isOpen) {
-    closeLouflixPanel();
-  }
-}
-
 function openContextPanel() {
   if (!elements.contextOverlay) return;
   elements.contextOverlay.classList.remove("is-hidden");
@@ -2410,6 +3688,9 @@ function refreshProactiveWatcher(options = {}) {
   }
   if (options.resetAttempts) {
     proactiveState.attempt = 0;
+    proactiveState.proactiveMessagesSent = 0;
+    proactiveState.absenceQuestionSent = false;
+    proactiveState.awaitingUserResponse = false;
   }
   proactiveState.lastUserActivity = Date.now();
   startProactiveTimer();
@@ -2417,9 +3698,36 @@ function refreshProactiveWatcher(options = {}) {
 
 function registerUserActivity() {
   refreshProactiveWatcher({ resetAttempts: true });
+  availabilityState.lastUserMessageAt = Date.now();
+  availabilityState.pendingShortCycle = true;
+  if (typeof window !== "undefined" && availabilityState.manualDowntimeTimerId) {
+    window.clearTimeout(availabilityState.manualDowntimeTimerId);
+    availabilityState.manualDowntimeTimerId = null;
+  }
+  if (availabilityState.isManualDowntimeActive) {
+    availabilityState.isManualDowntimeActive = false;
+    updateAiAvailabilityUi();
+  }
+  if (availabilityState.status === "away") {
+    clearAvailabilityShiftTimer();
+    scheduleReturnToAvailableAfterUserMessage();
+    return;
+  }
+  if (!availabilityState.isManualDowntimeActive) {
+    scheduleAvailabilityShift();
+  }
 }
 
 function queueLouReplyAfterUserMessage(serverId, channelId, referenceMessage) {
+  if (!serverId || !channelId) return;
+  if (availabilityState.status === "away") {
+    availabilityState.pendingLouReply = { serverId, channelId, referenceMessage };
+    return;
+  }
+  scheduleLouReplyCountdown({ serverId, channelId, referenceMessage });
+}
+
+function scheduleLouReplyCountdown({ serverId, channelId, referenceMessage }) {
   if (!serverId || !channelId) return;
   cancelLouReplyTimer();
   cancelLouReplyRequest();
@@ -2427,7 +3735,8 @@ function queueLouReplyAfterUserMessage(serverId, channelId, referenceMessage) {
   louReplyState.serverId = serverId;
   louReplyState.channelId = channelId;
   louReplyState.referenceMessage = referenceMessage;
-  const waitMs = randomBetween(louReplyState.debounceRange.min, louReplyState.debounceRange.max);
+  const baseDelay = randomBetween(louReplyState.debounceRange.min, louReplyState.debounceRange.max);
+  const waitMs = baseDelay + getAvailabilityResponseLag();
   louReplyState.generationToken += 1;
   const token = louReplyState.generationToken;
   louReplyState.timerId = window.setTimeout(() => {
@@ -2460,7 +3769,9 @@ function interruptLouOutput() {
 function startProactiveTimer() {
   window.clearTimeout(proactiveState.timerId);
   if (!getActiveChannel()) return;
-  if (proactiveState.attempt >= proactiveState.maxAttempts) return;
+  if (proactiveState.awaitingUserResponse) return;
+  const nextKind = getNextProactiveKind();
+  if (!nextKind) return;
   const delay = getProactiveDelay();
   proactiveState.timerId = window.setTimeout(handleProactiveTimeout, delay);
 }
@@ -2474,6 +3785,16 @@ function stopProactiveTimer() {
 
 function getProactiveDelay() {
   return PROACTIVE_DELAYS[Math.min(proactiveState.attempt, PROACTIVE_DELAYS.length - 1)];
+}
+
+function getNextProactiveKind() {
+  if (proactiveState.proactiveMessagesSent < MAX_PROACTIVE_MESSAGES) {
+    return "proactive";
+  }
+  if (!proactiveState.absenceQuestionSent) {
+    return "absence";
+  }
+  return null;
 }
 
 function handleProactiveTimeout() {
@@ -2496,31 +3817,57 @@ async function triggerProactiveMessage(options = {}) {
   const server = getActiveServer();
   const channel = getActiveChannel();
   if (!server || !channel) return;
-  if (!manual && proactiveState.attempt >= proactiveState.maxAttempts) return;
+  if (availabilityState.status === "away") {
+    if (!manual) {
+      startProactiveTimer();
+    }
+    return;
+  }
+  const nextKind = manual ? "proactive" : getNextProactiveKind();
+  if (!manual && (!nextKind || proactiveState.awaitingUserResponse)) {
+    stopProactiveTimer();
+    return;
+  }
   if (proactiveState.requestInFlight) return;
   proactiveState.requestInFlight = true;
   const requestStartedAt = Date.now();
-  const targetInitialDelay = randomBetween(LOU_TYPING_INITIAL_DELAY.min, LOU_TYPING_INITIAL_DELAY.max);
+  const targetInitialDelay =
+    randomBetween(LOU_TYPING_INITIAL_DELAY.min, LOU_TYPING_INITIAL_DELAY.max) + getAvailabilityTypingLag();
   try {
     const message = await postJSON(`${API_BASE}/proactive`, {
       serverId: server.id,
       channelId: channel.id,
-      attempt: proactiveState.attempt,
+      attempt: manual ? 0 : proactiveState.attempt,
     });
     const elapsed = Date.now() - requestStartedAt;
     const remainingInitialWait = Math.max(targetInitialDelay - elapsed, 0);
     await playLouTypingSequence(server.id, channel.id, [message], { initialWait: remainingInitialWait });
     proactiveState.lastUserActivity = Date.now();
-    if (manual) {
-      proactiveState.attempt = Math.min(proactiveState.attempt + 1, proactiveState.maxAttempts);
-    } else {
+    if (!manual) {
+      if (nextKind === "proactive") {
+        proactiveState.proactiveMessagesSent = Math.min(
+          proactiveState.proactiveMessagesSent + 1,
+          MAX_PROACTIVE_MESSAGES
+        );
+      } else if (nextKind === "absence") {
+        proactiveState.absenceQuestionSent = true;
+        proactiveState.awaitingUserResponse = true;
+      }
       proactiveState.attempt += 1;
     }
   } catch (error) {
     console.error("Falha ao gerar mensagem proativa", error);
   } finally {
     proactiveState.requestInFlight = false;
-    if (proactiveState.attempt < proactiveState.maxAttempts) {
+    if (manual) {
+      startProactiveTimer();
+      return;
+    }
+    if (proactiveState.awaitingUserResponse) {
+      stopProactiveTimer();
+      return;
+    }
+    if (getNextProactiveKind()) {
       startProactiveTimer();
     } else {
       stopProactiveTimer();

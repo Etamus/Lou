@@ -5,445 +5,68 @@
       "name": "Grupo da Lou",
       "icon_char": "L",
       "avatar": "477a5fca8b0e46b090ef9c972fbd5a10.png",
+      "voice_channels": [
+        {
+          "id": "voice_chat",
+          "name": "Chat de Voz"
+        }
+      ],
       "channels": [
         {
-          "id": "c_bcdae8",
-          "name": "Testes",
+          "id": "c_718ab5",
+          "name": "Novo Chat",
           "type": "text",
           "messages": [
             {
-              "id": "m-661be27d-7a20-41a5-ae87-0c8c01bb5370",
+              "id": "m-2bda3b2e-e22c-4c6b-934b-3a8f202ab58e",
               "role": "user",
               "authorId": "user",
               "parts": [
-                "Boa tardeeeeee"
+                "Oiiii"
               ],
-              "content": "Boa tardeeeeee",
-              "timestamp": "2025-12-04T17:20:29"
+              "content": "Oiiii",
+              "timestamp": "2025-12-05T17:52:53"
             },
             {
-              "id": "m-79153913-a421-431a-a18a-fe69cb9dfcb9",
+              "id": "m-8ed98532-0cdb-43ff-8d7a-d923b0ed3dd1",
               "role": "user",
               "authorId": "user",
               "parts": [
                 "Como vai?"
               ],
               "content": "Como vai?",
-              "timestamp": "2025-12-04T17:20:30"
+              "timestamp": "2025-12-05T17:57:31"
             },
             {
-              "id": "m-20c6a82b-307e-4b6f-a6c9-b585ff70978a",
+              "id": "m-f26a1f2e-d954-495a-91d7-153f5623a095",
               "role": "model",
               "authorId": "model",
               "parts": [
                 "Oiii, pai"
               ],
               "content": "Oiii, pai",
-              "timestamp": "2025-12-04T17:20:39",
-              "replyTo": "m-79153913-a421-431a-a18a-fe69cb9dfcb9",
+              "timestamp": "2025-12-05T17:58:15",
+              "replyTo": "m-8ed98532-0cdb-43ff-8d7a-d923b0ed3dd1",
               "is_reply_to": {
-                "id": "m-79153913-a421-431a-a18a-fe69cb9dfcb9",
+                "id": "m-8ed98532-0cdb-43ff-8d7a-d923b0ed3dd1",
                 "role": "user",
                 "authorId": "user",
                 "parts": [
                   "Como vai?"
                 ],
                 "content": "Como vai?",
-                "timestamp": "2025-12-04T17:20:30"
+                "timestamp": "2025-12-05T17:57:31"
               }
             },
             {
-              "id": "m-04ce75e8-3659-46c5-ad09-dfd570cac15d",
+              "id": "m-5c002da0-e75d-4bda-9c5f-64e45c0ba49c",
               "role": "model",
               "authorId": "model",
               "parts": [
-                "Tudo bem por aqui e com você?"
+                "Eu tô bem, e você?"
               ],
-              "content": "Tudo bem por aqui e com você?",
-              "timestamp": "2025-12-04T17:20:39"
-            },
-            {
-              "id": "m-a8974690-3fd6-47eb-a526-094cf2a5eb8d",
-              "role": "user",
-              "authorId": "user",
-              "parts": [
-                "Tudo certo também, filha"
-              ],
-              "content": "Tudo certo também, filha",
-              "timestamp": "2025-12-04T17:20:53"
-            },
-            {
-              "id": "m-7395738d-ae57-4437-a9e3-55d29470893f",
-              "role": "user",
-              "authorId": "user",
-              "parts": [
-                "O que tem feito de bom?"
-              ],
-              "content": "O que tem feito de bom?",
-              "timestamp": "2025-12-04T17:20:56"
-            },
-            {
-              "id": "m-de56c81f-c4c9-45ac-b3ce-31ecec2f5023",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Ah, de boa"
-              ],
-              "content": "Ah, de boa",
-              "timestamp": "2025-12-04T17:21:04",
-              "replyTo": "m-7395738d-ae57-4437-a9e3-55d29470893f",
-              "is_reply_to": {
-                "id": "m-7395738d-ae57-4437-a9e3-55d29470893f",
-                "role": "user",
-                "authorId": "user",
-                "parts": [
-                  "O que tem feito de bom?"
-                ],
-                "content": "O que tem feito de bom?",
-                "timestamp": "2025-12-04T17:20:56"
-              }
-            },
-            {
-              "id": "m-562db1e6-b48c-477d-9a49-e41c57774873",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Jogando um pouco, pai"
-              ],
-              "content": "Jogando um pouco, pai",
-              "timestamp": "2025-12-04T17:21:04"
-            },
-            {
-              "id": "m-8ad6c38a-c755-4194-ae35-eb1ef14b606a",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "E você, fez algo interessante hoje?"
-              ],
-              "content": "E você, fez algo interessante hoje?",
-              "timestamp": "2025-12-04T17:21:04"
-            },
-            {
-              "id": "m-0006aba1-28f1-4354-9efa-191b8fba7361",
-              "role": "user",
-              "authorId": "user",
-              "parts": [
-                "Só trabalhei, kkkk"
-              ],
-              "content": "Só trabalhei, kkkk",
-              "timestamp": "2025-12-04T17:21:18"
-            },
-            {
-              "id": "m-733fe2e4-14bf-4780-a900-9dc5bf2c44f3",
-              "role": "user",
-              "authorId": "user",
-              "parts": [
-                "Ta jogando o que?"
-              ],
-              "content": "Ta jogando o que?",
-              "timestamp": "2025-12-04T17:21:21"
-            },
-            {
-              "id": "m-d6a42ca1-595f-49d4-a8a5-f995cec08c1a",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Detroit: Become"
-              ],
-              "content": "Detroit: Become",
-              "timestamp": "2025-12-04T17:21:29",
-              "replyTo": "m-733fe2e4-14bf-4780-a900-9dc5bf2c44f3",
-              "is_reply_to": {
-                "id": "m-733fe2e4-14bf-4780-a900-9dc5bf2c44f3",
-                "role": "user",
-                "authorId": "user",
-                "parts": [
-                  "Ta jogando o que?"
-                ],
-                "content": "Ta jogando o que?",
-                "timestamp": "2025-12-04T17:21:21"
-              }
-            },
-            {
-              "id": "m-7bff217a-ccb3-456f-9904-ed920193adac",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Human de novo, pai"
-              ],
-              "content": "Human de novo, pai",
-              "timestamp": "2025-12-04T17:21:29"
-            },
-            {
-              "id": "m-e3ece873-add4-4237-aea6-1c5fe4a343d0",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Hehe Tô tentando uns finais diferentes"
-              ],
-              "content": "Hehe Tô tentando uns finais diferentes",
-              "timestamp": "2025-12-04T17:21:29"
-            },
-            {
-              "id": "m-fd410363-e081-42c2-b47a-47a96f71dfec",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Cansado, paizão?"
-              ],
-              "content": "Cansado, paizão?",
-              "timestamp": "2025-12-04T17:23:43"
-            },
-            {
-              "id": "m-268d6092-2b71-434e-8ad3-55f4977fec95",
-              "role": "user",
-              "authorId": "user",
-              "parts": [
-                "To nada"
-              ],
-              "content": "To nada",
-              "timestamp": "2025-12-04T17:27:08"
-            },
-            {
-              "id": "m-c2752eb8-08c9-41bf-8e73-36849e3c77fa",
-              "role": "user",
-              "authorId": "user",
-              "parts": [
-                "E qual final ta fazendo"
-              ],
-              "content": "E qual final ta fazendo",
-              "timestamp": "2025-12-04T17:27:14"
-            },
-            {
-              "id": "m-68fd002f-f7fc-43da-bcce-51d291e3c80f",
-              "role": "user",
-              "authorId": "user",
-              "parts": [
-                "No detroit?"
-              ],
-              "content": "No detroit?",
-              "timestamp": "2025-12-04T17:27:16"
-            },
-            {
-              "id": "m-92162b55-5b38-4c93-b0e2-5a6ee49ca0cc",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Ainda não sei kkkk"
-              ],
-              "content": "Ainda não sei kkkk",
-              "timestamp": "2025-12-04T17:27:25",
-              "replyTo": "m-68fd002f-f7fc-43da-bcce-51d291e3c80f",
-              "is_reply_to": {
-                "id": "m-68fd002f-f7fc-43da-bcce-51d291e3c80f",
-                "role": "user",
-                "authorId": "user",
-                "parts": [
-                  "No detroit?"
-                ],
-                "content": "No detroit?",
-                "timestamp": "2025-12-04T17:27:16"
-              }
-            },
-            {
-              "id": "m-38165103-9e26-4897-8016-b88d8ce338f0",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Mas tô tentando fazer o"
-              ],
-              "content": "Mas tô tentando fazer o",
-              "timestamp": "2025-12-04T17:27:25"
-            },
-            {
-              "id": "m-bf338f86-38cb-425a-91e7-ba36b485381f",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Connor virar um deviante de vez, sabe?"
-              ],
-              "content": "Connor virar um deviante de vez, sabe?",
-              "timestamp": "2025-12-04T17:27:25"
-            },
-            {
-              "id": "m-c723d2cb-3901-4dab-ba5a-e0581423f23a",
-              "role": "user",
-              "authorId": "user",
-              "parts": [
-                "Eita"
-              ],
-              "content": "Eita",
-              "timestamp": "2025-12-04T17:31:07"
-            },
-            {
-              "id": "m-45c31847-e074-4879-8e30-ceb602ccc2da",
-              "role": "user",
-              "authorId": "user",
-              "parts": [
-                "Tadinho dele"
-              ],
-              "content": "Tadinho dele",
-              "timestamp": "2025-12-04T17:31:11"
-            },
-            {
-              "id": "m-bf453e7f-4154-45f7-8766-5a661be587d6",
-              "role": "user",
-              "authorId": "user",
-              "parts": [
-                "Eu gosto dele bonzinho"
-              ],
-              "content": "Eu gosto dele bonzinho",
-              "timestamp": "2025-12-04T17:31:14"
-            },
-            {
-              "id": "m-691d0952-84d2-4642-9196-dcbb13c9f9e3",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "GIF:confused"
-              ],
-              "content": "GIF:confused",
-              "timestamp": "2025-12-04T17:31:23",
-              "attachments": [
-                {
-                  "type": "gif",
-                  "name": "confused",
-                  "filename": "confused.gif",
-                  "url": "/assets/gifs/confused.gif"
-                }
-              ],
-              "replyTo": "m-bf453e7f-4154-45f7-8766-5a661be587d6",
-              "is_reply_to": {
-                "id": "m-bf453e7f-4154-45f7-8766-5a661be587d6",
-                "role": "user",
-                "authorId": "user",
-                "parts": [
-                  "Eu gosto dele bonzinho"
-                ],
-                "content": "Eu gosto dele bonzinho",
-                "timestamp": "2025-12-04T17:31:14"
-              }
-            },
-            {
-              "id": "m-1004274d-f700-458c-b12c-2f7dc306edd4",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Ah para, pai"
-              ],
-              "content": "Ah para, pai",
-              "timestamp": "2025-12-04T17:31:23"
-            },
-            {
-              "id": "m-9e705d96-7d7e-425b-87d5-ce858791d60c",
-              "role": "user",
-              "authorId": "user",
-              "parts": [
-                "É serio poxa"
-              ],
-              "content": "É serio poxa",
-              "timestamp": "2025-12-04T17:31:38"
-            },
-            {
-              "id": "m-89a73609-3d95-4ec2-833e-bf81ce604d03",
-              "role": "user",
-              "authorId": "user",
-              "parts": [
-                "É triste ver ele sendo do mal"
-              ],
-              "content": "É triste ver ele sendo do mal",
-              "timestamp": "2025-12-04T17:31:43"
-            },
-            {
-              "id": "m-235df675-ba0f-49cf-9558-618f21476e7b",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Aiii, Mateus"
-              ],
-              "content": "Aiii, Mateus",
-              "timestamp": "2025-12-04T17:31:51",
-              "replyTo": "m-89a73609-3d95-4ec2-833e-bf81ce604d03",
-              "is_reply_to": {
-                "id": "m-89a73609-3d95-4ec2-833e-bf81ce604d03",
-                "role": "user",
-                "authorId": "user",
-                "parts": [
-                  "É triste ver ele sendo do mal"
-                ],
-                "content": "É triste ver ele sendo do mal",
-                "timestamp": "2025-12-04T17:31:43"
-              }
-            },
-            {
-              "id": "m-a1eba0dc-953b-40aa-8854-48028d98849c",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Você e essa sua visão de mundo"
-              ],
-              "content": "Você e essa sua visão de mundo",
-              "timestamp": "2025-12-04T17:31:51"
-            },
-            {
-              "id": "m-94c92aba-8968-4bd1-9de8-6512d95d77f2",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "E o trabalho, como foi hoje?"
-              ],
-              "content": "E o trabalho, como foi hoje?",
-              "timestamp": "2025-12-04T17:34:05"
-            },
-            {
-              "id": "m-4187af56-6927-4ed8-970e-71ed12d5c528",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Pai, tá tudo bem por aí?"
-              ],
-              "content": "Pai, tá tudo bem por aí?",
-              "timestamp": "2025-12-04T17:40:16"
-            },
-            {
-              "id": "m-524aa0b7-3c7f-4a8f-9f23-73596df72809",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Pai, você sumiu kkkkk"
-              ],
-              "content": "Pai, você sumiu kkkkk",
-              "timestamp": "2025-12-04T17:42:20"
-            },
-            {
-              "id": "m-15077118-38cc-44f8-ace5-8ddf6e7daa6f",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Pai, você tá bem mesmo?"
-              ],
-              "content": "Pai, você tá bem mesmo?",
-              "timestamp": "2025-12-04T18:02:04"
-            },
-            {
-              "id": "m-47e8a45d-a1fc-46e3-9db3-aad9750a8a24",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Já sei, você deve estar pensando em qual final do Detroit vai fazer, né?"
-              ],
-              "content": "Já sei, você deve estar pensando em qual final do Detroit vai fazer, né?",
-              "timestamp": "2025-12-04T18:17:41"
-            },
-            {
-              "id": "m-65e99491-9551-4974-a7bc-6ff2fef4b873",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Pai, se você não quiser falar do jogo, tudo bem também"
-              ],
-              "content": "Pai, se você não quiser falar do jogo, tudo bem também",
-              "timestamp": "2025-12-04T18:25:13"
+              "content": "Eu tô bem, e você?",
+              "timestamp": "2025-12-05T17:58:15"
             }
           ]
         }

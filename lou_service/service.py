@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import json
 from pathlib import Path
 import random
+import re
 import threading
 import uuid
 from datetime import datetime
@@ -37,10 +38,10 @@ class LouService:
         self._long_term_memories: List[str] = []
         self._short_term_memories: List[str] = []
         self._style_patterns: List[str] = []
+        self._style_terms: List[str] = []
         self._personality_data: Dict[str, Any] = {}
         self._available_gifs: List[str] = []
-        self._louflix_session: Dict[str, Any] = {}
-        self._louflix_comments: List[Dict[str, Any]] = []
+        self._allow_style_autolearn = False
         self._load_state()
 
     # ------------------------------------------------------------------
@@ -52,13 +53,15 @@ class LouService:
             self._long_term_memories = self._load_long_term_memories()
             self._short_term_memories = self._load_short_term_memories()
             self._style_patterns = self._load_json(self.config.style_file) or []
+            deduped_styles = self._dedupe_styles(self._style_patterns)
+            if deduped_styles != self._style_patterns:
+                self._style_patterns = deduped_styles
+                self._persist_style_bank()
+            self._refresh_style_terms()
             self._personality_data = self._load_json(self.config.personality_file) or {}
             self._available_gifs = [entry["name"] for entry in self._build_gif_entries()]
-            self._louflix_session = self._load_louflix_session()
-            self._louflix_comments = self._load_json(self.config.louflix_comments_file) or []
             self._normalize_data()
             self._persist_chat_data()
-            self._persist_louflix_comments()
 
     def _load_json(self, file_path: Path) -> Optional[Any]:
         if not file_path.exists():
@@ -120,10 +123,6 @@ class LouService:
         with self.config.personality_file.open("w", encoding="utf-8") as handle:
             json.dump(self._personality_data, handle, indent=2, ensure_ascii=False)
 
-    def _persist_louflix_comments(self) -> None:
-        with self.config.louflix_comments_file.open("w", encoding="utf-8") as handle:
-            json.dump(self._louflix_comments, handle, indent=2, ensure_ascii=False)
-
     def _default_data(self) -> Dict[str, Any]:
         return {
             "servers": [
@@ -132,6 +131,7 @@ class LouService:
                     "name": "Laboratório da Lou",
                     "icon_char": "L",
                     "avatar": None,
+                    "voice_channels": self._default_voice_channels("s1"),
                     "channels": [
                         {"id": "c1_1", "name": "papo-ia", "type": "text", "messages": []}
                     ],
@@ -143,6 +143,10 @@ class LouService:
             },
         }
 
+    def _default_voice_channels(self, server_id: str) -> List[Dict[str, Any]]:
+        base = (server_id or "voice").replace(" ", "-").lower()
+        return [{"id": f"{base}_chat", "name": "Chat de Voz"}]
+
     def _normalize_data(self) -> None:
         profiles = self._data.setdefault("profiles", {})
         profiles.setdefault("user", {"name": "Mateus", "id_tag": "#1987", "avatar": "default.png"})
@@ -151,6 +155,21 @@ class LouService:
             server.setdefault("avatar", None)
             text_channels = [c for c in server.get("channels", []) if c.get("type") == "text"]
             server["channels"] = text_channels
+            voice_channels = server.get("voice_channels")
+            voice_channel_id: Optional[str] = None
+            if isinstance(voice_channels, list):
+                for entry in voice_channels:
+                    channel_id = str(entry.get("id") or "").strip()
+                    if channel_id:
+                        voice_channel_id = channel_id
+                        break
+            if not voice_channel_id:
+                fallback = self._default_voice_channels(server.get("id", "voice"))
+                if fallback and isinstance(fallback, list):
+                    voice_channel_id = str(fallback[0].get("id") or "").strip()
+            if not voice_channel_id:
+                voice_channel_id = f"voice_{uuid.uuid4().hex[:6]}"
+            server["voice_channels"] = [{"id": voice_channel_id, "name": "Chat de Voz"}]
 
     # ------------------------------------------------------------------
     # Public accessors
@@ -161,7 +180,8 @@ class LouService:
 
     def list_servers(self) -> List[Dict[str, Any]]:
         with self._lock:
-            return deepcopy(self._data.get("servers", []))
+            servers = self._data.get("servers", [])
+            return deepcopy(servers[:1])
 
     def get_server(self, server_id: str) -> Optional[Dict[str, Any]]:
         with self._lock:
@@ -184,15 +204,6 @@ class LouService:
     def get_personality_prompt(self) -> Dict[str, Any]:
         with self._lock:
             return deepcopy(self._personality_data)
-
-    def get_louflix_session(self) -> Dict[str, Any]:
-        with self._lock:
-            session = deepcopy(self._louflix_session)
-            triggers = session.get("triggers", [])
-            if isinstance(triggers, list):
-                session["triggers"] = sorted(triggers, key=lambda item: item.get("seconds", 0))
-            session["comments"] = deepcopy(self._louflix_comments)
-            return session
 
     def get_available_gifs(self) -> List[Dict[str, str]]:
         with self._lock:
@@ -217,19 +228,7 @@ class LouService:
             return deepcopy(message)
 
     def create_server(self, name: str, avatar_filename: Optional[str] = None) -> Dict[str, Any]:
-        new_server = {
-            "id": f"s_{uuid.uuid4().hex[:6]}",
-            "name": name,
-            "icon_char": name[0].upper(),
-            "avatar": avatar_filename,
-            "channels": [
-                {"id": f"c_{uuid.uuid4().hex[:6]}", "name": "geral", "type": "text", "messages": []}
-            ],
-        }
-        with self._lock:
-            self._data.setdefault("servers", []).append(new_server)
-            self._persist_chat_data()
-        return deepcopy(new_server)
+        raise ValueError("Criar novos grupos foi desativado nesta versão.")
 
     def create_channel(self, server_id: str, name: str) -> Dict[str, Any]:
         new_channel = {"id": f"c_{uuid.uuid4().hex[:6]}", "name": name, "type": "text", "messages": []}
@@ -241,35 +240,24 @@ class LouService:
             self._persist_chat_data()
         return deepcopy(new_channel)
 
-    def update_server(self, server_id: str, *, name: Optional[str] = None, avatar: Optional[str] = None) -> Dict[str, Any]:
+    def update_server(self, server_id: str, *, name: Optional[str] = None) -> Dict[str, Any]:
         with self._lock:
             server = self._locate_server(server_id)
             if server is None:
                 raise KeyError("Servidor nao encontrado")
-            changed = False
-            if name is not None:
-                trimmed = name.strip()
-                if not trimmed:
-                    raise ValueError("Nome nao pode ser vazio")
-                if server.get("name") != trimmed:
-                    server["name"] = trimmed
-                    server["icon_char"] = trimmed[0].upper()
-                    changed = True
-            if avatar is not None and server.get("avatar") != avatar:
-                server["avatar"] = avatar
-                changed = True
-            if changed:
+            if name is None:
+                raise ValueError("Nome obrigatorio")
+            trimmed = name.strip()
+            if not trimmed:
+                raise ValueError("Nome nao pode ser vazio")
+            if server.get("name") != trimmed:
+                server["name"] = trimmed
+                server["icon_char"] = trimmed[0].upper()
                 self._persist_chat_data()
             return deepcopy(server)
 
     def delete_server(self, server_id: str) -> None:
-        with self._lock:
-            servers = self._data.setdefault("servers", [])
-            before = len(servers)
-            self._data["servers"] = [s for s in servers if s.get("id") != server_id]
-            if len(self._data["servers"]) == before:
-                raise KeyError("Servidor nao encontrado")
-            self._persist_chat_data()
+        raise ValueError("Excluir grupos foi desativado nesta versão.")
 
     def update_channel(self, server_id: str, channel_id: str, *, name: Optional[str] = None) -> Dict[str, Any]:
         if name is None:
@@ -291,9 +279,6 @@ class LouService:
             server = self._locate_server(server_id)
             if server is None:
                 raise KeyError("Servidor nao encontrado")
-            text_channels = [c for c in server.get("channels", []) if c.get("type") == "text"]
-            if len(text_channels) <= 1:
-                raise ValueError("Nao e possivel excluir o unico canal de texto")
             before = len(server.get("channels", []))
             server["channels"] = [c for c in server.get("channels", []) if c.get("id") != channel_id]
             if len(server["channels"]) == before:
@@ -372,12 +357,70 @@ class LouService:
     def save_styles(self, new_styles: List[str]) -> None:
         with self._lock:
             changed = False
+            normalized_index = {style.lower(): idx for idx, style in enumerate(self._style_patterns) if isinstance(style, str)}
             for style in new_styles:
-                if isinstance(style, str) and style not in self._style_patterns:
-                    self._style_patterns.append(style)
-                    changed = True
+                cleaned = self._sanitize_style_entry(style)
+                if not cleaned:
+                    continue
+                key = cleaned.lower()
+                if key in normalized_index:
+                    idx = normalized_index[key]
+                    if len(cleaned) > len(self._style_patterns[idx]):
+                        self._style_patterns[idx] = cleaned
+                        changed = True
+                    continue
+                self._style_patterns.append(cleaned)
+                normalized_index[key] = len(self._style_patterns) - 1
+                changed = True
+            deduped = self._dedupe_styles(self._style_patterns)
+            if deduped != self._style_patterns:
+                self._style_patterns = deduped
+                changed = True
             if changed:
                 self._persist_style_bank()
+                self._refresh_style_terms()
+
+    def _sanitize_style_entry(self, style: Any) -> str:
+        if not isinstance(style, str):
+            return ""
+        return " ".join(style.strip().split())
+
+    def _dedupe_styles(self, styles: List[str]) -> List[str]:
+        seen = set()
+        deduped: List[str] = []
+        for entry in styles:
+            cleaned = self._sanitize_style_entry(entry)
+            if not cleaned:
+                continue
+            key = cleaned.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(cleaned)
+        return deduped
+
+    def _refresh_style_terms(self) -> None:
+        terms: List[str] = []
+        for entry in self._style_patterns:
+            terms.extend(self._extract_style_terms(entry))
+        deduped: List[str] = []
+        seen = set()
+        for term in terms:
+            normalized = term.strip()
+            if not normalized:
+                continue
+            lower = normalized.lower()
+            if lower in seen:
+                continue
+            deduped.append(normalized)
+            seen.add(lower)
+        self._style_terms = deduped
+
+    def _extract_style_terms(self, entry: Any) -> List[str]:
+        if not isinstance(entry, str):
+            return []
+        matches = re.findall(r"'([^']+)'", entry)
+        return [match.strip() for match in matches if match.strip()]
 
     def save_long_term_memories(self, new_memories: List[str]) -> None:
         with self._lock:
@@ -396,6 +439,16 @@ class LouService:
                 "short_term": list(self._short_term_memories),
                 "styles": list(self._style_patterns),
             }
+
+    def get_allowed_slang_terms(self, limit: Optional[int] = None) -> List[str]:
+        with self._lock:
+            terms = list(self._style_terms)
+        if limit is None or limit >= len(terms):
+            return terms
+        return terms[:limit]
+
+    def allow_style_autolearn(self) -> bool:
+        return self._allow_style_autolearn
 
     def update_context(self, *, long_term: Optional[List[str]] = None, short_term: Optional[List[str]] = None, styles: Optional[List[str]] = None) -> Dict[str, List[str]]:
         if not any([long_term, short_term, styles]):
@@ -418,40 +471,6 @@ class LouService:
             content=text,
         )
         return self.add_message(payload)
-
-    def add_louflix_comment(
-        self,
-        *,
-        comment: str,
-        timestamp: Optional[str] = None,
-        seconds: Optional[int] = None,
-        trigger_prompt: Optional[str] = None,
-    ) -> Dict[str, Any]:
-        text = (comment or "").strip()
-        if not text:
-            raise ValueError("Comentario obrigatorio")
-        normalized_timestamp = (timestamp or "").strip() or None
-        normalized_seconds: Optional[int]
-        if isinstance(seconds, int) and seconds >= 0:
-            normalized_seconds = seconds
-        else:
-            normalized_seconds = self._parse_timestamp(normalized_timestamp or "00:00:00")
-        if normalized_seconds is None:
-            normalized_seconds = 0
-        if not normalized_timestamp:
-            normalized_timestamp = self._format_timestamp(normalized_seconds)
-        entry = {
-            "id": f"lf_{uuid.uuid4().hex[:8]}",
-            "timestamp": normalized_timestamp,
-            "seconds": normalized_seconds,
-            "comment": text,
-            "trigger_prompt": (trigger_prompt or "").strip(),
-            "created_at": datetime.utcnow().isoformat() + "Z",
-        }
-        with self._lock:
-            self._louflix_comments.append(entry)
-            self._persist_louflix_comments()
-            return deepcopy(entry)
 
     def _compose_proactive_text(self, server_id: str, channel_id: str, attempt: int) -> str:
         channel = self._locate_channel(server_id, channel_id)
@@ -545,72 +564,6 @@ class LouService:
             text = f"{text[:87]}..."
         return text
 
-    def _load_louflix_session(self) -> Dict[str, Any]:
-        session = self._load_json(self.config.louflix_session_file) or {}
-        triggers_path = session.get("triggers_file")
-        if triggers_path:
-            triggers_file = Path(triggers_path)
-            if not triggers_file.is_absolute():
-                triggers_file = self.config.data_dir / triggers_path
-        else:
-            triggers_file = self.config.louflix_triggers_file
-        triggers = self._load_json(triggers_file) or []
-        normalized_triggers: List[Dict[str, Any]] = []
-        for item in triggers:
-            timestamp = item.get("timestamp") or "00:00:00"
-            normalized_triggers.append(
-                {
-                    "timestamp": timestamp,
-                    "seconds": self._parse_timestamp(timestamp),
-                    "prompt": item.get("prompt", ""),
-                }
-            )
-        video_path = session.get("video") or "Lizzy McAlpine - Doomsday.mp4"
-        video_path = self._normalize_media_path(video_path)
-        poster_path = session.get("poster")
-        poster_path = self._normalize_media_path(poster_path) if poster_path else None
-        return {
-            "title": session.get("title", "LouFlix (demo)"),
-            "description": session.get("description", "Sessão experimental pronta para comentários contextuais."),
-            "video": video_path,
-            "poster": poster_path,
-            "triggers": normalized_triggers,
-        }
-
-    def _parse_timestamp(self, timestamp: str) -> int:
-        parts = timestamp.split(":")
-        if len(parts) == 2:
-            minutes, seconds = parts
-            hours = 0
-        elif len(parts) == 3:
-            hours, minutes, seconds = parts
-        else:
-            return 0
-        try:
-            total = int(hours) * 3600 + int(minutes) * 60 + int(seconds)
-        except ValueError:
-            total = 0
-        return total
-
-    def _format_timestamp(self, total_seconds: int) -> str:
-        total_seconds = max(int(total_seconds), 0)
-        hours = total_seconds // 3600
-        minutes = (total_seconds % 3600) // 60
-        seconds = total_seconds % 60
-        return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-
-    def _normalize_media_path(self, path_value: Optional[str]) -> Optional[str]:
-        if not path_value:
-            return None
-        if path_value.startswith("http"):
-            return path_value
-        trimmed = path_value.strip()
-        if not trimmed:
-            return None
-        if trimmed.startswith("/"):
-            return trimmed
-        return f"/{trimmed}"
-
     # ------------------------------------------------------------------
     # Context builder (shared with IA workers)
     # ------------------------------------------------------------------
@@ -639,6 +592,12 @@ class LouService:
         except KeyError:
             user_name = "Pai"
         history_copy.insert(2, {"role": "user", "parts": [f"[Contexto Pessoal: O nome do seu pai é '{user_name}'.]"]})
+        focus_instruction = (
+            "[Foco no Contexto: Responda apenas sobre assuntos citados recentemente nas mensagens, "
+            "memórias ou pedidos explícitos do Pai. Não ofereça criar projetos novos (jogo, app, bot) "
+            "se ele não pediu. Quando estiver em dúvida, pergunte antes de assumir um novo tema.]"
+        )
+        history_copy.insert(2, {"role": "user", "parts": [focus_instruction]})
 
         if self._long_term_memories:
             sample = random.sample(self._long_term_memories, min(len(self._long_term_memories), 2))
@@ -649,6 +608,22 @@ class LouService:
         if self._style_patterns:
             sample_styles = random.sample(self._style_patterns, min(len(self._style_patterns), 5))
             history_copy.insert(2, {"role": "user", "parts": [f"[Estilo do Usuário: {', '.join(sample_styles)}]"]})
+        allowed_slang = self.get_allowed_slang_terms(limit=10)
+        if allowed_slang:
+            bundle = ", ".join(allowed_slang)
+            history_copy.insert(
+                2,
+                {
+                    "role": "user",
+                    "parts": [
+                        (
+                            "[Gírias Autorizadas: {tokens}. Quando quiser usar gírias, escolha apenas"
+                            " essas expressões ou variações diretas delas. Se nenhuma fizer sentido,"
+                            " responda sem gírias.]"
+                        ).format(tokens=bundle)
+                    ],
+                },
+            )
         if self._available_gifs:
             gif_list = ", ".join([f"'{gif}'" for gif in self._available_gifs])
             history_copy.insert(2, {"role": "user", "parts": [f"[Ferramentas: GIFs disponíveis: {gif_list}]"]})

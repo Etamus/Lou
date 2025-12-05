@@ -23,14 +23,13 @@
     <div class="app-shell">
       <div class="glass-backdrop" aria-hidden="true"></div>
       <div class="neve-app" role="application">
-      <nav class="server-rail" aria-label="Servidores" data-role="server-rail"></nav>
       <aside class="channel-panel">
         <header class="panel-header">
           <div>
             <p class="panel-label">Servidor</p>
             <p class="panel-title" data-bind="server-name">—</p>
           </div>
-          <button class="ghost-button" data-role="server-settings" title="Configurações do servidor" type="button">
+          <button class="ghost-button" data-role="server-settings" title="Renomear grupo" type="button">
             <i class="fas fa-gear" aria-hidden="true"></i>
           </button>
         </header>
@@ -43,9 +42,12 @@
           </div>
           <div class="channel-list" data-role="channel-list"></div>
         </div>
+        <div class="voice-section">
+          <div class="voice-channel-list" data-role="voice-channel-list"></div>
+        </div>
         <footer class="user-card">
           <div class="avatar" data-bind="user-avatar"></div>
-          <div>
+          <div class="user-card-info">
             <p class="user-name" data-bind="user-name">Você</p>
             <p class="user-status">Disponível</p>
           </div>
@@ -65,15 +67,68 @@
             <p class="chat-title" data-bind="channel-name">—</p>
             <p class="chat-topic" data-bind="channel-topic"></p>
           </div>
-          <div class="chat-actions">
-            <button class="ghost-button" type="button" title="Assistir com LouFlix" data-role="louflix-toggle">
-              <i class="fas fa-clapperboard" aria-hidden="true"></i>
-            </button>
-            <button class="ghost-button" type="button" title="Memórias e estilos" data-role="context-toggle">
-              <i class="fas fa-brain" aria-hidden="true"></i>
-            </button>
+          <div class="ai-availability" data-role="ai-availability" data-status="available">
+            <span class="ai-availability-dot"></span>
+            <span class="ai-availability-label" data-role="ai-availability-label">Disponível</span>
           </div>
+          <div class="voice-presence-indicator is-hidden" data-role="voice-presence-indicator">
+            <i class="fas fa-headset" aria-hidden="true"></i>
+            <span>Lou está no chat de voz</span>
+          </div>
+            <div class="chat-actions">
+              <button class="ghost-button" type="button" title="Memórias e estilos" data-role="context-toggle">
+                <i class="fas fa-brain" aria-hidden="true"></i>
+              </button>
+            </div>
         </header>
+        <section class="voice-session is-hidden" data-role="voice-session">
+          <header class="voice-session-header">
+            <div>
+              <p class="voice-session-label">CHAT DE VOZ</p>
+            </div>
+            <div class="voice-session-actions">
+              <span class="voice-session-status" data-role="voice-session-status"></span>
+              <button
+                class="ghost-button is-hidden"
+                type="button"
+                data-role="voice-share-stop"
+                title="Parar transmissão"
+              >
+                <i class="fas fa-stop" aria-hidden="true"></i>
+              </button>
+              <button class="ghost-button" type="button" data-role="voice-share-trigger" title="Iniciar transmissão">
+                <i class="fas fa-display" aria-hidden="true"></i>
+              </button>
+              <button class="ghost-button" type="button" data-role="voice-leave" title="Sair do chat de voz">
+                <i class="fas fa-phone-slash" aria-hidden="true"></i>
+              </button>
+              <input class="visually-hidden" type="file" accept="video/*" data-role="voice-share-file" />
+            </div>
+          </header>
+          <div class="voice-session-participants" data-role="voice-participants"></div>
+          <div class="voice-share is-hidden" data-role="voice-share">
+            <header class="voice-share-header">
+              <div>
+                <p class="voice-share-label">Transmissão</p>
+                <h3 class="voice-share-title" data-role="voice-share-title">Chat de Voz</h3>
+              </div>
+              <div class="voice-share-header-actions">
+                <span class="voice-share-status" data-role="voice-share-status"></span>
+                <button class="ghost-button voice-share-toggle" type="button" data-role="voice-share-toggle">
+                  <i class="fas fa-eye-slash" aria-hidden="true"></i>
+                  <span>Ocultar</span>
+                </button>
+              </div>
+            </header>
+            <button class="voice-share-collapse-banner is-hidden" type="button" data-role="voice-share-collapse-banner">
+              <i class="fas fa-clapperboard" aria-hidden="true"></i>
+              <span>Transmissão oculta. Mostrar novamente</span>
+            </button>
+            <div class="voice-share-player">
+              <video class="voice-share-video" data-role="voice-share-video" controls playsinline preload="metadata"></video>
+            </div>
+          </div>
+        </section>
         <div class="chat-body">
           <div class="chat-scroll" data-role="message-list" aria-live="polite"></div>
           <div class="empty-state" data-role="empty-state">
@@ -99,7 +154,7 @@
           <textarea
             id="message-input"
             name="message"
-            placeholder="Conversar em #geral"
+            placeholder="Conversar em @geral"
             rows="1"
             autocomplete="off"
           ></textarea>
@@ -112,7 +167,7 @@
         </form>
         <footer class="chat-footer" aria-live="polite">
           <span class="status-dot"></span>
-          <p>Neve conectado ao backend local • Porta 8765</p>
+          <p>Lou conectada ao backend local • Porta 8765</p>
         </footer>
       </main>
       </div>
@@ -179,6 +234,10 @@
           </section>
         </div>
         <footer class="context-footer">
+          <button class="ghost-button availability-toggle" type="button" data-role="availability-toggle" data-status="available">
+            <span class="availability-toggle-dot" data-role="availability-toggle-dot" aria-hidden="true"></span>
+            <span data-role="availability-toggle-label">Mudar para Ausente</span>
+          </button>
           <button class="primary-button" type="button" data-role="proactive-trigger">
             <i class="fas fa-bolt" aria-hidden="true"></i>
             <span>Forçar mensagem proativa</span>
@@ -213,93 +272,6 @@
         </div>
         <footer class="gif-footer">
         </footer>
-      </section>
-    </div>
-    <div class="louflix-overlay is-hidden" data-role="louflix-overlay" aria-live="polite">
-      <section class="louflix-panel" data-role="louflix-panel" role="dialog" aria-modal="true" aria-labelledby="louflix-title">
-        <header class="louflix-header">
-          <div class="louflix-session-info">
-            <div class="louflix-poster" data-role="louflix-poster" aria-hidden="true"></div>
-            <div>
-              <p class="louflix-label">LouFlix</p>
-              <h2 class="louflix-title" id="louflix-title" data-role="louflix-title">Sessão</h2>
-              <p class="louflix-description" data-role="louflix-description"></p>
-            </div>
-          </div>
-          <div class="louflix-header-actions">
-            <button class="ghost-button" type="button" data-role="louflix-refresh" title="Recarregar sessão">
-              <i class="fas fa-rotate" aria-hidden="true"></i>
-            </button>
-            <button class="ghost-button" type="button" data-role="louflix-close" title="Fechar LouFlix">
-              <i class="fas fa-xmark" aria-hidden="true"></i>
-            </button>
-          </div>
-        </header>
-        <p class="louflix-status" data-role="louflix-status"></p>
-        <div class="louflix-body">
-          <div class="louflix-main">
-            <div class="louflix-player-card">
-              <video class="louflix-video" data-role="louflix-video" controls playsinline preload="metadata"></video>
-              <div class="louflix-player-toolbar">
-                <div class="louflix-playback-indicator" data-role="louflix-playback-indicator">00:00:00</div>
-                <button class="lou-button" type="button" data-role="louflix-capture-time">
-                  <i class="fas fa-clock" aria-hidden="true"></i>
-                  <span>Usar tempo atual</span>
-                </button>
-              </div>
-            </div>
-            <section class="louflix-timeline">
-              <header class="louflix-section-header">
-                <div>
-                  <p class="louflix-section-label">Timeline</p>
-                  <h3>Triggers temporizados</h3>
-                </div>
-                <span class="louflix-trigger-count" data-role="louflix-trigger-count"></span>
-              </header>
-              <div class="louflix-trigger-list" data-role="louflix-trigger-list"></div>
-            </section>
-          </div>
-          <aside class="louflix-sidebar">
-            <section class="louflix-comment-editor">
-              <header class="louflix-section-header">
-                <div>
-                  <p class="louflix-section-label">Comentário</p>
-                  <h3>Registrar insight</h3>
-                </div>
-              </header>
-              <form class="louflix-comment-form" data-role="louflix-comment-form">
-                <label class="louflix-field">
-                  <span>Timestamp</span>
-                  <div class="louflix-timestamp-row">
-                    <input type="text" placeholder="00:00:00" data-role="louflix-timestamp-input" />
-                    <input type="hidden" data-role="louflix-seconds-input" />
-                    <button class="louflix-mini-button" type="button" title="Sincronizar com o player" data-role="louflix-capture-time">
-                      <i class="fas fa-bullseye" aria-hidden="true"></i>
-                    </button>
-                  </div>
-                </label>
-                <p class="louflix-prompt-preview" data-role="louflix-prompt-preview">Selecione um trigger para preencher automaticamente.</p>
-                <label class="louflix-field">
-                  <span>Comentário</span>
-                  <textarea rows="4" placeholder="Escreva algo sobre a cena" data-role="louflix-comment-input"></textarea>
-                </label>
-                <button class="lou-button primary" type="submit" data-role="louflix-comment-submit">
-                  <i class="fas fa-paper-plane" aria-hidden="true"></i>
-                  <span>Enviar para o backend</span>
-                </button>
-              </form>
-            </section>
-            <section class="louflix-comment-feed">
-              <header class="louflix-section-header">
-                <div>
-                  <p class="louflix-section-label">Comentários enviados</p>
-                  <h3>Histórico</h3>
-                </div>
-              </header>
-              <div class="louflix-comments-list" data-role="louflix-comments-list"></div>
-            </section>
-          </aside>
-        </div>
       </section>
     </div>
     <div class="modal-root" data-role="modal-root" aria-live="polite"></div>

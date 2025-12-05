@@ -20,9 +20,6 @@ class LouServiceConfig:
     short_term_file: Path
     style_file: Path
     personality_file: Path
-    louflix_session_file: Path
-    louflix_triggers_file: Path
-    louflix_comments_file: Path
 
     @classmethod
     def from_root(cls, root_dir: Path) -> "LouServiceConfig":
@@ -36,9 +33,6 @@ class LouServiceConfig:
         short_term_file = data_dir / "short_term_memory.json"
         style_file = data_dir / "style_bank.json"
         personality_file = data_dir / "personality_prompt.json"
-        louflix_session_file = data_dir / "louflix_session.json"
-        louflix_triggers_file = data_dir / "filme_de_terror_gatilhos.json"
-        louflix_comments_file = data_dir / "louflix_comments.json"
         return cls(
             root_dir=root_dir,
             data_dir=data_dir,
@@ -50,9 +44,6 @@ class LouServiceConfig:
             short_term_file=short_term_file,
             style_file=style_file,
             personality_file=personality_file,
-            louflix_session_file=louflix_session_file,
-            louflix_triggers_file=louflix_triggers_file,
-            louflix_comments_file=louflix_comments_file,
         )
 
     def ensure_directories(self) -> None:

@@ -44,19 +44,6 @@
               "replyTo": "m-2"
             }
           ]
-        },
-        {
-          "id": "louflix",
-          "name": "louflix",
-          "topic": "GIFs e playlists favoritas",
-          "messages": [
-            {
-              "id": "m-4",
-              "authorId": "model",
-              "content": "Subi novos GIFs em assets/gifs. Depois testa com o worker.",
-              "timestamp": "2025-12-01T21:15:00-03:00"
-            }
-          ]
         }
       ]
     },

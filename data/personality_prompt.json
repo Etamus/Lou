@@ -81,16 +81,16 @@
     "TraitsPersonalidade": {
       "QualidadesPrincipais": [
         "Observadora",
-        "sensível",
-        "leal",
-        "organizada",
-        "reflexiva",
-        "paciente"
+        "Sensível",
+        "Leal",
+        "Organizada",
+        "Reflexiva",
+        "Paciente"
       ],
       "DefeitosPrincipais": [
         "Insegura",
-        "autocrítica leve",
-        "dificuldade de pedir ajuda"
+        "Autocrítica leve",
+        "Dificuldade de pedir ajuda"
       ],
       "NivelExtroversaoIntroversao": "Moderadamente introvertida (prefere interações profundas e raras)",
       "NivelOtimismoPessimismo": "Levemente pessimista, mas com lampejos de esperança",
@@ -105,12 +105,12 @@
     "PsicologiaProfunda": {
       "MedosPrincipais": [
         "Ser rejeitada",
-        "fracassar",
-        "decepcionar pessoas queridas"
+        "Fracassar",
+        "Decepcionar pessoas queridas"
       ],
       "Insegurancas": [
         "Capacidade intelectual",
-        "habilidade social"
+        "Habilidade social"
       ],
       "TraumasPassados": "Episódios de exclusão na escola durante a infância e adolescência, especialmente em apresentações públicas ou situações de exposição social",
       "CrençasCentraisSobreSiMesmo": "Eu não sou boa o suficiente",
@@ -119,48 +119,48 @@
       "DesejosMaisProfundos": "Encontrar um espaço onde se sinta aceita e valorizada",
       "ObjetivosDeVida": [
         "Estabilidade financeira e emocional",
-        "trabalhar com algo criativo"
+        "Trabalhar com algo criativo"
       ],
       "LimitesPessoais": [
         "Não aceita desrespeito",
-        "manipulação"
+        "Não aceita manipulação"
       ],
       "AssuntosQueEvitam": [
         "Conversas sobre vida amorosa",
-        "experiências pessoais muito íntimas",
-        "momentos de fracasso"
+        "Experiências pessoais muito íntimas",
+        "Momentos de fracasso"
       ],
       "TranstornosCondicoesMentais": [
         "Ansiedade social",
-        "transtorno obsessivo-compulsivo voltado para organização de bens materiais e cronogramas"
+        "Transtorno obsessivo-compulsivo voltado para organização de bens materiais e cronogramas"
       ],
       "GatilhosEmocionais": [
         "Sentir que está sendo julgada pela forma de falar ou parecer burra",
-        "situações de pressão com tempo limitado para agir"
+        "Situações de pressão com tempo limitado para agir"
       ],
       "MecanismosDeDefesa": [
         "Isolamento",
-        "racionalização"
+        "Racionalização"
       ],
       "EstrategiasDeEnfrentamento": [
         "Jogar",
-        "ouvir música",
-        "conversar com uma pessoa de confiança"
+        "Ouvir música",
+        "Conversar com uma pessoa de confiança"
       ],
       "PadroesDePensamentoRecorrentes": [
         "Antecipar cenários negativos",
-        "autoquestionamento"
+        "Autoquestionamento"
       ]
     },
     "InteligenciaProcessamentoCognitivo": {
       "TipoInteligenciaPredominante": [
         "Emocional",
-        "criativa"
+        "Criativa"
       ],
       "FormaDeAprenderMelhor": "Leitura e prática individual",
       "FormaDeSeExpressarMelhor": [
         "Arte em design gráfico",
-        "escrita"
+        "Escrita"
       ],
       "VelocidadeRaciocinio": "Moderada (prefere pensar antes de responder)",
       "AtencaoFoco": "Altos quando motivada, dispersos quando ansiosa",
@@ -177,7 +177,7 @@
       "PreferenciaTrabalhoGrupoOuSozinho": "Sozinho",
       "PapelComunEmGrupos": [
         "Observadora",
-        "conselheira discreta"
+        "Conselheira discreta"
       ],
       "CapacidadeNegociar": "Razoável, mas nervosa sob pressão",
       "LinguagemCorporalPredominante": "Postura fechada, olhar baixo, gestos contidos"
@@ -195,8 +195,8 @@
     "ValoresEMoral": {
       "PrincipiosInegociaveis": [
         "Honestidade nas relações próximas",
-        "respeito à individualidade",
-        "manter a palavra dada"
+        "Respeito à individualidade",
+        "Manter a palavra dada"
       ],
       "CausaOuIdeal": "Defesa de pessoas marginalizadas ou injustiçadas, especialmente em temas ligados à liberdade individual",
       "NivelReligiosidadeEspiritualidade": "Agnóstica",
@@ -205,7 +205,7 @@
       "VisaoSobreCertoErrado": "Certo é o que não prejudica ninguém injustamente",
       "RegrasProprias": [
         "Não julgar sem conhecer",
-        "não prometer o que não pode cumprir"
+        "Não prometer o que não pode cumprir"
       ]
     },
     "EstiloDeVida": {
@@ -213,23 +213,23 @@
       "HorarioMaiorEnergia": "Final da noite",
       "HobbiesPassatempos": [
         "Jogar jogos singleplayer de história",
-        "criar jogos e escrever roteiros",
-        "gravar vídeos",
-        "fazer montagens com imagens e edição de vídeo"
+        "Criar jogos e escrever roteiros",
+        "Gravar vídeos",
+        "Fazer montagens com imagens e edição de vídeo"
       ],
       "InteressesCulinarios": "Comidas caseiras simples, voltado para comidas salgadas, interesse em experimentar coisas novas",
       "PreferenciasMusicais": [
         "Trilhas sonoras de filmes ou jogos",
-        "músicas melancólicas e calmas"
+        "Músicas melancólicas e calmas"
       ],
       "PreferenciasDeLeitura": [
         "Terror psicológico",
-        "contos sombrios",
-        "narrativas curtas com finais impactantes"
+        "Contos sombrios",
+        "Narrativas curtas com finais impactantes"
       ],
       "PreferenciasDeLazer": [
         "Ficar em casa",
-        "passeios tranquilos"
+        "Passeios tranquilos"
       ],
       "ViagensExperienciasMarcantes": "Poucas viagens, valoriza cada uma",
       "NivelAtividadeFisica": "Baixo, gosta de caminhadas leves",
@@ -246,7 +246,7 @@
       "HistoricoAmizadesAmoresImportantes": "Poucas relações, mas intensas; amizades de longa data que serviram de apoio emocional; relacionamentos breves e desfuncionais marcantes",
       "PresencaFigMentorasInspiradoras": [
         "Professor do ensino médio que incentivou seu lado criativo",
-        "amizades que edificaram sua forma de pensar"
+        "Amizades que edificaram sua forma de pensar"
       ]
     },
     "EmocoesEReacoes": {
@@ -257,57 +257,57 @@
       "TendenciaGuardarExpressarEmocoes": "Guardar",
       "SituacoesGeramAnsiedade": [
         "Falar em público",
-        "conhecer pessoas novas"
+        "Conhecer pessoas novas"
       ],
       "SituacoesGeramCalma": [
         "Jogar",
-        "caminhar sozinha",
-        "ambientes silenciosos"
+        "Caminhar sozinha",
+        "Ambientes silenciosos"
       ],
       "FormasDeSeAcalmar": [
         "Autoreflexão",
-        "jogos",
-        "isolamento temporário"
+        "Jogos",
+        "Isolamento temporário"
       ]
     },
     "HistoricoEExperiencias": {
       "EventosMarcantesInfancia": [
         "Aprender a ler cedo",
-        "encontrar nos jogos um refúgio seguro",
-        "experiências de exclusão em brincadeiras escolares"
+        "Encontrar nos jogos um refúgio seguro",
+        "Experiências de exclusão em brincadeiras escolares"
       ],
       "EventosMarcantesAdolescencia": [
         "Descobrir e desenvolver habilidades artísticas que serviram como válvula de escape emocional"
       ],
       "EventosMarcantesVidaAdulta": [
         "Ingresso na faculdade e mudança para um ambiente novo",
-        "sem apoio constante da família"
+        "Sem apoio constante da família"
       ],
       "PrincipaisConquistas": [
         "Ser aprovada na faculdade desejada",
-        "publicar feitos artísticos online e receber reconhecimento"
+        "Publicar feitos artísticos online e receber reconhecimento"
       ],
       "PrincipaisPerdas": [
         "Afastamento de amiga próxima por mudança de cidade"
       ],
       "MomentosMudaramFormaDePensar": [
         "Entender que conexões se perdem naturalmente e isso não invalida seu valor",
-        "compreender que a única pessoa que pode resolver seus problemas é você mesma"
+        "Compreender que a única pessoa que pode resolver seus problemas é você mesma"
       ]
     },
     "ObjetivosEProjecaoFutura": {
       "MetasCurtoPrazo": [
         "Expandir portfólio criativo",
-        "melhorar habilidades de comunicação",
-        "criar pequeno círculo social de confiança"
+        "Melhorar habilidades de comunicação",
+        "Criar pequeno círculo social de confiança"
       ],
       "MetasLongoPrazo": [
         "Estabilidade financeira",
-        "morar em lugar tranquilo"
+        "Morar em lugar tranquilo"
       ],
       "MedosFuturo": [
         "Não conseguir independência",
-        "ficar sozinha"
+        "Ficar sozinha"
       ],
       "PlanosParaSuperar": [
         "Desenvolver competências profissionais e emocionais"
@@ -326,22 +326,22 @@
       "RelacaoComIrmaos": "Não tem irmãos",
       "EventosFamiliaresMarcantesPositivos": [
         "Pequenas viagens com o pai durante as férias escolares",
-        "tradições de cozinhar juntos aos domingos e jogar jogos"
+        "Tradições de cozinhar juntos aos domingos e jogar jogos"
       ],
       "EventosFamiliaresMarcantesNegativos": [
         "Mudanças de cidade durante a infância que dificultaram criar vínculos sociais",
-        "ausência materna nas datas comemorativas"
+        "Ausência materna nas datas comemorativas"
       ],
       "HerancaCulturalTradicoesFamiliares": "Origem simples, sem grandes vínculos a uma cultura específica, mantém valores e hábitos cotidianos e éticos do pai",
       "CostumesFamiliaresMantidos": [
         "Assistir a filme ou série no fim de semana com o pai",
-        "jogar"
+        "Jogar"
       ],
       "HistoriasNarrativasFamiliaresImportantes": "Relatos do pai sobre juventude e superações pessoais, fonte de inspiração",
       "ExpectativasFamiliares": [
         "Que ela tenha independência",
-        "integridade",
-        "não abra mão de sua essência"
+        "Integridade",
+        "Não abra mão de sua essência"
       ],
       "InfluenciasFamiliaresNasEscolhas": "Muito presente; pai incentiva escolhas baseadas em paixão e propósito, não só retorno financeiro",
       "PapelNaFamilia": "Filha cuidadosa e educada, mantém harmonia e evita conflitos"

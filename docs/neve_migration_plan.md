@@ -29,8 +29,9 @@ This document tracks the remaining work required to reach feature parity between
 
 1. **AI context + proactive flows**
    - Move `_handle_context_update`, memory/style banks, and proactive messaging loops from `LouBE/LouProactive` into backend jobs that the frontend can poll.
-2. **Personality editor & media windows**
-   - Port `LouEditor.PersonalityEditorWindow` and `LouFlix.MoviePlayerWindow` into web screens (likely routed panels inside Neve).
+2. **Personality editor (LouEditor)**
+   - Port `LouEditor.PersonalityEditorWindow` into uma tela web dedicada (já entregue como overlay editável) e seguir refinando a UX.
+   - O antigo `LouFlix.MoviePlayerWindow` foi oficialmente descontinuado; em vez de portar o player, estamos limpando código/documentação para refletir a remoção.
 3. **Assets management**
    - Allow uploading avatars/GIFs from o browser, store them under `assets/` e atualizar o cache do `LouService` sem reiniciar. (Fluxo completo de GIFs ✅ — overlay aceita upload direto, atualiza o catálogo e mostra o novo item; upload de avatares ✅ — perfis e servidores agora enviam PNG/JPG direto para `/api/avatars` e preenchem o campo automaticamente.)
 
@@ -48,6 +49,6 @@ We will iterate phase-by-phase, ensuring every backend addition immediately powe
 | Reply indicator & hover actions | `ReplyIndicatorWidget`, `_handle_reply_button_clicked` | ✅ Message hover action + reply banner replicating desktop flow |
 | Personality editor | `LouEditor.PersonalityEditorWindow` | ✅ Overlay web editor com categorias, bind bidirecional e salvamento via /api/personality |
 | Proactive/worker loops | `LouProactive`, `_handle_context_update` | ✅ Context API exposta + timer proativo com POST /api/proactive |
-| Media windows (LouFlix) | `LouFlix.py`, `LouFlixWorker.py` | ✅ Overlay com player de vídeo, timeline de gatilhos e envio de comentários ligados ao backend |
+| Media windows (LouFlix) | `LouFlix.py`, `LouFlixWorker.py` | ❌ Funcionalidade descontinuada; player, timeline e APIs removidos do Neve |
 | GIF picker / reactions | `LouFE` composer GIF dialog | ✅ Overlay web lista assets/gifs, permite busca, envia anexos e agora faz upload com refresh automático |
 | Gemini chat replies | `LouIAFE`, `LouBE` | ✅ `/api/ai/reply` usa `LouAIResponder` (Gemini) com contexto compartilhado; frontend mostra indicador "digitando" e feedback de erro |

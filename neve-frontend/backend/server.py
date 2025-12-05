@@ -24,6 +24,7 @@ FRONTEND_DIR = ROOT_DIR / "neve-frontend"
 ASSETS_DIR = ROOT_DIR / "assets"
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8765
+VIDEO_EXTENSIONS = {".mp4", ".mov", ".m4v", ".webm", ".mkv"}
 
 
 def build_handler(service: LouService, ai_responder: Optional[LouAIResponder] = None) -> Callable[..., SimpleHTTPRequestHandler]:
@@ -86,14 +87,14 @@ def build_handler(service: LouService, ai_responder: Optional[LouAIResponder] = 
             if path == "/api/context":
                 self._json_response(service.get_context_snapshot())
                 return
-            if path == "/api/louflix/session":
-                self._json_response(service.get_louflix_session())
-                return
             if path == "/api/gifs":
                 self._json_response(service.get_available_gifs())
                 return
             if path == "/api/personality":
                 self._json_response(service.get_personality_prompt())
+                return
+            if path == "/api/media/videos":
+                self._handle_list_videos()
                 return
 
             parts = path.strip("/").split("/")
@@ -138,9 +139,6 @@ def build_handler(service: LouService, ai_responder: Optional[LouAIResponder] = 
                 return
             if path == "/api/ai/reply":
                 self._handle_ai_reply()
-                return
-            if path == "/api/louflix/comments":
-                self._handle_create_louflix_comment()
                 return
             if parts[:2] == ["api", "servers"]:
                 if len(parts) == 2:
@@ -196,7 +194,11 @@ def build_handler(service: LouService, ai_responder: Optional[LouAIResponder] = 
             if not name:
                 self.send_error(400, "Nome obrigatorio")
                 return
-            server = service.create_server(name)
+            try:
+                server = service.create_server(name)
+            except ValueError as exc:
+                self.send_error(403, str(exc))
+                return
             self._json_response(server, status=201)
 
         def _handle_create_channel(self, server_id: str) -> None:
@@ -317,43 +319,15 @@ def build_handler(service: LouService, ai_responder: Optional[LouAIResponder] = 
             }
             self._json_response(payload, status=201)
 
-        def _handle_create_louflix_comment(self) -> None:
-            body = self._read_json_body()
-            if body is None:
-                return
-            comment_text = (body.get("comment") or "").strip()
-            if not comment_text:
-                self.send_error(400, "Comentario obrigatorio")
-                return
-            timestamp = (body.get("timestamp") or "").strip() or None
-            seconds_raw = body.get("seconds")
-            seconds_value: Optional[int]
-            try:
-                seconds_value = int(seconds_raw) if seconds_raw is not None else None
-            except (TypeError, ValueError):
-                seconds_value = None
-            trigger_prompt = body.get("triggerPrompt")
-            try:
-                comment = service.add_louflix_comment(
-                    comment=comment_text,
-                    timestamp=timestamp,
-                    seconds=seconds_value,
-                    trigger_prompt=trigger_prompt,
-                )
-            except ValueError as exc:
-                self.send_error(400, str(exc))
-                return
-            self._json_response(comment, status=201)
-
         def _handle_update_server(self, server_id: str) -> None:
             body = self._read_json_body()
             if body is None:
                 return
-            if not any(key in body for key in ("name", "avatar")):
-                self.send_error(400, "Nenhum campo para atualizar")
+            if "name" not in body:
+                self.send_error(400, "Nome obrigatorio")
                 return
             try:
-                server = service.update_server(server_id, name=body.get("name"), avatar=body.get("avatar"))
+                server = service.update_server(server_id, name=body.get("name"))
             except KeyError as exc:
                 self.send_error(404, str(exc))
                 return
@@ -365,8 +339,8 @@ def build_handler(service: LouService, ai_responder: Optional[LouAIResponder] = 
         def _handle_delete_server(self, server_id: str) -> None:
             try:
                 service.delete_server(server_id)
-            except KeyError as exc:
-                self.send_error(404, str(exc))
+            except (KeyError, ValueError) as exc:
+                self.send_error(403, str(exc))
                 return
             self._json_response({"status": "ok"})
 
@@ -397,6 +371,24 @@ def build_handler(service: LouService, ai_responder: Optional[LouAIResponder] = 
                 self.send_error(400, str(exc))
                 return
             self._json_response({"status": "ok"})
+
+        def _handle_list_videos(self) -> None:
+            videos_dir = ASSETS_DIR / "videos"
+            entries = []
+            if videos_dir.exists() and videos_dir.is_dir():
+                for file_path in sorted(videos_dir.iterdir()):
+                    if not file_path.is_file():
+                        continue
+                    if file_path.suffix.lower() not in VIDEO_EXTENSIONS:
+                        continue
+                    entries.append(
+                        {
+                            "filename": file_path.name,
+                            "path": f"/assets/videos/{file_path.name}",
+                            "size": file_path.stat().st_size,
+                        }
+                    )
+            self._json_response({"videos": entries})
 
         def _handle_update_profile(self, profile_key: str) -> None:
             body = self._read_json_body()

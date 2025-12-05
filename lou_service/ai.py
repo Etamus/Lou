@@ -54,6 +54,112 @@ INCOMPLETE_SUFFIXES = (
     " ah",
 )
 
+CREATION_VERBS = {
+    "criar",
+    "fazer",
+    "montar",
+    "desenvolver",
+    "programar",
+    "bolar",
+    "codar",
+    "construir",
+}
+
+PROJECT_TOPICS = {
+    "jogo",
+    "joguinho",
+    "game",
+    "app",
+    "aplicativo",
+    "bot",
+    "site",
+    "sistema",
+    "projeto",
+    "software",
+}
+
+STYLE_TERM_CONNECTORS = {
+    "de",
+    "da",
+    "do",
+    "das",
+    "dos",
+    "que",
+    "pra",
+    "pro",
+    "para",
+    "com",
+    "sem",
+    "no",
+    "na",
+    "nos",
+    "nas",
+    "o",
+    "a",
+    "os",
+    "as",
+    "um",
+    "uma",
+    "uns",
+    "umas",
+    "ao",
+    "aos",
+    "e",
+    "em",
+}
+
+STYLE_KEYWORD_TOKENS = {
+    "oxe",
+    "oxi",
+    "eita",
+    "aff",
+    "vish",
+    "vixe",
+    "haha",
+    "hehe",
+    "hihi",
+    "kkk",
+    "mano",
+    "mana",
+    "véi",
+    "vei",
+    "véio",
+    "véia",
+    "bora",
+    "partiu",
+    "po",
+    "poxa",
+    "rapidao",
+    "rapidão",
+    "ai",
+    "aí",
+    "ae",
+    "uai",
+}
+
+STYLE_ACCENT_CHARS = set("áéíóúâêîôûãõàèìòùç")
+
+STYLE_EMPHASIS_SUFFIXES = (
+    "zinho",
+    "zinha",
+    "zão",
+    "zao",
+    "zito",
+    "zita",
+    "zica",
+    "zinhaaa",
+    "zin",
+    "zim",
+    "zaum",
+    "saaa",
+    "eeeee",
+    "iiii",
+    "uuu",
+    "rrr",
+)
+
+DUPLICATE_HISTORY_WINDOW = 6
+
 
 from .service import CreateMessagePayload, LouService
 
@@ -138,6 +244,7 @@ class LouAIResponder:
         chunks = sanitize_and_split_response(payload.get("messages", ""))
         chunks = self._merge_incomplete_chunks(chunks)
         chunks = self._ensure_complete_chunks(chunks, history, model)
+        chunks = self._ensure_contextual_alignment(chunks, history, model)
         if not chunks:
             raise RuntimeError("A IA retornou uma resposta vazia")
         created_messages: List[Dict[str, Any]] = []
@@ -207,24 +314,28 @@ class LouAIResponder:
         candidate = self._normalize_single_chunk(text)
         max_attempts = 3
         for round_index in range(max_attempts):
-            if candidate and not self._needs_proactive_retry(candidate):
+            if candidate and not self._needs_proactive_retry(candidate, history):
                 return candidate
-            reason = self._diagnose_proactive_issue(candidate)
+            reason = self._diagnose_proactive_issue(candidate, history)
             candidate = self._normalize_single_chunk(
                 self._request_proactive_fix(candidate, reason, history, model, attempt, round_index)
             )
         raise RuntimeError("Nao consegui gerar uma mensagem proativa completa a tempo")
 
-    def _needs_proactive_retry(self, text: str) -> bool:
+    def _needs_proactive_retry(self, text: str, history: List[Dict[str, Any]]) -> bool:
         if not text.strip():
+            return True
+        if self._is_duplicate_of_recent_model(text, history):
             return True
         if re.search(r"(pensando aqui|lembr(ei|ando)|sabe o que)", text, re.IGNORECASE):
             return True
         return self._looks_incomplete_sentence(text)
 
-    def _diagnose_proactive_issue(self, text: str) -> str:
+    def _diagnose_proactive_issue(self, text: str, history: List[Dict[str, Any]]) -> str:
         if not text.strip():
             return "Mensagem vazia"
+        if self._is_duplicate_of_recent_model(text, history):
+            return "Você repetiu praticamente a mesma mensagem; tente outro ângulo"
         if re.search(r"(pensando aqui|lembr(ei|ando)|sabe o que)", text, re.IGNORECASE):
             return "Você começou um pensamento mas não concluiu"
         if self._looks_incomplete_sentence(text):
@@ -255,6 +366,39 @@ class LouAIResponder:
         with self._request_lock:
             response = model.generate_content(corrective_history)
         return self._extract_text(response) or ""
+
+    def _is_duplicate_of_recent_model(self, text: str, history: List[Dict[str, Any]], window: int = DUPLICATE_HISTORY_WINDOW) -> bool:
+        fingerprint = self._message_fingerprint(text)
+        if not fingerprint:
+            return False
+        recent: List[str] = []
+        for entry in reversed(history):
+            if entry.get("role") != "model":
+                continue
+            parts = entry.get("parts") or []
+            if not parts:
+                continue
+            snippet = (parts[0] or "").strip()
+            if not snippet or snippet.startswith("["):
+                continue
+            entry_fp = self._message_fingerprint(snippet)
+            if not entry_fp:
+                continue
+            recent.append(entry_fp)
+            if len(recent) >= window:
+                break
+        return fingerprint in recent
+
+    def _message_fingerprint(self, text: str) -> str:
+        if not text:
+            return ""
+        cleaned = self._strip_code_fences(text)
+        cleaned = re.sub(r"\s+", " ", cleaned).strip().lower()
+        cleaned = re.sub(r"[\"'“”‘’]+", "", cleaned)
+        cleaned = cleaned.strip(".?!…")
+        if not cleaned:
+            return ""
+        return cleaned[:160]
 
     def _normalize_single_chunk(self, text: str) -> str:
         cleaned = self._strip_code_fences(text or "")
@@ -314,6 +458,90 @@ class LouAIResponder:
         if self._looks_incomplete_sentence(chunks[-1]):
             chunks[-1] = chunks[-1].rstrip(",") + "..."
         return chunks
+
+    def _ensure_contextual_alignment(
+        self,
+        chunks: List[str],
+        history: List[Dict[str, Any]],
+        model: Any,
+    ) -> List[str]:
+        if not chunks:
+            return []
+        user_context = self._collect_recent_user_text(history)
+        if not user_context.strip():
+            return chunks
+        combined = " ".join(chunks)
+        if not self._needs_contextual_fix(combined, user_context):
+            return chunks
+        attempts = 2
+        for attempt in range(attempts):
+            corrective_text = self._request_on_topic_fix(combined, user_context, history, model, attempt)
+            cleaned = self._strip_code_fences(corrective_text or "")
+            sanitized = sanitize_and_split_response(cleaned)
+            sanitized = self._merge_incomplete_chunks(sanitized)
+            if not sanitized:
+                continue
+            candidate = " ".join(sanitized)
+            if not self._needs_contextual_fix(candidate, user_context):
+                return sanitized
+            combined = candidate
+        return chunks
+
+    def _collect_recent_user_text(self, history: List[Dict[str, Any]], limit: int = 6) -> str:
+        user_lines: List[str] = []
+        for entry in history:
+            if entry.get("role") != "user":
+                continue
+            parts = entry.get("parts") or []
+            if not parts:
+                continue
+            snippet = (parts[0] or "").strip()
+            if not snippet or snippet.startswith("["):
+                continue
+            user_lines.append(snippet)
+        if not user_lines:
+            return ""
+        return " ".join(user_lines[-limit:])
+
+    def _needs_contextual_fix(self, candidate: str, user_context: str) -> bool:
+        if not candidate:
+            return False
+        if not self._detect_creation_pitch(candidate):
+            return False
+        return not self._detect_creation_pitch(user_context)
+
+    def _detect_creation_pitch(self, text: str) -> bool:
+        lowered = (text or "").lower()
+        if not lowered:
+            return False
+        has_verb = any(verb in lowered for verb in CREATION_VERBS)
+        if not has_verb:
+            return False
+        has_topic = any(topic in lowered for topic in PROJECT_TOPICS)
+        return has_topic
+
+    def _request_on_topic_fix(
+        self,
+        previous_text: str,
+        user_context: str,
+        history: List[Dict[str, Any]],
+        model: Any,
+        attempt: int,
+    ) -> str:
+        instruction = (
+            "Sua resposta anterior saiu do assunto porque sugeriu criar algo novo (jogo/app/projeto) sem o Pai pedir. "
+            "Reescreva tudo mantendo o foco APENAS no que o Pai falou recentemente."
+        )
+        if user_context.strip():
+            instruction += f" Baseie-se nessas falas recentes do Pai: '{user_context.strip()}'."
+        instruction += f" Resposta anterior: '{previous_text.strip()}'."
+        instruction += " Entregue no máximo duas frases curtas, naturais e zero propostas inéditas."
+        if attempt:
+            instruction += " Desta vez, confirme explicitamente algo que o Pai disse antes de mudar de assunto."
+        corrective_history = history + [{"role": "user", "parts": [instruction]}]
+        with self._request_lock:
+            response = model.generate_content(corrective_history)
+        return self._extract_text(response) or previous_text
 
     def _looks_incomplete_sentence(self, text: str) -> bool:
         stripped = (text or "").strip()
@@ -378,7 +606,7 @@ class LouAIResponder:
             
             # Processa styles independentemente de short_term
             # Styles captura APENAS padrões de escrita/gírias do usuário
-            if data.get("styles"):
+            if data.get("styles") and self._service.allow_style_autolearn():
                 if snippet_user.strip():
                     filtered_styles = self._filter_style_entries(
                         data["styles"], user_name, snippet_user, snippet_all
@@ -547,18 +775,57 @@ class LouAIResponder:
                 continue
 
             term_from_user = True
+            valid_style_terms = 0
             for term in quoted_terms:
                 term_lower = term.lower().strip()
                 if not any(term_lower in user_line for user_line in user_lines):
                     term_from_user = False
                     break
+                if self._looks_like_style_snippet(term):
+                    valid_style_terms += 1
 
             if not term_from_user:
+                continue
+
+            if not valid_style_terms:
                 continue
 
             filtered.append(normalized)
 
         return filtered
+
+    def _looks_like_style_snippet(self, term: str) -> bool:
+        normalized = re.sub(r"\s+", " ", (term or "").strip().lower())
+        if not normalized:
+            return False
+        tokens = [token for token in re.split(r"[\s,]+", normalized) if token]
+        if not tokens:
+            return False
+        core_tokens = [token for token in tokens if token not in STYLE_TERM_CONNECTORS]
+        if not core_tokens:
+            return False
+        if len(core_tokens) > 3:
+            return False
+        if len(tokens) == 1:
+            return True
+        return self._contains_style_marker(tokens)
+
+    def _contains_style_marker(self, tokens: List[str]) -> bool:
+        return any(self._looks_like_style_word(token) for token in tokens)
+
+    def _looks_like_style_word(self, token: str) -> bool:
+        cleaned = re.sub(r"[^0-9a-záéíóúâêîôûãõàèìòùç]+", "", (token or "").lower())
+        if not cleaned:
+            return False
+        if cleaned in STYLE_KEYWORD_TOKENS:
+            return True
+        if any(char in STYLE_ACCENT_CHARS for char in cleaned):
+            return True
+        if re.search(r"(.)\1{1,}", cleaned):
+            return True
+        if any(cleaned.endswith(suffix) for suffix in STYLE_EMPHASIS_SUFFIXES):
+            return True
+        return len(cleaned) <= 3
 
     def _maybe_rebalance_short_term(
         self,
