@@ -461,16 +461,44 @@ class LouService:
             self.save_styles(styles)
         return self.get_context_snapshot()
 
-    def generate_proactive_message(self, server_id: str, channel_id: str, *, attempt: int = 0) -> Dict[str, Any]:
-        attempt_index = max(attempt, 0)
-        text = self._compose_proactive_text(server_id, channel_id, attempt_index)
+    def generate_proactive_message(self, server_id: str, channel_id: str, *, attempt: int = 0, kind: str = "proactive") -> List[Dict[str, Any]]:
+        normalized_kind = (kind or "proactive").strip().lower()
+        if normalized_kind == "absence":
+            text = self._compose_absence_question(server_id, channel_id)
+        elif normalized_kind == "video_swap":
+            text = self._compose_video_swap_notice(server_id, channel_id)
+        else:
+            attempt_index = max(attempt, 0)
+            text = self._compose_proactive_text(server_id, channel_id, attempt_index)
         payload = CreateMessagePayload(
             server_id=server_id,
             channel_id=channel_id,
             author_id="model",
             content=text,
         )
-        return self.add_message(payload)
+        return [self.add_message(payload)]
+
+    def _compose_absence_question(self, server_id: str, channel_id: str) -> str:
+        channel = self._locate_channel(server_id, channel_id)
+        if channel is None:
+            raise KeyError("Canal nao encontrado")
+        templates = [
+            "Tá por aí ainda? A transmissão continua rolando por aqui.",
+            "Sumiu? Só queria saber se você ainda tá acompanhando a tela comigo.",
+            "Continua vendo o vídeo comigo ou preciso pausar por aqui?",
+        ]
+        return random.choice(templates)
+
+    def _compose_video_swap_notice(self, server_id: str, channel_id: str) -> str:
+        channel = self._locate_channel(server_id, channel_id)
+        if channel is None:
+            raise KeyError("Canal nao encontrado")
+        templates = [
+            "Dá um segundinho que vou colocar outro vídeo pra gente.",
+            "Fica aí que já troco pra uma cena nova.",
+            "Vou puxar outro vídeo rapidinho pra esquentar mais a transmissão.",
+        ]
+        return random.choice(templates)
 
     def _compose_proactive_text(self, server_id: str, channel_id: str, attempt: int) -> str:
         channel = self._locate_channel(server_id, channel_id)

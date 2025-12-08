@@ -26,6 +26,7 @@ const elements = {
   replyIndicator: document.querySelector("[data-role=reply-indicator]"),
   replyAuthor: document.querySelector("[data-role=reply-author]"),
   replySnippet: document.querySelector("[data-role=reply-snippet]"),
+  replyAvatar: document.querySelector("[data-role=reply-avatar]"),
   replyCancel: document.querySelector("[data-role=reply-cancel]"),
   aiAvailability: document.querySelector("[data-role=ai-availability]"),
   aiAvailabilityLabel: document.querySelector("[data-role=ai-availability-label]"),
@@ -62,6 +63,7 @@ const elements = {
   gifFileInput: document.querySelector("[data-role=gif-file-input]"),
   voiceSession: document.querySelector("[data-role=voice-session]"),
   voiceSessionStatus: document.querySelector("[data-role=voice-session-status]"),
+  voiceHeadingAvatars: document.querySelector("[data-role=voice-heading-avatars]"),
   voiceParticipants: document.querySelector("[data-role=voice-participants]"),
   voiceLeave: document.querySelector("[data-role=voice-leave]"),
   voiceShare: document.querySelector("[data-role=voice-share]"),
@@ -136,17 +138,38 @@ const voicePlaybackState = {
   readyHandler: null,
   readyErrorHandler: null,
   unlockListenersAttached: false,
+  playbackEndedHandler: null,
+  replayTimerId: null,
 };
 
 const voiceIntentState = {
   pending: [],
 };
 
+const videoSessionState = {
+  isActive: false,
+  mode: null,
+  owner: null,
+  channelId: null,
+  title: "",
+  sessionKey: null,
+  proactiveMessageSent: false,
+  absenceQuestionSent: false,
+  absenceLockPhase: null,
+  pendingSwapChannelId: null,
+  startedAt: 0,
+  lastProactiveAt: 0,
+};
+
 const VOICE_ACTION_DELAY_MS = 3000;
 const AI_AUTO_LEAVE_DELAY_MS = 45000;
+const VIDEO_ABSENCE_TIMEOUT_MS = 10 * 60 * 1000;
+const VIDEO_LEAVE_AFTER_STOP_MS = 30000;
 
 const voiceTimers = {
   aiAutoLeaveTimeoutId: null,
+  videoAbsenceTimeoutId: null,
+  videoLeaveTimeoutId: null,
 };
 
 let channelLimitMeasureFrame = null;
@@ -271,6 +294,7 @@ const VOICE_UI_TONES = {
   connect: { frequency: 660, duration: 0.18, volume: 0.14, wave: "triangle" },
   disconnect: { frequency: 420, duration: 0.2, volume: 0.12, wave: "sine" },
   share: { frequency: 520, duration: 0.22, volume: 0.16, wave: "sawtooth" },
+  ai_join: { frequency: 760, duration: 0.24, volume: 0.18, wave: "square" },
 };
 
 const VOICE_TITLE_ACRONYM_WORDS = new Set(["AI", "IA", "VR", "HDR", "DLSS"]);
@@ -452,16 +476,32 @@ const gifState = {
   isUploading: false,
 };
 
-const PROACTIVE_DELAYS = [60000, 120000, 240000];
-const MAX_PROACTIVE_MESSAGES = 3;
+const PROACTIVE_PROFILES = {
+  normal: {
+    proactiveWindow: { min: 10000, max: 30000 },
+    absenceWindow: { min: 40000, max: 60000 },
+    maxProactives: 1,
+  },
+  video: {
+    proactiveWindow: { min: 10000, max: 30000 },
+    absenceWindow: { min: 30000, max: 60000 },
+    maxProactives: 1,
+  },
+};
+const PROACTIVE_RETRY_DELAYS_MS = [4000, 8000];
 const proactiveState = {
   timerId: null,
   attempt: 0,
-  lastUserActivity: Date.now(),
+  lastUserActivity: 0,
   requestInFlight: false,
   proactiveMessagesSent: 0,
   absenceQuestionSent: false,
   awaitingUserResponse: false,
+  retryTimerId: null,
+  retryAttempt: 0,
+  pendingRetryKind: null,
+  lastLouMessageAt: 0,
+  lastProactiveAt: 0,
 };
 const louReplyState = {
   timerId: null,
@@ -503,9 +543,13 @@ const availabilityState = {
   pendingShortCycle: false,
   lastUserMessageAt: 0,
   returnFromAwayTimerId: null,
+  lastAutoAwayAt: 0,
+  lastAbsenceQuestionAt: 0,
 };
 const LOU_TYPING_INITIAL_DELAY = { min: 900, max: 2000 };
-const LOU_TYPING_BURST_DELAY = { min: 1100, max: 2200 };
+const LOU_TYPING_CHAR_INTERVAL_MS = 200;
+const LOU_TYPING_MIN_DURATION_MS = 1200;
+const LOU_TYPING_MAX_DURATION_MS = 20000;
 const LOU_TYPING_BETWEEN_DELAY = { min: 350, max: 900 };
 
 function syncOverlayPresence() {
@@ -555,7 +599,7 @@ function renderServers() {
     state.activeChannelId = server.channels[0]?.id ?? null;
     renderChannels();
     renderChatArea();
-    refreshProactiveWatcher();
+      refreshProactiveWatcher({ resetAttempts: true, resetAnchors: true, silent: true });
   });
   rail.appendChild(button);
 }
@@ -718,6 +762,7 @@ function joinVoiceChannel(channelId) {
   syncVoiceControls();
   clearAiAutoLeaveTimer();
   playVoiceUiTone("connect");
+  syncVideoSessionState();
 }
 
 function showVoiceSession(channel) {
@@ -726,6 +771,51 @@ function showVoiceSession(channel) {
   if (elements.voiceSessionStatus) {
     elements.voiceSessionStatus.textContent = "";
   }
+}
+
+function updateVoiceSessionStreamingState(active) {
+  if (!elements.voiceSession) return;
+  elements.voiceSession.classList.toggle("voice-session--streaming", Boolean(active));
+  if (!active && elements.voiceHeadingAvatars) {
+    elements.voiceHeadingAvatars.innerHTML = "";
+    elements.voiceHeadingAvatars.classList.add("is-hidden");
+  }
+}
+
+function renderVoiceHeadingAvatars() {
+  if (!elements.voiceHeadingAvatars) return;
+  const shouldShow = elements.voiceSession?.classList.contains("voice-session--streaming");
+  if (!shouldShow) {
+    elements.voiceHeadingAvatars.innerHTML = "";
+    elements.voiceHeadingAvatars.classList.add("is-hidden");
+    return;
+  }
+  const participantOrder = ["user", "ai"];
+  const participants = Array.isArray(voiceState.participants) ? [...voiceState.participants] : [];
+  const prioritized = participantOrder
+    .map((role) => participants.find((participant) => participant.id === role))
+    .filter(Boolean);
+  const extras = participants.filter((participant) => !prioritized.some((entry) => entry.id === participant.id));
+  let avatars = [...prioritized, ...extras];
+  if (!avatars.length) {
+    avatars = [createVoiceParticipantFromProfile(profiles.user, "user")];
+  }
+  elements.voiceHeadingAvatars.innerHTML = "";
+  elements.voiceHeadingAvatars.classList.remove("is-hidden");
+  avatars.slice(0, 3).forEach((participant) => {
+    const mini = document.createElement("div");
+    mini.className = "voice-heading-avatar";
+    mini.title = participant.name;
+    if (participant.avatar) {
+      const img = document.createElement("img");
+      img.src = participant.avatar;
+      img.alt = `Avatar de ${participant.name}`;
+      mini.appendChild(img);
+    } else {
+      mini.textContent = participant.initials || participant.name.slice(0, 2).toUpperCase();
+    }
+    elements.voiceHeadingAvatars.appendChild(mini);
+  });
 }
 
 function renderVoiceParticipants() {
@@ -755,6 +845,7 @@ function renderVoiceParticipants() {
     item.append(avatar, textWrapper);
     elements.voiceParticipants.appendChild(item);
   });
+  renderVoiceHeadingAvatars();
 }
 
 function createVoiceParticipantFromProfile(profile, role) {
@@ -775,6 +866,7 @@ function leaveVoiceChannel({ silent = false } = {}) {
   const wasUserStreaming = voiceState.share?.owner === "user";
   voiceState.activeChannelId = null;
   voiceState.participants = [];
+  clearVideoAbsenceLock({ resetPendingSwap: true });
   if (elements.voiceSession) {
     elements.voiceSession.classList.add("is-hidden");
   }
@@ -795,6 +887,7 @@ function leaveVoiceChannel({ silent = false } = {}) {
   if (!silent) {
     playVoiceUiTone("disconnect");
   }
+  syncVideoSessionState();
 }
 
 function syncVoiceControls() {
@@ -821,6 +914,7 @@ function pauseVoiceSharePlayback(removeSource = false) {
   videoEl.currentTime = 0;
   videoEl.muted = true;
   videoEl.volume = 0;
+  clearVoiceShareReplayTimer();
   if (videoEl.srcObject) {
     videoEl.srcObject = null;
   }
@@ -836,8 +930,9 @@ function pauseVoiceSharePlayback(removeSource = false) {
   videoEl.removeAttribute("poster");
 }
 
-function hideVoiceShare({ clearState = true } = {}) {
+function hideVoiceShare({ clearState = true, suppressSessionSync = false } = {}) {
   pauseVoiceSharePlayback(true);
+  updateVoiceSessionStreamingState(false);
   if (elements.voiceShareStatus && clearState) {
     elements.voiceShareStatus.textContent = "";
   }
@@ -845,6 +940,7 @@ function hideVoiceShare({ clearState = true } = {}) {
     elements.voiceShare.classList.add("is-hidden");
   }
   clearVoiceShareReadyListeners();
+  clearVoiceSharePlaybackEndedListener();
   clearVoiceShareResumeOnInteraction();
   if (clearState) {
     clearVoiceShareUnmute();
@@ -865,6 +961,9 @@ function hideVoiceShare({ clearState = true } = {}) {
   }
   updateVoiceShareVisibilityUi();
   syncVoiceControls();
+  if (!suppressSessionSync) {
+    syncVideoSessionState();
+  }
 }
 
 function scheduleVoiceShareUnmute() {
@@ -925,6 +1024,64 @@ function clearVoiceShareReadyListeners() {
   updateVoiceShareVisibilityUi();
 }
 
+function clearVoiceSharePlaybackEndedListener() {
+  if (!elements.voiceShareVideo) return;
+  if (voicePlaybackState.playbackEndedHandler) {
+    elements.voiceShareVideo.removeEventListener("ended", voicePlaybackState.playbackEndedHandler);
+    voicePlaybackState.playbackEndedHandler = null;
+  }
+}
+
+function clearVoiceShareReplayTimer() {
+  if (voicePlaybackState.replayTimerId) {
+    window.clearTimeout(voicePlaybackState.replayTimerId);
+    voicePlaybackState.replayTimerId = null;
+  }
+}
+
+function attachVoiceSharePlaybackEndedListener(videoEl) {
+  if (!videoEl) return;
+  clearVoiceSharePlaybackEndedListener();
+  const handler = () => handleVoiceSharePlaybackEnded();
+  voicePlaybackState.playbackEndedHandler = handler;
+  videoEl.addEventListener("ended", handler);
+}
+
+function handleVoiceSharePlaybackEnded() {
+  if (!voiceState.share || voiceState.share.owner !== "ai") return;
+  if (!voiceState.activeChannelId || voiceState.activeChannelId !== voiceState.share.channelId) {
+    return;
+  }
+  const channelId = voiceState.share.channelId;
+  const shareSignature = `${voiceState.share.owner}|${voiceState.share.src}`;
+  clearVoiceShareReplayTimer();
+  voicePlaybackState.replayTimerId = window.setTimeout(async () => {
+    voicePlaybackState.replayTimerId = null;
+    const currentShare = voiceState.share;
+    const currentSignature = currentShare ? `${currentShare.owner}|${currentShare.src}` : null;
+    if (!currentShare || currentShare.owner !== "ai" || currentShare.channelId !== channelId) {
+      return;
+    }
+    if (currentSignature !== shareSignature) {
+      return;
+    }
+    const channel = voiceState.channels.find((chn) => chn.id === channelId);
+    if (!channel) return;
+    if (shouldDelayVideoSwap(channelId)) {
+      queuePendingVideoSwap(channelId);
+      return;
+    }
+    if (elements.voiceSessionStatus && voiceState.activeChannelId === channelId) {
+      elements.voiceSessionStatus.textContent = "Carregando próxima transmissão…";
+    }
+    try {
+      await startAiVoiceShare(channel);
+    } catch (error) {
+      console.error("Falha ao reiniciar a transmissão da Lou", error);
+    }
+  }, 800);
+}
+
 function removeAiFromParticipants() {
   const before = voiceState.participants.length;
   voiceState.participants = voiceState.participants.filter((participant) => participant.id !== "ai");
@@ -951,10 +1108,55 @@ function scheduleAiAutoLeaveIfNeeded() {
   }, AI_AUTO_LEAVE_DELAY_MS);
 }
 
+function clearVideoAbsenceCountdown() {
+  if (voiceTimers.videoAbsenceTimeoutId) {
+    window.clearTimeout(voiceTimers.videoAbsenceTimeoutId);
+    voiceTimers.videoAbsenceTimeoutId = null;
+  }
+}
+
+function clearVideoLeaveTimer() {
+  if (voiceTimers.videoLeaveTimeoutId) {
+    window.clearTimeout(voiceTimers.videoLeaveTimeoutId);
+    voiceTimers.videoLeaveTimeoutId = null;
+  }
+}
+
+function clearVideoAbsenceFollowUps() {
+  clearVideoAbsenceCountdown();
+  clearVideoLeaveTimer();
+}
+
+function scheduleVideoAbsenceFollowUps(channelId) {
+  if (!isVideoSessionActive()) {
+    clearVideoAbsenceFollowUps();
+    return;
+  }
+  const targetChannelId = channelId || voiceState.share?.channelId;
+  if (!targetChannelId) return;
+  clearVideoAbsenceCountdown();
+  voiceTimers.videoAbsenceTimeoutId = window.setTimeout(() => {
+    voiceTimers.videoAbsenceTimeoutId = null;
+    const currentShare = voiceState.share;
+    if (!currentShare || currentShare.owner !== "ai" || currentShare.channelId !== targetChannelId) {
+      return;
+    }
+    stopVoiceShare();
+    clearVideoLeaveTimer();
+    voiceTimers.videoLeaveTimeoutId = window.setTimeout(() => {
+      voiceTimers.videoLeaveTimeoutId = null;
+      if (voiceState.aiChannelId === targetChannelId) {
+        disconnectAiFromVoiceChannel({ reason: "video_absence_timeout" });
+      }
+    }, VIDEO_LEAVE_AFTER_STOP_MS);
+  }, VIDEO_ABSENCE_TIMEOUT_MS);
+}
+
 function disconnectAiFromVoiceChannel({ reason = "manual" } = {}) {
   if (!voiceState.aiChannelId) return;
   const channelId = voiceState.aiChannelId;
   clearAiAutoLeaveTimer();
+  clearVideoAbsenceFollowUps();
   const aiStreamingInChannel = Boolean(
     voiceState.share && voiceState.share.owner === "ai" && voiceState.share.channelId === channelId
   );
@@ -964,6 +1166,7 @@ function disconnectAiFromVoiceChannel({ reason = "manual" } = {}) {
   }
   const removed = removeAiFromParticipants();
   clearAiPresence();
+  handleAiVoicePresenceChanged(false);
   if (removed) {
     renderVoiceParticipants();
   }
@@ -1062,6 +1265,8 @@ function playVoiceUiTone(kind) {
 function stopVoiceShare({ userTriggered = false } = {}) {
   if (!voiceState.share) return;
   const shareOwner = voiceState.share.owner;
+  clearVideoAbsenceLock({ resetPendingSwap: true });
+  clearVideoAbsenceFollowUps();
   hideVoiceShare({ clearState: true });
   scheduleAiAutoLeaveIfNeeded();
   if (!elements.voiceSessionStatus || !voiceState.activeChannelId) return;
@@ -1076,6 +1281,7 @@ function stopVoiceShare({ userTriggered = false } = {}) {
 
 function connectAiToVoiceChannel(channel, { source = "auto" } = {}) {
   if (!channel) return;
+  const alreadyInChannel = voiceState.aiChannelId === channel.id;
   voiceState.aiChannelId = channel.id;
   voiceState.aiPresenceSource = source;
   if (voiceState.activeChannelId === channel.id) {
@@ -1085,6 +1291,10 @@ function connectAiToVoiceChannel(channel, { source = "auto" } = {}) {
   renderVoicePresenceIndicator();
   renderVoiceChannels();
   scheduleAiAutoLeaveIfNeeded();
+  handleAiVoicePresenceChanged(true);
+  if (!alreadyInChannel && voiceState.activeChannelId === channel.id) {
+    playVoiceUiTone("ai_join");
+  }
 }
 
 function ensureAiInParticipants() {
@@ -1120,7 +1330,8 @@ function clearAiPresence() {
 
 function setVoiceShareState(shareConfig = {}) {
   const previousShare = voiceState.share;
-  hideVoiceShare({ clearState: true });
+  const suppressSessionSync = Boolean(previousShare);
+  hideVoiceShare({ clearState: true, suppressSessionSync });
   const channelId =
     shareConfig.channelId ||
     voiceState.activeChannelId ||
@@ -1142,12 +1353,279 @@ function setVoiceShareState(shareConfig = {}) {
     previousShare.src !== shareSrc;
   voiceState.isShareMinimized = false;
   voiceState.aiShareBackgrounded = false;
+  syncVideoSessionState();
   renderVoiceShareFromState();
   renderVoicePresenceIndicator();
   renderVoiceChannels();
   syncVoiceControls();
   if (shouldPlayTone) {
     playVoiceUiTone("share");
+  }
+}
+
+function syncVideoSessionState() {
+  const share = voiceState.share;
+  const activeChannelId = voiceState.activeChannelId;
+  const shareMatchesActive = Boolean(
+    share && activeChannelId && share.channelId === activeChannelId
+  );
+  const nextMode = shareMatchesActive ? (share.owner === "ai" ? "ai_stream" : "user_stream") : null;
+  const nextOwner = shareMatchesActive ? share.owner : null;
+  const nextChannelId = shareMatchesActive ? share.channelId : null;
+  const nextTitle = shareMatchesActive ? share.title || "Transmissão" : "";
+  const nextSessionKey = shareMatchesActive
+    ? `${share.owner || "owner"}|${share.channelId || "channel"}`
+    : null;
+  const stateUnchanged =
+    videoSessionState.isActive === shareMatchesActive &&
+    videoSessionState.mode === nextMode &&
+    videoSessionState.channelId === nextChannelId &&
+    videoSessionState.owner === nextOwner &&
+    videoSessionState.title === nextTitle &&
+    videoSessionState.sessionKey === nextSessionKey;
+  if (stateUnchanged) {
+    return;
+  }
+    const previousState = { ...videoSessionState };
+  videoSessionState.isActive = shareMatchesActive;
+  videoSessionState.mode = nextMode;
+  videoSessionState.owner = nextOwner;
+  videoSessionState.channelId = nextChannelId;
+  videoSessionState.title = nextTitle;
+  videoSessionState.sessionKey = nextSessionKey;
+    handleVideoSessionStateChange(previousState);
+}
+
+  function handleVideoSessionStateChange(previousState = null) {
+    const wasActive = Boolean(previousState?.isActive);
+    const isActive = isVideoSessionActive();
+    const ownerChanged = Boolean(
+      wasActive &&
+        isActive &&
+        previousState?.owner &&
+        previousState.owner !== videoSessionState.owner
+    );
+    const channelChanged = Boolean(
+      wasActive &&
+        isActive &&
+        previousState?.channelId &&
+        previousState.channelId !== videoSessionState.channelId
+    );
+    const sessionRestarted = !wasActive && isActive;
+    const sessionEnded = wasActive && !isActive;
+    const shouldResetBudget = sessionEnded || sessionRestarted || ownerChanged || channelChanged;
+    if (shouldResetBudget) {
+      videoSessionState.proactiveMessageSent = false;
+      videoSessionState.absenceQuestionSent = false;
+      videoSessionState.absenceLockPhase = null;
+      resetPendingVideoSwap();
+      videoSessionState.lastProactiveAt = 0;
+    }
+    if (sessionEnded || !isAiStreamInActiveChannel()) {
+      videoSessionState.startedAt = 0;
+    } else if (sessionRestarted || ownerChanged || channelChanged) {
+      videoSessionState.startedAt = Date.now();
+      videoSessionState.lastProactiveAt = 0;
+    }
+    if (sessionEnded) {
+      clearVideoAbsenceFollowUps();
+      clearVideoAbsenceLock({ resetPendingSwap: true });
+    }
+    if (isActive) {
+      enforceVideoAvailability();
+    }
+    if (shouldResetBudget || sessionEnded) {
+      refreshProactiveWatcher({ resetAttempts: true, resetAnchors: true, silent: true });
+    } else {
+      startProactiveTimer();
+    }
+}
+
+  function isAiStreamInActiveChannel() {
+    return Boolean(
+      isVideoSessionActive() &&
+        voiceState.share &&
+        voiceState.share.owner === "ai" &&
+        voiceState.activeChannelId &&
+        voiceState.share.channelId === voiceState.activeChannelId
+    );
+  }
+
+  function shouldDelayVideoSwap(channelId = null) {
+    if (!videoSessionState.absenceLockPhase) {
+      return false;
+    }
+    if (!isAiStreamInActiveChannel()) {
+      return false;
+    }
+    const targetChannelId = channelId || voiceState.share?.channelId;
+    if (!targetChannelId) {
+      return false;
+    }
+    return voiceState.share?.channelId === targetChannelId;
+  }
+
+  function beginVideoAbsenceLock() {
+    if (!isAiStreamInActiveChannel()) {
+      return;
+    }
+    videoSessionState.absenceLockPhase = "waiting_user";
+  }
+
+  function notifyVideoAbsenceUserReply() {
+    if (videoSessionState.absenceLockPhase === "waiting_user") {
+      videoSessionState.absenceLockPhase = "waiting_lou";
+    }
+  }
+
+  function clearVideoAbsenceLock(options = {}) {
+    if (videoSessionState.absenceLockPhase) {
+      videoSessionState.absenceLockPhase = null;
+    }
+    if (options.resetPendingSwap) {
+      resetPendingVideoSwap();
+    }
+  }
+
+  function queuePendingVideoSwap(channelId) {
+    if (!channelId) return;
+    videoSessionState.pendingSwapChannelId = channelId;
+  }
+
+  function resetPendingVideoSwap() {
+    videoSessionState.pendingSwapChannelId = null;
+  }
+
+  async function resumePendingVideoSwapIfPossible() {
+    const pendingChannelId = videoSessionState.pendingSwapChannelId;
+    if (!pendingChannelId) {
+      return false;
+    }
+    if (shouldDelayVideoSwap(pendingChannelId)) {
+      return false;
+    }
+    const channel = voiceState.channels.find((chn) => chn.id === pendingChannelId);
+    if (!channel) {
+      resetPendingVideoSwap();
+      return false;
+    }
+    resetPendingVideoSwap();
+    if (elements.voiceSessionStatus && voiceState.activeChannelId === channel.id) {
+      elements.voiceSessionStatus.textContent = "Carregando próxima transmissão…";
+    }
+    await startAiVoiceShare(channel);
+    return true;
+  }
+
+  async function handleLouReplyCompleted() {
+    if (videoSessionState.absenceLockPhase !== "waiting_lou") {
+      return;
+    }
+    videoSessionState.absenceLockPhase = null;
+    await resumePendingVideoSwapIfPossible();
+  }
+
+function isVideoSessionActive() {
+  return Boolean(videoSessionState.isActive);
+}
+
+function enforceVideoAvailability() {
+  if (!isVideoSessionActive()) return;
+  if (availabilityState.status !== "available") {
+    setAiAvailability("available", { source: "video_stream", skipSchedule: true });
+    return;
+  }
+  clearAvailabilityShiftTimer();
+}
+
+function buildActiveMediaContextPayload(options = {}) {
+  if (!isVideoSessionActive()) return null;
+  const share = voiceState.share;
+  if (!share) return null;
+  if (!voiceState.activeChannelId || voiceState.activeChannelId !== share.channelId) {
+    return null;
+  }
+  const enforce = options.enforce !== false;
+  const bypassReason = options.bypassReason || null;
+  const formattedTitle = formatVoiceShareTitle(share.title || "Transmissão");
+  const ownerProfile = share.owner === "ai" ? profiles.model : profiles.user;
+  const ownerName = ownerProfile?.name || (share.owner === "ai" ? "Lou" : "Pai");
+  const channelName =
+    voiceState.channels.find((chn) => chn.id === share.channelId)?.name || "Chat de Voz";
+  const payload = {
+    isActive: true,
+    mode: share.owner === "ai" ? "ai_stream" : "user_stream",
+    owner: share.owner,
+    ownerName,
+    title: formattedTitle,
+    channelId: share.channelId,
+    channelName,
+    enforce,
+  };
+  if (bypassReason) {
+    payload.bypassReason = bypassReason;
+  }
+  return payload;
+}
+
+function getCurrentProactiveProfile() {
+  return isVideoSessionActive() ? PROACTIVE_PROFILES.video : PROACTIVE_PROFILES.normal;
+}
+
+function getProactiveWindowForKind(kind) {
+  const profile = getCurrentProactiveProfile();
+  const range = kind === "absence" ? profile.absenceWindow : profile.proactiveWindow;
+  const min = Math.max(0, range?.min ?? 60000);
+  const max = Math.max(min, range?.max ?? min);
+  return { min, max };
+}
+
+function getProactiveAnchorTimestamp(kind) {
+  if (isVideoSessionActive()) {
+    if (!isAiStreamInActiveChannel()) {
+      return null;
+    }
+    if (kind === "proactive") {
+      return videoSessionState.startedAt || null;
+    }
+    if (kind === "absence") {
+      return videoSessionState.lastProactiveAt || null;
+    }
+    return null;
+  }
+  if (kind === "proactive") {
+    return proactiveState.lastLouMessageAt || null;
+  }
+  if (kind === "absence") {
+    return proactiveState.lastProactiveAt || null;
+  }
+  return null;
+}
+
+function shouldAllowProactiveKind(kind) {
+  if (!isVideoSessionActive()) {
+    return true;
+  }
+  if (!isAiStreamInActiveChannel()) {
+    return false;
+  }
+  if (kind === "proactive") {
+    return !videoSessionState.proactiveMessageSent;
+  }
+  if (kind === "absence") {
+    return !videoSessionState.absenceQuestionSent;
+  }
+  return true;
+}
+
+function markVideoSessionProactiveUsage(kind) {
+  if (!isVideoSessionActive()) {
+    return;
+  }
+  if (kind === "proactive") {
+    videoSessionState.proactiveMessageSent = true;
+  } else if (kind === "absence") {
+    videoSessionState.absenceQuestionSent = true;
   }
 }
 
@@ -1318,6 +1796,7 @@ function restoreBackgroundedAiShareIfNeeded() {
 function renderVoiceShareFromState() {
   const share = voiceState.share;
   if (!share) {
+    updateVoiceSessionStreamingState(false);
     hideVoiceShare({ clearState: true });
     return;
   }
@@ -1326,6 +1805,7 @@ function renderVoiceShareFromState() {
     voiceState.activeChannelId && share.channelId === voiceState.activeChannelId
   );
   if (!canDisplay) {
+    updateVoiceSessionStreamingState(false);
     if (share.owner === "ai") {
       elements.voiceShare.classList.add("is-hidden");
       return;
@@ -1333,6 +1813,8 @@ function renderVoiceShareFromState() {
     hideVoiceShare({ clearState: false });
     return;
   }
+  updateVoiceSessionStreamingState(true);
+  renderVoiceHeadingAvatars();
   elements.voiceShare.classList.remove("is-hidden");
   clearVoiceShareResumeOnInteraction();
   clearVoiceShareReadyListeners();
@@ -1341,6 +1823,14 @@ function renderVoiceShareFromState() {
   }
   if (elements.voiceShareStatus) {
     elements.voiceShareStatus.textContent = share.owner === "ai" ? "Lou está transmitindo" : "Você está transmitindo";
+  }
+  if (
+    elements.voiceSessionStatus &&
+    voiceState.activeChannelId &&
+    share.channelId === voiceState.activeChannelId
+  ) {
+    elements.voiceSessionStatus.textContent =
+      share.owner === "ai" ? "Lou está transmitindo" : "Você está transmitindo";
   }
   const videoEl = elements.voiceShareVideo;
   const previousSrc = videoEl.getAttribute("data-voice-share-src") || videoEl.getAttribute("src") || "";
@@ -1365,6 +1855,8 @@ function renderVoiceShareFromState() {
     videoEl.removeAttribute("muted");
   }
   videoEl.volume = 1;
+
+  attachVoiceSharePlaybackEndedListener(videoEl);
 
   const startPlayback = () => {
     Promise.resolve(ensureVoicePlaybackUnlock())
@@ -1419,6 +1911,10 @@ function renderVoiceShareFromState() {
 
 async function startAiVoiceShare(channel) {
   if (!channel) return;
+  if (shouldDelayVideoSwap(channel.id)) {
+    queuePendingVideoSwap(channel.id);
+    return;
+  }
   const library = await ensureVoiceMediaLibrary();
   if (!library.length) {
     if (elements.voiceSessionStatus && voiceState.activeChannelId === channel.id) {
@@ -1428,6 +1924,14 @@ async function startAiVoiceShare(channel) {
   }
   const chosen = pickRandomVoiceVideo(library);
   if (!chosen) return;
+  const isReplacingExistingShare = Boolean(
+    voiceState.share &&
+    voiceState.share.owner === "ai" &&
+    voiceState.share.channelId === channel.id
+  );
+  if (isReplacingExistingShare) {
+    await announceUpcomingAiShareSwap();
+  }
   setVoiceShareState({
     owner: "ai",
     title: chosen.filename || "Transmissão surpresa",
@@ -1436,6 +1940,44 @@ async function startAiVoiceShare(channel) {
     channelId: channel.id,
     mimeType: inferMimeTypeFromSource(chosen.path || chosen.filename || ""),
   });
+}
+
+async function announceUpcomingAiShareSwap() {
+  const announced = await requestVideoSwapAnnouncement();
+  if (!announced) {
+    appendLocalLouMessage("Vou pegar outro vídeo pra gente, segura cinco segundinhos.", { isSystem: true });
+  }
+  await delay(5000);
+}
+
+async function requestVideoSwapAnnouncement() {
+  const server = getActiveServer();
+  const channel = getActiveChannel();
+  if (!server || !channel) {
+    return false;
+  }
+  const mediaContext = buildActiveMediaContextPayload({ enforce: true });
+  const payload = {
+    serverId: server.id,
+    channelId: channel.id,
+    attempt: 0,
+    kind: "video_swap",
+  };
+  if (mediaContext) {
+    payload.mediaContext = mediaContext;
+  }
+  try {
+    const response = await postJSON(`${API_BASE}/proactive`, payload);
+    const newMessages = normalizeLouMessages(response);
+    if (!newMessages.length) {
+      return false;
+    }
+    await playLouTypingSequence(server.id, channel.id, newMessages, { initialWait: 0 });
+    return true;
+  } catch (error) {
+    console.error("Falha ao gerar aviso de troca de vídeo", error);
+    return false;
+  }
 }
 
 async function requestAiTransmission({ channelId } = {}) {
@@ -1765,17 +2307,54 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, Math.max(0, ms)));
 }
 
+function getMessageTextContent(message) {
+  if (!message) return "";
+  if (Array.isArray(message.parts) && message.parts.length) {
+    return message.parts
+      .filter((part) => typeof part === "string")
+      .join(" ")
+      .trim();
+  }
+  if (typeof message.content === "string") {
+    return message.content.trim();
+  }
+  return "";
+}
+
+function estimateLouTypingDurationMs(message) {
+  const text = getMessageTextContent(message);
+  const length = text.length;
+  if (!length) {
+    return LOU_TYPING_MIN_DURATION_MS;
+  }
+  const raw = length * LOU_TYPING_CHAR_INTERVAL_MS;
+  return Math.min(
+    Math.max(raw, LOU_TYPING_MIN_DURATION_MS),
+    LOU_TYPING_MAX_DURATION_MS
+  );
+}
+
 function getAvailabilityConfig(status) {
   return AVAILABILITY_STATUS_META[status] ?? AVAILABILITY_STATUS_META.available;
 }
 
 function initAiAvailability() {
-  setAiAvailability(availabilityState.status);
+  setAiAvailability(availabilityState.status, { source: "init" });
 }
 
 function setAiAvailability(nextStatus, options = {}) {
-  const normalized = AVAILABILITY_STATUS_META[nextStatus] ? nextStatus : "available";
+  const source = options.source || "system";
+  let normalized = AVAILABILITY_STATUS_META[nextStatus] ? nextStatus : "available";
   const previousStatus = availabilityState.status;
+  const videoSessionActive = isVideoSessionActive();
+  if (videoSessionActive && normalized === "away") {
+    normalized = "available";
+  }
+  const preventingAway = normalized === "away" && isAiInVoiceCall();
+  if (preventingAway) {
+    normalized = "available";
+    showVoiceCallAvailabilityNotice("Lou permanece disponível enquanto estiver no chat de voz.");
+  }
   if (!options.preserveTimer) {
     clearAvailabilityShiftTimer();
   }
@@ -1786,15 +2365,30 @@ function setAiAvailability(nextStatus, options = {}) {
   }
   if (normalized === "away") {
     availabilityState.cooldownUntil = 0;
+    if (source !== "manual") {
+      availabilityState.lastAutoAwayAt = Date.now();
+    }
   }
   updateAiAvailabilityUi();
   if (normalized === "available") {
     dispatchPendingLouReply();
   }
-  if (options.skipSchedule) {
-    return;
+  let shouldScheduleNextShift = !options.skipSchedule;
+  if (normalized === "available" && source === "user_message") {
+    shouldScheduleNextShift = false;
   }
-  scheduleAvailabilityShift();
+  if (normalized === "available" && source === "auto_cycle") {
+    const scheduled = scheduleAwayAfterSilentAutoReturn();
+    if (scheduled) {
+      shouldScheduleNextShift = false;
+    }
+  }
+  if (videoSessionActive) {
+    shouldScheduleNextShift = false;
+  }
+  if (shouldScheduleNextShift) {
+    scheduleAvailabilityShift();
+  }
 }
 
 function updateAiAvailabilityUi() {
@@ -1821,14 +2415,25 @@ function updateAiAvailabilityUi() {
   }
 }
 
-function scheduleAvailabilityShift() {
+function scheduleAvailabilityShift(options = {}) {
   if (typeof window === "undefined") {
     return;
   }
   clearAvailabilityShiftTimer();
+  const { overrideRange, forceNextStatus, reason, forceWhileInVoiceCall = false } = options;
+  if (isVideoSessionActive() && !forceWhileInVoiceCall) {
+    return;
+  }
+  if (availabilityState.status === "available" && isAiInVoiceCall() && !forceWhileInVoiceCall) {
+    return;
+  }
   const config = getAvailabilityConfig(availabilityState.status);
-  let range = config.cycleRange || { min: 60000, max: 120000 };
-  if (availabilityState.status === "available" && availabilityState.pendingShortCycle) {
+  const useOverrideRange = Boolean(overrideRange);
+  if (useOverrideRange) {
+    availabilityState.pendingShortCycle = false;
+  }
+  let range = overrideRange || config.cycleRange || { min: 60000, max: 120000 };
+  if (!useOverrideRange && availabilityState.status === "available" && availabilityState.pendingShortCycle) {
     const hasRecentUserMessage =
       availabilityState.lastUserMessageAt &&
       Date.now() - availabilityState.lastUserMessageAt <= AVAILABILITY_SHORT_CYCLE_EXPIRY_MS;
@@ -1840,13 +2445,74 @@ function scheduleAvailabilityShift() {
   const wait = randomBetween(range.min || 60000, range.max || range.min || 120000);
   availabilityState.timerId = window.setTimeout(() => {
     availabilityState.timerId = null;
-    const nextStatus = availabilityState.status === "available" ? "away" : "available";
-    setAiAvailability(nextStatus);
+    const targetStatus =
+      forceNextStatus || (availabilityState.status === "available" ? "away" : "available");
+    if (targetStatus === availabilityState.status) {
+      return;
+    }
+    const nextSource = reason || "auto_cycle";
+    setAiAvailability(targetStatus, { source: nextSource });
   }, wait);
+}
+
+function shouldUseNormalChatAvailability() {
+  return !isVideoSessionActive();
+}
+
+function scheduleAwayAfterSilentAutoReturn() {
+  if (!shouldUseNormalChatAvailability()) {
+    return false;
+  }
+  if (availabilityState.status !== "available") {
+    return false;
+  }
+  if (isAiInVoiceCall()) {
+    return false;
+  }
+  if (!availabilityState.lastAutoAwayAt) {
+    return false;
+  }
+  const userAnsweredSinceAway =
+    availabilityState.lastUserMessageAt &&
+    availabilityState.lastUserMessageAt > availabilityState.lastAutoAwayAt;
+  if (userAnsweredSinceAway) {
+    return false;
+  }
+  scheduleAvailabilityShift({
+    overrideRange: AVAILABILITY_SHORT_CYCLE_RANGE,
+    forceNextStatus: "away",
+    reason: "auto_return",
+  });
+  return true;
+}
+
+function scheduleAwayAfterAbsenceQuestion() {
+  if (isVideoSessionActive()) {
+    scheduleVideoAbsenceFollowUps();
+    enforceVideoAvailability();
+    return;
+  }
+  if (!shouldUseNormalChatAvailability()) {
+    return;
+  }
+  if (availabilityState.status !== "available") {
+    return;
+  }
+  availabilityState.lastAbsenceQuestionAt = Date.now();
+  scheduleAvailabilityShift({
+    overrideRange: AVAILABILITY_SHORT_CYCLE_RANGE,
+    forceNextStatus: "away",
+    reason: "absence_question",
+    forceWhileInVoiceCall: true,
+  });
 }
 
 function handleAvailabilityToggleClick() {
   if (availabilityState.status === "available") {
+    if (isAiInVoiceCall()) {
+      showVoiceCallAvailabilityNotice("Lou não pode ficar ausente enquanto estiver no chat de voz.");
+      return;
+    }
     beginManualDowntimeWindow();
     return;
   }
@@ -1875,6 +2541,30 @@ function clearReturnFromAwayTimer() {
   }
 }
 
+function isAiInVoiceCall() {
+  return Boolean(voiceState.aiChannelId);
+}
+
+function handleAiVoicePresenceChanged(isPresent) {
+  if (isPresent) {
+    clearAvailabilityShiftTimer();
+    if (availabilityState.status !== "available") {
+      setAiAvailability("available", { skipSchedule: true, preserveTimer: true, source: "voice_call" });
+    }
+    return;
+  }
+  scheduleAvailabilityShift();
+}
+
+function showVoiceCallAvailabilityNotice(message) {
+  if (!message || !elements.voiceSessionStatus) return;
+  const sameChannel = Boolean(
+    voiceState.activeChannelId && voiceState.activeChannelId === voiceState.aiChannelId
+  );
+  if (!sameChannel) return;
+  elements.voiceSessionStatus.textContent = message;
+}
+
 function scheduleReturnToAvailableAfterUserMessage() {
   if (typeof window === "undefined") {
     return;
@@ -1886,7 +2576,7 @@ function scheduleReturnToAvailableAfterUserMessage() {
   );
   availabilityState.returnFromAwayTimerId = window.setTimeout(() => {
     availabilityState.returnFromAwayTimerId = null;
-    setAiAvailability("available");
+    setAiAvailability("available", { source: "user_message" });
   }, wait);
 }
 
@@ -1894,10 +2584,14 @@ function beginManualDowntimeWindow() {
   if (typeof window === "undefined" || availabilityState.isManualDowntimeActive) {
     return;
   }
+  if (isAiInVoiceCall()) {
+    showVoiceCallAvailabilityNotice("Lou não pode ficar ausente enquanto estiver no chat de voz.");
+    return;
+  }
   availabilityState.isManualDowntimeActive = true;
   updateAiAvailabilityUi();
   captureActiveLouReplyForLater();
-  setAiAvailability("away", { skipSchedule: true });
+  setAiAvailability("away", { skipSchedule: true, source: "manual" });
   const wait = randomBetween(MANUAL_AWAY_DURATION_MS.min, MANUAL_AWAY_DURATION_MS.max);
   if (availabilityState.manualDowntimeTimerId) {
     window.clearTimeout(availabilityState.manualDowntimeTimerId);
@@ -1906,7 +2600,7 @@ function beginManualDowntimeWindow() {
     availabilityState.manualDowntimeTimerId = null;
     availabilityState.isManualDowntimeActive = false;
     updateAiAvailabilityUi();
-    setAiAvailability("available");
+    setAiAvailability("available", { source: "manual" });
   }, wait);
 }
 
@@ -1919,7 +2613,7 @@ function endManualDowntimeWindow() {
     availabilityState.isManualDowntimeActive = false;
     updateAiAvailabilityUi();
   }
-  setAiAvailability("available");
+  setAiAvailability("available", { source: "manual" });
 }
 
 function captureActiveLouReplyForLater() {
@@ -2018,7 +2712,12 @@ function createMessageNode(message, channelMessages) {
   };
   const row = document.createElement("article");
   row.className = "message-row";
-  if (message.authorId === "user") row.classList.add("is-user");
+  if (message.authorId === "user") {
+    row.classList.add("is-user");
+  } else if (message.authorId === "model") {
+    row.classList.add("is-ai");
+  }
+  row.dataset.messageAuthor = message.authorId || "unknown";
   row.dataset.messageId = message.id;
 
   const avatar = buildAvatar(profile);
@@ -2065,19 +2764,8 @@ function createMessageNode(message, channelMessages) {
     }
   }
 
-  const actions = document.createElement("div");
-  actions.className = "message-actions";
-  const replyButton = document.createElement("button");
-  replyButton.type = "button";
-  replyButton.className = "message-action";
-  replyButton.dataset.messageAction = "reply";
-  replyButton.title = "Responder";
-  replyButton.setAttribute("aria-label", "Responder mensagem");
-  replyButton.innerHTML = '<i class="fas fa-reply" aria-hidden="true"></i>';
-  actions.appendChild(replyButton);
-
   content.append(header, bubble);
-  row.append(avatar, content, actions);
+  row.append(avatar, content);
   return row;
 }
 
@@ -2097,6 +2785,13 @@ function buildAvatar(profile) {
     wrapper.textContent = profile.initials ?? profile.name.slice(0, 2).toUpperCase();
   }
   return wrapper;
+}
+
+function renderReplyAvatar(profile) {
+  if (!elements.replyAvatar) return;
+  elements.replyAvatar.innerHTML = "";
+  const avatarNode = buildAvatar(profile);
+  elements.replyAvatar.appendChild(avatarNode);
 }
 
 function buildReplyPreview(messageId, channelMessages) {
@@ -2171,6 +2866,7 @@ async function handleFormSubmit(event) {
     });
 
     channel.messages.push(newMessage);
+    notifyVideoAbsenceUserReply();
     analyzeVoiceIntentsFromMessage(text, { serverId: server.id, channelId: channel.id });
     textarea.value = "";
     autoResizeTextarea(textarea);
@@ -2191,14 +2887,23 @@ async function triggerLouReplyFlow(serverId, channelId, referenceMessage, option
   const abortController = new AbortController();
   louReplyState.abortController = abortController;
   let payload;
+  const shouldBypassVideoFocus = Boolean(referenceMessage?.replyTo) && isVideoSessionActive();
+  const mediaContext = buildActiveMediaContextPayload({
+    enforce: !shouldBypassVideoFocus,
+    bypassReason: shouldBypassVideoFocus ? "reply" : null,
+  });
+  const requestBody = {
+    serverId,
+    channelId,
+    replyTo: referenceMessage?.id ?? null,
+  };
+  if (mediaContext) {
+    requestBody.mediaContext = mediaContext;
+  }
   try {
     payload = await postJSON(
       `${API_BASE}/ai/reply`,
-      {
-        serverId,
-        channelId,
-        replyTo: referenceMessage?.id ?? null,
-      },
+      requestBody,
       { signal: abortController.signal }
     );
   } catch (error) {
@@ -2248,7 +2953,7 @@ async function triggerLouReplyFlow(serverId, channelId, referenceMessage, option
   if (outputController.cancelled) {
     return;
   }
-  proactiveState.lastUserActivity = Date.now();
+  await handleLouReplyCompleted();
   startProactiveTimer();
   if (payload?.reasoning) {
     console.info("Raciocínio da Lou:", payload.reasoning);
@@ -2314,7 +3019,8 @@ async function playLouTypingSequence(serverId, channelId, messages, options = {}
     }
   };
   for (let index = 0; index < messages.length; index += 1) {
-    const typingDuration = randomBetween(LOU_TYPING_BURST_DELAY.min, LOU_TYPING_BURST_DELAY.max);
+    const chunkMessage = messages[index];
+    const typingDuration = estimateLouTypingDurationMs(chunkMessage);
     if (!(await waitForController(typingDuration, controller))) {
       removePlaceholder();
       return;
@@ -2323,7 +3029,7 @@ async function playLouTypingSequence(serverId, channelId, messages, options = {}
     if (controller?.cancelled) {
       return;
     }
-    channel.messages.push(messages[index]);
+    channel.messages.push(chunkMessage);
     if (serverId === state.activeServerId && channelId === state.activeChannelId) {
       renderMessages();
     }
@@ -2348,6 +3054,7 @@ async function playLouTypingSequence(serverId, channelId, messages, options = {}
   }
   removePlaceholder();
   flushVoiceIntentQueue(serverId, channelId);
+  proactiveState.lastLouMessageAt = Date.now();
 }
 
 function getFriendlyAiErrorMessage(error) {
@@ -2359,6 +3066,29 @@ function getFriendlyAiErrorMessage(error) {
     return "O backend recusou o pedido agora pouco. Tente novamente em instantes.";
   }
   return "Não consegui responder agora. Tente de novo em instantes.";
+}
+
+function appendLocalLouMessage(content, options = {}) {
+  if (!content) return null;
+  const server = getActiveServer();
+  const channel = getActiveChannel();
+  if (!server || !channel) return null;
+  const message = {
+    id: `lou-local-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+    role: "model",
+    authorId: "model",
+    content,
+    parts: [content],
+    timestamp: new Date().toISOString(),
+    isSystem: Boolean(options.isSystem),
+  };
+  channel.messages.push(message);
+  if (server.id === state.activeServerId && channel.id === state.activeChannelId) {
+    renderMessages();
+  }
+  proactiveState.lastLouMessageAt = Date.now();
+  startProactiveTimer();
+  return message;
 }
 
 function findChannel(serverId, channelId) {
@@ -2497,7 +3227,7 @@ async function init() {
     renderServers();
     renderChannels();
     renderChatArea();
-    refreshProactiveWatcher({ resetAttempts: true });
+    refreshProactiveWatcher({ resetAttempts: true, resetAnchors: true, silent: true });
   }
 }
 
@@ -2528,7 +3258,7 @@ function handleChannelListClick(event) {
     state.activeChannelId = channelId;
     renderChannels();
     renderChatArea();
-    refreshProactiveWatcher();
+    refreshProactiveWatcher({ resetAttempts: true, resetAnchors: true, silent: true });
   }
 }
 
@@ -2542,9 +3272,23 @@ function handleChannelListKeyDown(event) {
 
 function handleMessageListClick(event) {
   const actionButton = event.target.closest("[data-message-action]");
-  if (!actionButton) return;
+  if (actionButton) {
+    event.preventDefault();
+    const row = actionButton.closest(".message-row");
+    processMessageReplyRequest(row);
+    return;
+  }
+  const bubble = event.target.closest(".message-bubble");
+  if (!bubble) return;
+  const messageRow = bubble.closest(".message-row");
+  if (!messageRow || messageRow.dataset.messageAuthor !== "model") {
+    return;
+  }
   event.preventDefault();
-  const messageRow = actionButton.closest(".message-row");
+  processMessageReplyRequest(messageRow);
+}
+
+function processMessageReplyRequest(messageRow) {
   if (!messageRow) return;
   const channel = getActiveChannel();
   const server = getActiveServer();
@@ -2577,6 +3321,10 @@ function updateReplyIndicator() {
   if (!elements.replyIndicator || !elements.replyAuthor || !elements.replySnippet) return;
   if (!replyState.message) {
     elements.replyIndicator.classList.add("is-hidden");
+    elements.replySnippet.textContent = "";
+    if (elements.replyAvatar) {
+      elements.replyAvatar.innerHTML = "";
+    }
     return;
   }
   const profile = profiles[replyState.message.authorId] ?? profiles.model ?? { name: "Desconhecido" };
@@ -2585,6 +3333,7 @@ function updateReplyIndicator() {
   const truncated = cleanSnippet.length > 90 ? `${cleanSnippet.slice(0, 90)}…` : cleanSnippet;
   elements.replyAuthor.textContent = profile.name;
   elements.replySnippet.textContent = truncated;
+  renderReplyAvatar(profile);
   elements.replyIndicator.classList.remove("is-hidden");
 }
 
@@ -2603,7 +3352,7 @@ async function handleCreateChannelFlow() {
     state.activeChannelId = channel.id;
     renderChannels();
     renderChatArea();
-    refreshProactiveWatcher({ resetAttempts: true });
+    refreshProactiveWatcher({ resetAttempts: true, resetAnchors: true, silent: true });
   } catch (error) {
     console.error("Falha ao criar canal", error);
   }
@@ -2728,7 +3477,7 @@ function removeChannelFromState(serverId, channelId) {
   if (replyState.channelId === channelId) {
     clearReplyTarget();
   }
-  refreshProactiveWatcher({ resetAttempts: true });
+  refreshProactiveWatcher({ resetAttempts: true, resetAnchors: true, silent: true });
 }
 
 function openServerSettingsDialog(server) {
@@ -2819,7 +3568,7 @@ function openServerSettingsDialog(server) {
       renderServers();
       renderChannels();
       renderChatArea();
-      refreshProactiveWatcher({ resetAttempts: true });
+  refreshProactiveWatcher({ resetAttempts: true, resetAnchors: true, silent: true });
       closeDialog();
     } catch (error) {
       console.error("Falha ao excluir servidor", error);
@@ -3462,6 +4211,7 @@ async function sendGifMessage(gifEntry) {
       ],
     });
     channel.messages.push(newMessage);
+    notifyVideoAbsenceUserReply();
     clearReplyTarget();
     registerUserActivity();
     renderMessages();
@@ -3691,13 +4441,24 @@ function refreshProactiveWatcher(options = {}) {
     proactiveState.proactiveMessagesSent = 0;
     proactiveState.absenceQuestionSent = false;
     proactiveState.awaitingUserResponse = false;
+    proactiveState.lastProactiveAt = 0;
+    if (options.resetAnchors) {
+      proactiveState.lastLouMessageAt = 0;
+      videoSessionState.lastProactiveAt = 0;
+    }
   }
-  proactiveState.lastUserActivity = Date.now();
+  if (!options.silent) {
+    proactiveState.lastUserActivity = Date.now();
+  }
   startProactiveTimer();
 }
 
 function registerUserActivity() {
-  refreshProactiveWatcher({ resetAttempts: true });
+  refreshProactiveWatcher({ resetAttempts: true, resetAnchors: true });
+  proactiveState.lastLouMessageAt = 0;
+  proactiveState.lastProactiveAt = 0;
+  videoSessionState.lastProactiveAt = 0;
+  clearVideoAbsenceFollowUps();
   availabilityState.lastUserMessageAt = Date.now();
   availabilityState.pendingShortCycle = true;
   if (typeof window !== "undefined" && availabilityState.manualDowntimeTimerId) {
@@ -3714,7 +4475,7 @@ function registerUserActivity() {
     return;
   }
   if (!availabilityState.isManualDowntimeActive) {
-    scheduleAvailabilityShift();
+    clearAvailabilityShiftTimer();
   }
 }
 
@@ -3766,14 +4527,47 @@ function interruptLouOutput() {
   }
 }
 
+const MAX_PROACTIVE_RETRY_ATTEMPTS = PROACTIVE_RETRY_DELAYS_MS.length;
+
+function clearProactiveRetryTimer() {
+  if (proactiveState.retryTimerId) {
+    window.clearTimeout(proactiveState.retryTimerId);
+    proactiveState.retryTimerId = null;
+  }
+  proactiveState.pendingRetryKind = null;
+  proactiveState.retryAttempt = 0;
+}
+
+function scheduleProactiveRetry(kind, attempt) {
+  if (!kind) return;
+  const clampedAttempt = Math.max(1, attempt);
+  const delay = PROACTIVE_RETRY_DELAYS_MS[Math.min(clampedAttempt - 1, PROACTIVE_RETRY_DELAYS_MS.length - 1)] || PROACTIVE_RETRY_DELAYS_MS[PROACTIVE_RETRY_DELAYS_MS.length - 1];
+  clearProactiveRetryTimer();
+  proactiveState.retryAttempt = clampedAttempt;
+  proactiveState.pendingRetryKind = kind;
+  proactiveState.retryTimerId = window.setTimeout(() => {
+    proactiveState.retryTimerId = null;
+    proactiveState.pendingRetryKind = null;
+    triggerProactiveMessage({ forcedKind: kind, retryAttempt: clampedAttempt });
+  }, delay);
+}
+
 function startProactiveTimer() {
+  clearProactiveRetryTimer();
   window.clearTimeout(proactiveState.timerId);
   if (!getActiveChannel()) return;
   if (proactiveState.awaitingUserResponse) return;
   const nextKind = getNextProactiveKind();
   if (!nextKind) return;
-  const delay = getProactiveDelay();
-  proactiveState.timerId = window.setTimeout(handleProactiveTimeout, delay);
+  const anchor = getProactiveAnchorTimestamp(nextKind);
+  if (!anchor) return;
+  const windowRange = getProactiveWindowForKind(nextKind);
+  const now = Date.now();
+  const elapsed = now - anchor;
+  const minDelay = Math.max(windowRange.min - elapsed, 0);
+  const maxDelay = Math.max(windowRange.max - elapsed, minDelay);
+  const delay = maxDelay === minDelay ? minDelay : randomBetween(minDelay, maxDelay);
+  proactiveState.timerId = window.setTimeout(() => handleProactiveTimeout(nextKind), delay);
 }
 
 function stopProactiveTimer() {
@@ -3781,84 +4575,180 @@ function stopProactiveTimer() {
     window.clearTimeout(proactiveState.timerId);
     proactiveState.timerId = null;
   }
-}
-
-function getProactiveDelay() {
-  return PROACTIVE_DELAYS[Math.min(proactiveState.attempt, PROACTIVE_DELAYS.length - 1)];
+  clearProactiveRetryTimer();
 }
 
 function getNextProactiveKind() {
-  if (proactiveState.proactiveMessagesSent < MAX_PROACTIVE_MESSAGES) {
+  if (isVideoSessionActive()) {
+    if (!videoSessionState.proactiveMessageSent && shouldAllowProactiveKind("proactive")) {
+      return "proactive";
+    }
+    if (!videoSessionState.absenceQuestionSent && shouldAllowProactiveKind("absence")) {
+      return "absence";
+    }
+    return null;
+  }
+  const profile = getCurrentProactiveProfile();
+  const maxProactives = profile.maxProactives ?? 2;
+  if (proactiveState.proactiveMessagesSent < maxProactives && shouldAllowProactiveKind("proactive")) {
     return "proactive";
   }
-  if (!proactiveState.absenceQuestionSent) {
+  if (!proactiveState.absenceQuestionSent && shouldAllowProactiveKind("absence")) {
     return "absence";
   }
   return null;
 }
 
-function handleProactiveTimeout() {
-  if (!shouldTriggerProactive()) {
+function handleProactiveTimeout(expectedKind) {
+  const nextKind = getNextProactiveKind();
+  const resolvedKind = expectedKind && shouldAllowProactiveKind(expectedKind) ? expectedKind : nextKind;
+  if (!resolvedKind) {
     startProactiveTimer();
     return;
   }
-  triggerProactiveMessage();
+  if (!shouldTriggerProactive(resolvedKind)) {
+    startProactiveTimer();
+    return;
+  }
+  triggerProactiveMessage({ forcedKind: resolvedKind });
 }
 
-function shouldTriggerProactive() {
+function shouldTriggerProactive(kind) {
   const channel = getActiveChannel();
-  if (!channel) return false;
-  const idleFor = Date.now() - proactiveState.lastUserActivity;
-  return idleFor >= getProactiveDelay();
+  if (!channel || !kind) return false;
+  if (proactiveState.awaitingUserResponse) return false;
+  const anchor = getProactiveAnchorTimestamp(kind);
+  if (!anchor) return false;
+  if (isVideoSessionActive() && !isAiStreamInActiveChannel()) return false;
+  const { min, max } = getProactiveWindowForKind(kind);
+  const now = Date.now();
+  if (now < anchor + min) {
+    return false;
+  }
+  if (proactiveState.lastUserActivity && proactiveState.lastUserActivity > anchor) {
+    return false;
+  }
+  const tolerance = 2000;
+  if (now > anchor + max + tolerance) {
+    return false;
+  }
+  return true;
+}
+
+function normalizeLouMessages(response) {
+  if (!response) {
+    return [];
+  }
+  if (Array.isArray(response.messages)) {
+    return response.messages.filter(Boolean);
+  }
+  if (Array.isArray(response)) {
+    return response.filter(Boolean);
+  }
+  return [response];
 }
 
 async function triggerProactiveMessage(options = {}) {
-  const { manual = false } = options;
+  const { manual = false, forcedKind = null, retryAttempt = 0 } = options;
   const server = getActiveServer();
   const channel = getActiveChannel();
   if (!server || !channel) return;
+  if (manual) {
+    clearProactiveRetryTimer();
+  }
   if (availabilityState.status === "away") {
     if (!manual) {
       startProactiveTimer();
     }
     return;
   }
-  const nextKind = manual ? "proactive" : getNextProactiveKind();
+  const nextKind = manual ? "proactive" : forcedKind || getNextProactiveKind();
   if (!manual && (!nextKind || proactiveState.awaitingUserResponse)) {
     stopProactiveTimer();
     return;
   }
+  if (nextKind && !shouldAllowProactiveKind(nextKind)) {
+    if (!manual) {
+      stopProactiveTimer();
+    }
+    return;
+  }
   if (proactiveState.requestInFlight) return;
   proactiveState.requestInFlight = true;
+  let scheduledRetry = false;
   const requestStartedAt = Date.now();
   const targetInitialDelay =
     randomBetween(LOU_TYPING_INITIAL_DELAY.min, LOU_TYPING_INITIAL_DELAY.max) + getAvailabilityTypingLag();
+  const videoContext = isVideoSessionActive();
+  const profile = getCurrentProactiveProfile();
+  const maxProactives = profile.maxProactives ?? 2;
   try {
-    const message = await postJSON(`${API_BASE}/proactive`, {
+    const mediaContext = buildActiveMediaContextPayload({ enforce: true });
+    const requestKind = manual ? "proactive" : nextKind;
+    const requestPayload = {
       serverId: server.id,
       channelId: channel.id,
       attempt: manual ? 0 : proactiveState.attempt,
-    });
+      kind: requestKind,
+    };
+    if (mediaContext) {
+      requestPayload.mediaContext = mediaContext;
+    }
+    const response = await postJSON(`${API_BASE}/proactive`, requestPayload);
+    const newMessages = normalizeLouMessages(response);
     const elapsed = Date.now() - requestStartedAt;
     const remainingInitialWait = Math.max(targetInitialDelay - elapsed, 0);
-    await playLouTypingSequence(server.id, channel.id, [message], { initialWait: remainingInitialWait });
-    proactiveState.lastUserActivity = Date.now();
+    await playLouTypingSequence(server.id, channel.id, newMessages, { initialWait: remainingInitialWait });
+    if (nextKind === "proactive") {
+      const now = Date.now();
+      if (videoContext) {
+        videoSessionState.lastProactiveAt = now;
+      } else {
+        proactiveState.lastProactiveAt = now;
+      }
+    }
+    if (nextKind) {
+      markVideoSessionProactiveUsage(nextKind);
+    }
     if (!manual) {
       if (nextKind === "proactive") {
-        proactiveState.proactiveMessagesSent = Math.min(
-          proactiveState.proactiveMessagesSent + 1,
-          MAX_PROACTIVE_MESSAGES
-        );
+        if (!videoContext) {
+          proactiveState.proactiveMessagesSent = Math.min(
+            proactiveState.proactiveMessagesSent + 1,
+            maxProactives
+          );
+        }
       } else if (nextKind === "absence") {
         proactiveState.absenceQuestionSent = true;
         proactiveState.awaitingUserResponse = true;
+        scheduleAwayAfterAbsenceQuestion();
+        beginVideoAbsenceLock();
       }
       proactiveState.attempt += 1;
     }
+    if (response?.reasoning) {
+      console.info("Raciocínio da Lou:", response.reasoning);
+    }
   } catch (error) {
     console.error("Falha ao gerar mensagem proativa", error);
+    const errorMessage = String(error?.message || "");
+    const loweredError = errorMessage.toLowerCase();
+    const isHighLoadMessage = loweredError.includes("high load") || loweredError.includes("overload") || loweredError.includes("busy");
+    const isRetriableStatus = error?.status === 503 || error?.status === 429;
+    const shouldRetry =
+      !manual &&
+      nextKind &&
+      (isRetriableStatus || errorMessage.includes("503") || isHighLoadMessage) &&
+      retryAttempt < MAX_PROACTIVE_RETRY_ATTEMPTS;
+    if (shouldRetry) {
+      scheduledRetry = true;
+      scheduleProactiveRetry(nextKind, retryAttempt + 1);
+    }
   } finally {
     proactiveState.requestInFlight = false;
+    if (scheduledRetry) {
+      return;
+    }
     if (manual) {
       startProactiveTimer();
       return;
@@ -3933,10 +4823,14 @@ async function sendJSON(url, method, payload, requestOptions = {}) {
     fetchOptions.signal = requestOptions.signal;
   }
   const response = await fetch(url, fetchOptions);
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || `Erro ${response.status}`);
-  }
   const text = await response.text();
+  if (!response.ok) {
+    const message = text || `Erro ${response.status}`;
+    const error = new Error(message);
+    error.status = response.status;
+    error.statusText = response.statusText;
+    error.body = text;
+    throw error;
+  }
   return text ? JSON.parse(text) : null;
 }

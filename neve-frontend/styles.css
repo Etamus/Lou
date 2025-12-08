@@ -675,6 +675,16 @@ body.has-overlay .neve-app {
   color: var(--accent-strong);
 }
 
+.message-row.is-ai .message-bubble {
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+.message-row.is-ai .message-bubble:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .message-actions {
   position: absolute;
   top: 6px;
@@ -913,12 +923,36 @@ body.has-overlay .neve-app {
   display: none;
 }
 
-.reply-label {
-  margin: 0;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
+
+.reply-target {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.reply-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.reply-avatar .avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: inherit;
+}
+
+.reply-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .reply-author {
@@ -953,10 +987,18 @@ body.has-overlay .neve-app {
 }
 
 .voice-session {
-  padding: 18px 28px 16px;
+  padding: 18px 28px 22px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   background: rgba(21, 23, 30, 0.6);
   backdrop-filter: blur(12px);
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+}
+
+.voice-session.voice-session--streaming {
+  padding-bottom: 45px;
+  margin-bottom: -18px;
 }
 
 .voice-session.is-hidden {
@@ -970,12 +1012,48 @@ body.has-overlay .neve-app {
   gap: 16px;
 }
 
+.voice-session-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .voice-session-label {
   margin: 0;
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-muted);
+}
+
+.voice-session-heading-avatars {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.voice-session-heading-avatars.is-hidden {
+  display: none;
+}
+
+.voice-heading-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-strong);
+  overflow: hidden;
+}
+
+.voice-heading-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .voice-session-actions {
@@ -987,6 +1065,7 @@ body.has-overlay .neve-app {
 .voice-session-status {
   font-size: 13px;
   color: var(--text-muted);
+  display: none;
 }
 
 .voice-session-participants {
@@ -994,6 +1073,15 @@ body.has-overlay .neve-app {
   flex-wrap: wrap;
   gap: 12px;
   margin: 8px 0 10px;
+}
+
+.voice-session.voice-session--streaming .voice-session-participants {
+  display: none;
+}
+
+.voice-session.voice-session--streaming .voice-share {
+  margin-top: 26px;
+  padding-bottom: 32px;
 }
 
 .voice-participant {
@@ -1045,7 +1133,9 @@ body.has-overlay .neve-app {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: 8px;
+  margin-top: 18px;
+  position: relative;
+  overflow: visible;
 }
 
 .voice-share.is-hidden {

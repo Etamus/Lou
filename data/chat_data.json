@@ -11,66 +11,7 @@
           "name": "Chat de Voz"
         }
       ],
-      "channels": [
-        {
-          "id": "c_718ab5",
-          "name": "Novo Chat",
-          "type": "text",
-          "messages": [
-            {
-              "id": "m-2bda3b2e-e22c-4c6b-934b-3a8f202ab58e",
-              "role": "user",
-              "authorId": "user",
-              "parts": [
-                "Oiiii"
-              ],
-              "content": "Oiiii",
-              "timestamp": "2025-12-05T17:52:53"
-            },
-            {
-              "id": "m-8ed98532-0cdb-43ff-8d7a-d923b0ed3dd1",
-              "role": "user",
-              "authorId": "user",
-              "parts": [
-                "Como vai?"
-              ],
-              "content": "Como vai?",
-              "timestamp": "2025-12-05T17:57:31"
-            },
-            {
-              "id": "m-f26a1f2e-d954-495a-91d7-153f5623a095",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Oiii, pai"
-              ],
-              "content": "Oiii, pai",
-              "timestamp": "2025-12-05T17:58:15",
-              "replyTo": "m-8ed98532-0cdb-43ff-8d7a-d923b0ed3dd1",
-              "is_reply_to": {
-                "id": "m-8ed98532-0cdb-43ff-8d7a-d923b0ed3dd1",
-                "role": "user",
-                "authorId": "user",
-                "parts": [
-                  "Como vai?"
-                ],
-                "content": "Como vai?",
-                "timestamp": "2025-12-05T17:57:31"
-              }
-            },
-            {
-              "id": "m-5c002da0-e75d-4bda-9c5f-64e45c0ba49c",
-              "role": "model",
-              "authorId": "model",
-              "parts": [
-                "Eu tô bem, e você?"
-              ],
-              "content": "Eu tô bem, e você?",
-              "timestamp": "2025-12-05T17:58:15"
-            }
-          ]
-        }
-      ]
+      "channels": []
     }
   ],
   "profiles": {

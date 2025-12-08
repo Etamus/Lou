@@ -448,14 +448,33 @@ def build_handler(service: LouService, ai_responder: Optional[LouAIResponder] = 
             server_id = body.get("serverId")
             channel_id = body.get("channelId")
             attempt = int(body.get("attempt", 0))
+            media_context = body.get("mediaContext")
+            kind = (body.get("kind") or "proactive").strip().lower()
+            if media_context is not None and not isinstance(media_context, dict):
+                self.send_error(400, "mediaContext invalido")
+                return
             if not server_id or not channel_id:
                 self.send_error(400, "serverId e channelId sao obrigatorios")
                 return
+            if kind not in {"proactive", "absence", "video_swap"}:
+                self.send_error(400, "kind invalido")
+                return
             try:
                 if ai_responder is not None:
-                    message = ai_responder.generate_proactive_message(server_id, channel_id, attempt)
+                    messages = ai_responder.generate_proactive_message(
+                        server_id,
+                        channel_id,
+                        attempt=attempt,
+                        kind=kind,
+                        media_context=media_context,
+                    )
                 else:
-                    message = service.generate_proactive_message(server_id, channel_id, attempt=attempt)
+                    messages = service.generate_proactive_message(
+                        server_id,
+                        channel_id,
+                        attempt=attempt,
+                        kind=kind,
+                    )
             except KeyError as exc:
                 self.send_error(404, str(exc))
                 return
@@ -468,7 +487,7 @@ def build_handler(service: LouService, ai_responder: Optional[LouAIResponder] = 
             except Exception as exc:  # pragma: no cover - guardrails only
                 self.send_error(500, f"Falha ao gerar mensagem proativa: {exc}")
                 return
-            self._json_response(message, status=201)
+            self._json_response({"messages": messages}, status=201)
 
         def _handle_ai_reply(self) -> None:
             if ai_responder is None:
@@ -480,11 +499,20 @@ def build_handler(service: LouService, ai_responder: Optional[LouAIResponder] = 
             server_id = (body.get("serverId") or "").strip()
             channel_id = (body.get("channelId") or "").strip()
             reply_to = (body.get("replyTo") or "").strip() or None
+            media_context = body.get("mediaContext")
+            if media_context is not None and not isinstance(media_context, dict):
+                self.send_error(400, "mediaContext invalido")
+                return
             if not server_id or not channel_id:
                 self.send_error(400, "serverId e channelId sao obrigatorios")
                 return
             try:
-                ai_payload = ai_responder.generate_reply(server_id, channel_id, reply_to=reply_to)
+                ai_payload = ai_responder.generate_reply(
+                    server_id,
+                    channel_id,
+                    reply_to=reply_to,
+                    media_context=media_context,
+                )
             except KeyError as exc:
                 self.send_error(404, str(exc))
                 return

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import contextlib
 import importlib.util
+import os
 import threading
 import time
 from pathlib import Path
@@ -40,6 +41,25 @@ DEFAULT_PORT = backend_module.DEFAULT_PORT
 create_server = backend_module.create_server
 
 
+def configure_rendering_backend() -> str:
+    """Choose the OpenGL backend to minimize flicker and artifacts."""
+
+    mode = os.environ.get("LOU_OPENGL_MODE", "auto").lower().strip()
+    if mode == "software":
+        QApplication.setAttribute(Qt.AA_UseSoftwareOpenGL, True)
+        return "software"
+    if mode == "angle":
+        QApplication.setAttribute(Qt.AA_UseOpenGLES, True)
+        return "opengles"
+    if mode == "desktop":
+        QApplication.setAttribute(Qt.AA_UseDesktopOpenGL, True)
+        return "desktop"
+
+    # Auto: prefer desktop OpenGL and let Qt fall back automatically if unavailable.
+    QApplication.setAttribute(Qt.AA_UseDesktopOpenGL, True)
+    return "desktop"
+
+
 def start_backend() -> tuple[threading.Thread, object]:
     server = create_server(DEFAULT_HOST, DEFAULT_PORT)
     thread = threading.Thread(target=server.serve_forever, name="neve-backend", daemon=True)
@@ -67,7 +87,8 @@ def create_window() -> QWebEngineView:
 
 
 def main() -> int:
-    QApplication.setAttribute(Qt.AA_UseSoftwareOpenGL, True)
+    backend = configure_rendering_backend()
+    print(f"[Lou] Render backend: {backend}")
     app = QApplication(sys.argv)
     backend_thread, backend = start_backend()
     window = create_window()

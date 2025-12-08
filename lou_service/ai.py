@@ -6,8 +6,11 @@ import json
 import os
 import re
 import threading
+import time
+from collections import deque
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple, Set
+from difflib import SequenceMatcher
+from typing import Any, Dict, List, Optional, Tuple, Set, Deque
 
 try:  # Optional dependency; defer errors until runtime.
     import google.generativeai as genai
@@ -22,11 +25,57 @@ REGRAS OBRIGATÓRIAS:
 1. Crie um pensamento completo, com início e fim. Nada de "Pai..." ou "Pensando aqui..." sem concluir.
 2. Você pode continuar o assunto anterior OU puxar um tema novo que faça sentido para vocês dois.
 3. Seja natural, divertida e íntima como sempre. Use o tom que estava rolando antes.
+4. Se fizer uma pergunta, termine com "?" e mantenha o ponto de interrogação no final da frase.
 """
 
 PROACTIVE_CHECKIN_PROMPT = """
 Você já tentou falar 2 vezes e ele não respondeu. Envie UMA mensagem bem curta só para saber se ele está por perto. Exemplos: "Pai?", "Tá aí?", "Tudo bem por aí?". Não invente assunto novo.
+Sempre finalize com "?" e não remova o ponto de interrogação.
 """
+
+VIDEO_PROACTIVE_PROMPT = """
+Você está transmitindo um vídeo AO VIVO e o Pai ficou em silêncio.
+Envie UMA mensagem empolgada narrando ou comentando o que está acontecendo na tela agora ou perguntando se ele está curtindo essa cena.
+Não traga assuntos externos e não fale de texto normal: mantenha o foco total na transmissão.
+Se formular uma pergunta, mantenha o "?" no final.
+"""
+
+VIDEO_ABSENCE_PROMPT = """
+Você continua transmitindo o vídeo e o Pai não respondeu.
+Envie UMA pergunta direta e curta para checar se ele ainda está assistindo a transmissão agora.
+Mencione a tela ou o vídeo para deixar claro que é sobre a call de streaming e não sobre outros assuntos.
+Garanta que essa pergunta termina com "?".
+"""
+
+VIDEO_SWAP_PROMPT = """
+Você vai trocar o vídeo da transmissão em poucos segundos.
+Avise de forma natural e animada que vai colocar outro vídeo agora, sem precisar citar o título.
+Use uma única frase curta.
+Se optar por perguntar algo, finalize com "?".
+"""
+
+VIDEO_CONTEXT_KEYWORDS = (
+    "vídeo",
+    "video",
+    "transmiss",
+    "stream",
+    "tela",
+    "cena",
+    "assist",
+    "ao vivo",
+)
+
+VIDEO_SWAP_HINTS = (
+    "troca",
+    "trocar",
+    "mudar",
+    "substit",
+    "outro vídeo",
+    "outro video",
+    "colocar outro",
+    "puxar outro",
+    "mais um vídeo",
+)
 
 INCOMPLETE_SUFFIXES = (
     " de",
@@ -159,6 +208,9 @@ STYLE_EMPHASIS_SUFFIXES = (
 )
 
 DUPLICATE_HISTORY_WINDOW = 6
+PROACTIVE_VARIATION_WINDOW = 4
+PROACTIVE_VARIATION_INSTRUCTION_LIMIT = 3
+PROACTIVE_SIMILARITY_THRESHOLD = 0.86
 
 
 from .service import CreateMessagePayload, LouService
@@ -219,7 +271,7 @@ class LouAIResponder:
         service: LouService,
         *,
         api_key: Optional[str] = None,
-        model_name: str = "gemini-2.0-flash",
+        model_name: str = "gemini-2.5-flash",
         temperature: float = 0.75,
     ) -> None:
         self._service = service
@@ -231,20 +283,97 @@ class LouAIResponder:
         self._model: Any = None
         self._personality_signature: Optional[str] = None
         self._context_threads: set[threading.Thread] = set()
+        self._recent_proactive_samples: Dict[str, Deque[Dict[str, str]]] = {}
+        self._context_update_lock = threading.Lock()
+        self._last_context_update_at = 0.0
+        self._context_update_pending = 0
+        self._context_update_interval = 180.0
+        self._context_update_force_threshold = 4
 
-    def generate_reply(self, server_id: str, channel_id: str, *, reply_to: Optional[str] = None) -> AIResponse:
+    def _get_style_terms(self) -> List[str]:
+        try:
+            return self._service.get_allowed_slang_terms(limit=64)
+        except Exception:
+            return []
+
+    def _call_model(
+        self,
+        model: Any,
+        history: List[Dict[str, Any]],
+        *,
+        attempts: int = 1,
+        allow_high_load_retry: bool = False,
+        base_delay: float = 2.0,
+    ) -> Any:
+        last_error: Optional[Exception] = None
+        for attempt in range(1, max(1, attempts) + 1):
+            try:
+                with self._request_lock:
+                    return model.generate_content(history)
+            except Exception as exc:  # pragma: no cover - network resilience
+                should_retry = (
+                    allow_high_load_retry
+                    and attempt < attempts
+                    and self._looks_like_high_load_error(exc)
+                )
+                if not should_retry:
+                    raise
+                last_error = exc
+                sleep_for = base_delay * attempt
+                time.sleep(max(0.5, sleep_for))
+        if last_error is not None:
+            raise last_error
+        raise RuntimeError("Falha ao gerar conteúdo com o modelo")
+
+    def _looks_like_high_load_error(self, exc: Exception) -> bool:
+        message = self._extract_error_message(exc)
+        lowered = message.lower()
+        keywords = (
+            "high load",
+            "overloaded",
+            "busy",
+            "try again",
+            "resource exhausted",
+            "quota",
+            "429",
+        )
+        if any(keyword in lowered for keyword in keywords if keyword):
+            return True
+        status = getattr(exc, "code", None) or getattr(exc, "status", None) or getattr(exc, "status_code", None)
+        return isinstance(status, int) and status in {429, 503}
+
+    def _extract_error_message(self, exc: Exception) -> str:
+        if exc is None:
+            return ""
+        if getattr(exc, "message", None):
+            return str(exc.message)
+        if exc.args:
+            return " ".join(str(arg) for arg in exc.args if arg)
+        return str(exc)
+
+    def generate_reply(
+        self,
+        server_id: str,
+        channel_id: str,
+        *,
+        reply_to: Optional[str] = None,
+        media_context: Optional[Dict[str, Any]] = None,
+    ) -> AIResponse:
         model = self._ensure_model()
         history = self._service.build_history_context(server_id, channel_id)
         if not history:
             raise ValueError("Historico insuficiente para gerar resposta")
-        with self._request_lock:
-            response = model.generate_content(history)
+        media_instruction = self._build_media_focus_instruction(media_context)
+        if media_instruction:
+            history.insert(2, {"role": "user", "parts": [media_instruction]})
+        response = self._call_model(model, history)
         raw_text = self._extract_text(response)
         payload = self._parse_payload(raw_text)
-        chunks = sanitize_and_split_response(payload.get("messages", ""))
+        style_terms = self._get_style_terms()
+        chunks = sanitize_and_split_response(payload.get("messages", ""), style_terms=style_terms)
         chunks = self._merge_incomplete_chunks(chunks)
-        chunks = self._ensure_complete_chunks(chunks, history, model)
-        chunks = self._ensure_contextual_alignment(chunks, history, model)
+        chunks = self._ensure_complete_chunks(chunks, history, model, style_terms)
+        chunks = self._ensure_contextual_alignment(chunks, history, model, style_terms)
         if not chunks:
             raise RuntimeError("A IA retornou uma resposta vazia")
         created_messages: List[Dict[str, Any]] = []
@@ -271,38 +400,121 @@ class LouAIResponder:
         self._schedule_context_update(server_id, channel_id)
         return AIResponse(reasoning=payload.get("reasoning", ""), messages=created_messages)
 
-    def generate_proactive_message(self, server_id: str, channel_id: str, attempt: int) -> Dict[str, Any]:
+    def _build_media_focus_instruction(self, media_context: Optional[Dict[str, Any]]) -> str:
+        if not isinstance(media_context, dict):
+            return ""
+        if not media_context.get("isActive"):
+            return ""
+        if not media_context.get("enforce", True):
+            return ""
+        raw_title = str(media_context.get("title") or "").strip()
+        title = raw_title.replace("\"", "'") if raw_title else "a transmissão atual"
+        owner_mode = str(media_context.get("mode") or "").strip()
+        owner_key = str(media_context.get("owner") or "").strip()
+        is_ai_stream = owner_mode == "ai_stream" or owner_key == "ai"
+        channel_name = str(media_context.get("channelName") or "").strip()
+        channel_hint = f" no chat de voz '{channel_name}'" if channel_name else ""
+        owner_name = str(media_context.get("ownerName") or "").strip()
+        if not owner_name:
+            owner_name = "Pai" if not is_ai_stream else "Lou"
+        if is_ai_stream:
+            return (
+                f"[Contexto de Transmissão: Você está transmitindo ao vivo o vídeo \"{title}\"{channel_hint}. "
+                "Descreva o que aparece na tela, reaja como apresentadora empolgada e mantenha o foco TOTAL nesse vídeo até a transmissão encerrar. "
+                "Trate qualquer mensagem do Pai como comentário sobre essa transmissão.]"
+            )
+        return (
+            f"[Contexto de Transmissão: {owner_name} está compartilhando agora o vídeo \"{title}\". "
+            "Assista junto como espectadora, comente as cenas em tempo real, faça perguntas sobre o que estiver acontecendo na tela e não puxe outros assuntos até o compartilhamento terminar.]"
+        )
+
+    def _is_video_stream_context(self, media_context: Optional[Dict[str, Any]]) -> bool:
+        if not isinstance(media_context, dict):
+            return False
+        if not media_context.get("isActive"):
+            return False
+        mode = str(media_context.get("mode") or "").lower()
+        owner = str(media_context.get("owner") or "").lower()
+        return mode == "ai_stream" or owner == "ai"
+
+    def generate_proactive_message(
+        self,
+        server_id: str,
+        channel_id: str,
+        *,
+        attempt: int = 0,
+        kind: str = "proactive",
+        media_context: Optional[Dict[str, Any]] = None,
+    ) -> List[Dict[str, Any]]:
         model = self._ensure_model()
         history = self._service.build_history_context(server_id, channel_id)
         if not history:
             raise ValueError("Historico insuficiente para mensagem proativa")
-        prompt = PROACTIVE_CREATIVE_PROMPT if attempt < 2 else PROACTIVE_CHECKIN_PROMPT
-        request_history = history + [{"role": "user", "parts": [prompt]}]
-        with self._request_lock:
-            response = model.generate_content(request_history)
+        media_instruction = self._build_media_focus_instruction(media_context)
+        if media_instruction:
+            insert_index = 2 if len(history) >= 2 else len(history)
+            history.insert(insert_index, {"role": "user", "parts": [media_instruction]})
+        self._maybe_seed_proactive_history(server_id, channel_id, history)
+        normalized_kind = (kind or "proactive").strip().lower()
+        is_video_stream = self._is_video_stream_context(media_context)
+        if normalized_kind == "absence":
+            prompt = VIDEO_ABSENCE_PROMPT if is_video_stream else PROACTIVE_CHECKIN_PROMPT
+        elif normalized_kind == "video_swap":
+            prompt = VIDEO_SWAP_PROMPT
+        else:
+            if is_video_stream:
+                prompt = VIDEO_PROACTIVE_PROMPT
+            else:
+                prompt = PROACTIVE_CREATIVE_PROMPT if attempt < 2 else PROACTIVE_CHECKIN_PROMPT
+        request_history = list(history)
+        variation_instruction = self._build_proactive_variation_instruction(server_id, channel_id)
+        if variation_instruction:
+            request_history.append({"role": "user", "parts": [variation_instruction]})
+        request_history.append({"role": "user", "parts": [prompt]})
+        response = self._call_model(
+            model,
+            request_history,
+            attempts=3,
+            allow_high_load_retry=True,
+            base_delay=2.5,
+        )
         generated_text = (self._extract_text(response) or "").strip()
         payload = self._parse_payload(generated_text)
         candidate_text = payload.get("messages") or generated_text
         candidate_text = self._strip_code_fences(candidate_text)
-        chunks = sanitize_and_split_response(candidate_text)
-        first_chunk = ""
-        for chunk in chunks:
-            trimmed = chunk.strip()
-            if trimmed:
-                first_chunk = trimmed
-                break
-        if not first_chunk:
-            first_chunk = candidate_text.strip()
-        final_text = self._ensure_proactive_completion(first_chunk, history, model, attempt)
-        payload = CreateMessagePayload(
-            server_id=server_id,
-            channel_id=channel_id,
-            author_id="model",
-            content=final_text.strip(),
+        style_terms = self._get_style_terms()
+        chunks = sanitize_and_split_response(candidate_text, style_terms=style_terms)
+        chunks = self._merge_incomplete_chunks(chunks)
+        sanitized_chunks = [chunk.strip() for chunk in chunks if chunk.strip()]
+        if not sanitized_chunks:
+            sanitized_chunks = [candidate_text.strip()]
+        primary_text = self._ensure_proactive_completion(
+            sanitized_chunks[0],
+            history,
+            model,
+            attempt,
+            server_id,
+            channel_id,
+            style_terms,
+            kind=normalized_kind,
+            video_stream=is_video_stream,
         )
-        message = self._service.add_message(payload)
+        sanitized_chunks[0] = primary_text.strip()
+        created_messages: List[Dict[str, Any]] = []
+        for chunk in sanitized_chunks:
+            trimmed = chunk.strip()
+            if not trimmed:
+                continue
+            payload = CreateMessagePayload(
+                server_id=server_id,
+                channel_id=channel_id,
+                author_id="model",
+                content=trimmed,
+            )
+            message = self._service.add_message(payload)
+            created_messages.append(message)
         self._schedule_context_update(server_id, channel_id)
-        return message
+        return created_messages
 
     def _ensure_proactive_completion(
         self,
@@ -310,37 +522,195 @@ class LouAIResponder:
         history: List[Dict[str, Any]],
         model: Any,
         attempt: int,
+        server_id: str,
+        channel_id: str,
+        style_terms: Optional[List[str]] = None,
+        *,
+        kind: str = "proactive",
+        video_stream: bool = False,
     ) -> str:
-        candidate = self._normalize_single_chunk(text)
+        candidate = self._normalize_single_chunk(text, style_terms=style_terms)
         max_attempts = 3
         for round_index in range(max_attempts):
-            if candidate and not self._needs_proactive_retry(candidate, history):
-                return candidate
-            reason = self._diagnose_proactive_issue(candidate, history)
+            if candidate and not self._needs_proactive_retry(
+                candidate,
+                history,
+                server_id,
+                channel_id,
+                kind=kind,
+                video_stream=video_stream,
+            ):
+                finalized = self._finalize_proactive_candidate(candidate, kind=kind)
+                self._remember_proactive_candidate(server_id, channel_id, finalized)
+                return finalized
+            reason = self._diagnose_proactive_issue(
+                candidate,
+                history,
+                server_id,
+                channel_id,
+                kind=kind,
+                video_stream=video_stream,
+            )
             candidate = self._normalize_single_chunk(
-                self._request_proactive_fix(candidate, reason, history, model, attempt, round_index)
+                self._request_proactive_fix(candidate, reason, history, model, attempt, round_index),
+                style_terms=style_terms,
             )
         raise RuntimeError("Nao consegui gerar uma mensagem proativa completa a tempo")
 
-    def _needs_proactive_retry(self, text: str, history: List[Dict[str, Any]]) -> bool:
+    def _needs_proactive_retry(
+        self,
+        text: str,
+        history: List[Dict[str, Any]],
+        server_id: str,
+        channel_id: str,
+        *,
+        kind: str = "proactive",
+        video_stream: bool = False,
+    ) -> bool:
         if not text.strip():
             return True
         if self._is_duplicate_of_recent_model(text, history):
             return True
+        if self._is_similar_to_recent_proactive(text, server_id, channel_id):
+            return True
         if re.search(r"(pensando aqui|lembr(ei|ando)|sabe o que)", text, re.IGNORECASE):
+            return True
+        if video_stream and kind in {"proactive", "absence", "video_swap"} and not self._references_video_context(text):
+            return True
+        if kind == "absence" and not self._looks_like_question(text):
+            return True
+        if kind == "video_swap" and not self._mentions_video_swap(text):
             return True
         return self._looks_incomplete_sentence(text)
 
-    def _diagnose_proactive_issue(self, text: str, history: List[Dict[str, Any]]) -> str:
+    def _diagnose_proactive_issue(
+        self,
+        text: str,
+        history: List[Dict[str, Any]],
+        server_id: str,
+        channel_id: str,
+        *,
+        kind: str = "proactive",
+        video_stream: bool = False,
+    ) -> str:
         if not text.strip():
             return "Mensagem vazia"
         if self._is_duplicate_of_recent_model(text, history):
             return "Você repetiu praticamente a mesma mensagem; tente outro ângulo"
+        if self._is_similar_to_recent_proactive(text, server_id, channel_id):
+            return "Você está usando o mesmo gancho das últimas proativas; mude a abertura e o foco"
         if re.search(r"(pensando aqui|lembr(ei|ando)|sabe o que)", text, re.IGNORECASE):
             return "Você começou um pensamento mas não concluiu"
+        if video_stream and kind in {"proactive", "absence", "video_swap"} and not self._references_video_context(text):
+            return "Você esqueceu de falar do que está acontecendo no vídeo ao vivo; traga a transmissão para o centro da frase"
+        if kind == "absence" and not self._looks_like_question(text):
+            return "Transforme em uma pergunta direta pra checar se ele ainda está assistindo"
+        if kind == "video_swap" and not self._mentions_video_swap(text):
+            return "Avise claramente que vai trocar o vídeo agora"
         if self._looks_incomplete_sentence(text):
             return "A frase terminou sem finalizar a ideia"
         return "Finalize a ideia com clareza"
+
+    def _finalize_proactive_candidate(self, text: str, *, kind: str) -> str:
+        normalized = text.strip()
+        if kind == "absence" or ("?" not in normalized and self._looks_like_question(normalized)):
+            normalized = self._ensure_question_format(normalized)
+        return normalized
+
+    def _references_video_context(self, text: str) -> bool:
+        lowered = text.lower()
+        return any(keyword in lowered for keyword in VIDEO_CONTEXT_KEYWORDS)
+
+    def _mentions_video_swap(self, text: str) -> bool:
+        lowered = text.lower()
+        return any(hint in lowered for hint in VIDEO_SWAP_HINTS)
+
+    def _looks_like_question(self, text: str) -> bool:
+        stripped = text.strip()
+        if not stripped:
+            return False
+        if "?" in stripped:
+            return True
+        starters = (
+            "oi",
+            "cadê",
+            "ta",
+            "tá",
+            "ainda",
+            "sumiu",
+            "segue",
+            "voce",
+            "você",
+            "vocês",
+            "voces",
+            "vc",
+            "cê",
+            "ce",
+            "que",
+            "qual",
+            "quais",
+            "quando",
+            "onde",
+            "como",
+            "sera",
+            "será",
+            "serao",
+            "serão",
+        )
+        lowered = stripped.lower()
+        tokens = [token.strip(",.!?…") for token in lowered.split() if token.strip(",.!?…")]
+        if not tokens:
+            return False
+        if tokens[0] in starters:
+            return True
+        lead_ins = {"ai", "aí", "aii", "opa", "olha", "tipo", "eita", "aff", "oxe", "oxi", "ei"}
+        if len(tokens) >= 2 and tokens[0] in lead_ins and tokens[1] in starters:
+            return True
+        suffixes = (
+            " o que",
+            " que call",
+            " que é",
+            " qual",
+            " quais",
+            " onde",
+            " quando",
+            " pra que",
+            " por que",
+        )
+        base = lowered.rstrip(" ?")
+        if any(base.endswith(suffix.strip()) for suffix in suffixes):
+            return True
+        mid_markers = (
+            " o que ",
+            " o que?",
+            " o que vc",
+            " o que voce",
+            " o que você",
+            " pra que ",
+            " por que ",
+            " sera que",
+            " será que",
+            " cadê você",
+            " cadê voce",
+            " cade você",
+            " cade voce",
+            " cadê vc",
+            " cade vc",
+            " tá aí",
+            " ta ai",
+            " tá por aí",
+            " ta por ai",
+        )
+        if any(marker in lowered for marker in mid_markers):
+            return True
+        return False
+
+    def _ensure_question_format(self, text: str) -> str:
+        stripped = text.rstrip()
+        if stripped.endswith("?"):
+            return stripped
+        stripped = stripped.rstrip(".!…")
+        return f"{stripped}?"
 
     def _request_proactive_fix(
         self,
@@ -363,8 +733,13 @@ class LouAIResponder:
         else:
             instruction += " Traga um gancho leve relacionado com o último assunto ou algo novo."
         corrective_history = history + [{"role": "user", "parts": [instruction]}]
-        with self._request_lock:
-            response = model.generate_content(corrective_history)
+        response = self._call_model(
+            model,
+            corrective_history,
+            attempts=3,
+            allow_high_load_retry=True,
+            base_delay=2.5,
+        )
         return self._extract_text(response) or ""
 
     def _is_duplicate_of_recent_model(self, text: str, history: List[Dict[str, Any]], window: int = DUPLICATE_HISTORY_WINDOW) -> bool:
@@ -400,9 +775,115 @@ class LouAIResponder:
             return ""
         return cleaned[:160]
 
-    def _normalize_single_chunk(self, text: str) -> str:
+    def _maybe_seed_proactive_history(
+        self,
+        server_id: str,
+        channel_id: str,
+        history: List[Dict[str, Any]],
+    ) -> None:
+        bucket = self._get_proactive_bucket(server_id, channel_id)
+        if bucket:
+            return
+        seeded: List[Dict[str, str]] = []
+        for entry in reversed(history):
+            if entry.get("role") != "model":
+                continue
+            parts = entry.get("parts") or []
+            if not parts:
+                continue
+            snippet = (parts[0] or "").strip()
+            if not snippet or snippet.startswith("["):
+                continue
+            normalized = self._normalize_for_similarity(snippet)
+            if not normalized:
+                continue
+            seeded.append({"raw": snippet, "normalized": normalized})
+            if len(seeded) >= PROACTIVE_VARIATION_WINDOW:
+                break
+        for item in reversed(seeded):
+            bucket.append(item)
+
+    def _build_proactive_variation_instruction(self, server_id: str, channel_id: str) -> str:
+        bucket = self._recent_proactive_samples.get(self._proactive_history_key(server_id, channel_id))
+        if not bucket:
+            return ""
+        recent_entries = list(bucket)[-PROACTIVE_VARIATION_INSTRUCTION_LIMIT:]
+        snippets = []
+        for entry in recent_entries:
+            raw = entry.get("raw", "").strip()
+            snippet = self._shorten_for_prompt(raw)
+            if snippet:
+                snippets.append(snippet)
+        if not snippets:
+            return ""
+        unique_snippets = list(dict.fromkeys(snippets))
+        joined = " | ".join(f'"{snippet}"' for snippet in unique_snippets)
+        return (
+            "[Variedade Proativa: As últimas abordagens foram "
+            f"{joined}. Traga agora um início e um gancho completamente diferentes, "
+            "evitando repetir estruturas como 'Pai, será que...'.]"
+        )
+
+    def _shorten_for_prompt(self, text: str, limit: int = 90) -> str:
+        trimmed = (text or "").strip()
+        if not trimmed:
+            return ""
+        single_line = re.sub(r"\s+", " ", trimmed)
+        if len(single_line) > limit:
+            return single_line[: limit - 1].rstrip() + "…"
+        return single_line
+
+    def _proactive_history_key(self, server_id: str, channel_id: str) -> str:
+        return f"{server_id}:{channel_id}"
+
+    def _get_proactive_bucket(self, server_id: str, channel_id: str) -> Deque[Dict[str, str]]:
+        key = self._proactive_history_key(server_id, channel_id)
+        bucket = self._recent_proactive_samples.get(key)
+        if bucket is None:
+            bucket = deque(maxlen=PROACTIVE_VARIATION_WINDOW)
+            self._recent_proactive_samples[key] = bucket
+        return bucket
+
+    def _remember_proactive_candidate(self, server_id: str, channel_id: str, text: str) -> None:
+        normalized = self._normalize_for_similarity(text)
+        if not normalized:
+            return
+        bucket = self._get_proactive_bucket(server_id, channel_id)
+        bucket.append({"raw": text.strip(), "normalized": normalized})
+
+    def _normalize_for_similarity(self, text: str) -> str:
         cleaned = self._strip_code_fences(text or "")
-        chunks = sanitize_and_split_response(cleaned)
+        cleaned = cleaned.lower()
+        cleaned = re.sub(r"https?://\S+", " ", cleaned)
+        cleaned = re.sub(r"[^0-9a-záéíóúâêîôûãõàèìòùç\s]", " ", cleaned)
+        cleaned = re.sub(r"\s+", " ", cleaned)
+        return cleaned.strip()
+
+    def _is_similar_to_recent_proactive(
+        self,
+        text: str,
+        server_id: str,
+        channel_id: str,
+        threshold: float = PROACTIVE_SIMILARITY_THRESHOLD,
+    ) -> bool:
+        normalized = self._normalize_for_similarity(text)
+        if not normalized:
+            return False
+        bucket = self._recent_proactive_samples.get(self._proactive_history_key(server_id, channel_id))
+        if not bucket:
+            return False
+        for entry in bucket:
+            existing = entry.get("normalized")
+            if not existing:
+                continue
+            similarity = SequenceMatcher(None, normalized, existing).ratio()
+            if similarity >= threshold:
+                return True
+        return False
+
+    def _normalize_single_chunk(self, text: str, style_terms: Optional[List[str]] = None) -> str:
+        cleaned = self._strip_code_fences(text or "")
+        chunks = sanitize_and_split_response(cleaned, style_terms=style_terms)
         for chunk in chunks:
             trimmed = chunk.strip()
             if trimmed:
@@ -433,6 +914,7 @@ class LouAIResponder:
         chunks: List[str],
         history: List[Dict[str, Any]],
         model: Any,
+        style_terms: Optional[List[str]] = None,
     ) -> List[str]:
         if not chunks:
             return []
@@ -444,10 +926,9 @@ class LouAIResponder:
             "Continue SOMENTE a partir desse ponto e finalize o raciocínio em até duas frases curtas."
         ).format(fragment=fragment)
         corrective_history = history + [{"role": "user", "parts": [corrective_prompt]}]
-        with self._request_lock:
-            response = model.generate_content(corrective_history)
+        response = self._call_model(model, corrective_history)
         addition_text = self._strip_code_fences(self._extract_text(response) or "")
-        addition_chunks = sanitize_and_split_response(addition_text)
+        addition_chunks = sanitize_and_split_response(addition_text, style_terms=style_terms)
         addition_chunks = self._merge_incomplete_chunks(addition_chunks)
         if not addition_chunks:
             chunks[-1] = fragment.rstrip(",") + "..."
@@ -464,6 +945,7 @@ class LouAIResponder:
         chunks: List[str],
         history: List[Dict[str, Any]],
         model: Any,
+        style_terms: Optional[List[str]] = None,
     ) -> List[str]:
         if not chunks:
             return []
@@ -477,7 +959,7 @@ class LouAIResponder:
         for attempt in range(attempts):
             corrective_text = self._request_on_topic_fix(combined, user_context, history, model, attempt)
             cleaned = self._strip_code_fences(corrective_text or "")
-            sanitized = sanitize_and_split_response(cleaned)
+            sanitized = sanitize_and_split_response(cleaned, style_terms=style_terms)
             sanitized = self._merge_incomplete_chunks(sanitized)
             if not sanitized:
                 continue
@@ -539,8 +1021,7 @@ class LouAIResponder:
         if attempt:
             instruction += " Desta vez, confirme explicitamente algo que o Pai disse antes de mudar de assunto."
         corrective_history = history + [{"role": "user", "parts": [instruction]}]
-        with self._request_lock:
-            response = model.generate_content(corrective_history)
+        response = self._call_model(model, corrective_history)
         return self._extract_text(response) or previous_text
 
     def _looks_incomplete_sentence(self, text: str) -> bool:
@@ -569,6 +1050,8 @@ class LouAIResponder:
         snippet_all, snippet_user, structured_dialog = self._build_conversation_snippets(server_id, channel_id)
         if not snippet_all:
             return
+        if not self._should_run_context_update():
+            return
         snapshot = self._service.get_context_snapshot()
         def _runner() -> None:
             try:
@@ -578,6 +1061,18 @@ class LouAIResponder:
         thread = threading.Thread(target=_runner, name="LouContextWorker", daemon=True)
         self._context_threads.add(thread)
         thread.start()
+
+    def _should_run_context_update(self) -> bool:
+        now = time.time()
+        with self._context_update_lock:
+            self._context_update_pending += 1
+            cooldown_active = (now - self._last_context_update_at) < self._context_update_interval
+            under_force_threshold = self._context_update_pending < self._context_update_force_threshold
+            if cooldown_active and under_force_threshold:
+                return False
+            self._context_update_pending = 0
+            self._last_context_update_at = now
+            return True
 
     def _context_update_thread(
         self,
@@ -591,8 +1086,7 @@ class LouAIResponder:
             user_name = profiles.get("user", {}).get("name", "Pai")
             model = self._ensure_model()
             prompt = self._build_context_prompt(snippet_all, snippet_user, snapshot, user_name)
-            with self._request_lock:
-                response = model.generate_content([{"role": "user", "parts": [prompt]}])
+            response = self._call_model(model, [{"role": "user", "parts": [prompt]}])
             raw = (self._extract_text(response) or "").strip()
             if not raw:
                 return
@@ -870,8 +1364,7 @@ class LouAIResponder:
             f"{prompt}\n\nHistórico recente:\n---\n{snippet_all}\n---\n\n"
             f"Memórias atuais (INCORRETAS): {json.dumps(snapshot.get('short_term', []), ensure_ascii=False)}"
         )
-        with self._request_lock:
-            response = model.generate_content([{"role": "user", "parts": [full_prompt]}])
+        response = self._call_model(model, [{"role": "user", "parts": [full_prompt]}])
         raw = (self._extract_text(response) or "").strip()
         parsed = self._parse_context_response(raw)
         if parsed.get("short_term"):

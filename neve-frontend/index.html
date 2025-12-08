@@ -83,8 +83,9 @@
         </header>
         <section class="voice-session is-hidden" data-role="voice-session">
           <header class="voice-session-header">
-            <div>
+            <div class="voice-session-heading">
               <p class="voice-session-label">CHAT DE VOZ</p>
+              <div class="voice-session-heading-avatars is-hidden" data-role="voice-heading-avatars"></div>
             </div>
             <div class="voice-session-actions">
               <span class="voice-session-status" data-role="voice-session-status"></span>
@@ -138,8 +139,8 @@
           </div>
         </div>
         <div class="reply-indicator is-hidden" data-role="reply-indicator">
-          <div>
-            <p class="reply-label">Respondendo a</p>
+          <div class="reply-target">
+            <div class="reply-avatar" data-role="reply-avatar"></div>
             <p class="reply-author" data-role="reply-author">—</p>
           </div>
           <p class="reply-snippet" data-role="reply-snippet"></p>
@@ -167,7 +168,7 @@
         </form>
         <footer class="chat-footer" aria-live="polite">
           <span class="status-dot"></span>
-          <p>Lou conectada ao backend local • Porta 8765</p>
+          <p>Conectado ao backend local • Porta 8765</p>
         </footer>
       </main>
       </div>
